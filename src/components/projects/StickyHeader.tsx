@@ -23,22 +23,18 @@ export const StickyHeader = ({
   const headerContent = (
     <>
       {/* Desktop layout - single row */}
-      <div className="hidden lg:flex lg:justify-between lg:items-center">
-        <h2 className="text-xl font-semibold">
+      <div className="hidden lg:flex lg:justify-between lg:items-center lg:w-full">
+        <h2 className="text-xl font-semibold flex-shrink-0">
           {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
         </h2>
-        <div className="flex gap-4">
-          <div className="flex-shrink-0">
-            <ModeToggle mode={mode} onModeChange={onModeChange} />
-          </div>
+        <div className="flex gap-4 flex-shrink-0">
+          <ModeToggle mode={mode} onModeChange={onModeChange} />
           {mode === 'edit' && (
-            <div className="flex-shrink-0">
-              <RowTypeSelector
-                onAddRow={onAddRow}
-                onAddNote={onAddNote}
-                onAddDivider={onAddDivider}
-              />
-            </div>
+            <RowTypeSelector
+              onAddRow={onAddRow}
+              onAddNote={onAddNote}
+              onAddDivider={onAddDivider}
+            />
           )}
         </div>
       </div>
