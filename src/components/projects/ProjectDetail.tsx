@@ -26,7 +26,6 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
-  const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -52,7 +51,10 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
       ([entry]) => {
         setIsSticky(!entry.isIntersecting);
       },
-      { threshold: 0 }
+      { 
+        threshold: 0,
+        rootMargin: '0px'
+      }
     );
 
     if (sentinelRef.current) {
@@ -122,32 +124,50 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
       {/* Sentinel element to detect when header should become sticky */}
       <div ref={sentinelRef} className="h-0" />
 
-      <div className="sticky top-0 z-10" ref={stickyHeaderRef}>
-        <Card 
-          className={`border border-gray-200 rounded-lg shadow-sm transition-all duration-200 ${
-            isSticky 
-              ? 'border-l-0 border-r-0 rounded-none w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-white' 
-              : ''
-          }`}
-        >
-          <CardContent className="py-4">
-            <div className={`flex justify-between items-center ${isSticky ? 'max-w-6xl mx-auto px-4' : ''}`}>
-              <h2 className="text-xl font-semibold">
-                {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-              </h2>
-              <div className="flex items-center gap-4">
-                <ModeToggle mode={mode} onModeChange={setMode} />
-                {mode === 'edit' && (
-                  <RowTypeSelector
-                    onAddRow={addRow}
-                    onAddNote={addNote}
-                    onAddDivider={addDivider}
-                  />
-                )}
+      <div className="sticky top-0 z-10">
+        {isSticky ? (
+          // Full-width sticky header
+          <div className="w-full bg-white border-b border-gray-200">
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+                </h2>
+                <div className="flex items-center gap-4">
+                  <ModeToggle mode={mode} onModeChange={setMode} />
+                  {mode === 'edit' && (
+                    <RowTypeSelector
+                      onAddRow={addRow}
+                      onAddNote={addNote}
+                      onAddDivider={addDivider}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        ) : (
+          // Regular card header
+          <Card className="border border-gray-200 rounded-lg shadow-sm">
+            <CardContent className="py-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+                </h2>
+                <div className="flex items-center gap-4">
+                  <ModeToggle mode={mode} onModeChange={setMode} />
+                  {mode === 'edit' && (
+                    <RowTypeSelector
+                      onAddRow={addRow}
+                      onAddNote={addNote}
+                      onAddDivider={addDivider}
+                    />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <RowsList
