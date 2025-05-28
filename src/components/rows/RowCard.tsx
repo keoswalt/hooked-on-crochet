@@ -86,18 +86,38 @@ export const RowCard = ({
     }
   };
 
+  // Determine card styling based on make mode status
+  const getCardStyling = () => {
+    if (mode !== 'make') return '';
+    
+    switch (row.make_mode_status) {
+      case 'complete':
+        return 'bg-green-50 border-green-200';
+      case 'in_progress':
+        return 'bg-white border-blue-200 shadow-md';
+      case 'not_started':
+        return 'bg-gray-50 border-gray-200 opacity-60';
+      default:
+        return '';
+    }
+  };
+
   // Render divider
   if (row.type === 'divider') {
     return (
-      <Card className="mb-3">
+      <Card className={`mb-3 ${getCardStyling()}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-1">
               {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
               {mode === 'make' && (
                 <div className="w-6 h-6 rounded-full border-2 border-gray-300 bg-gray-100"></div>
               )}
-              <hr className="flex-1 border-gray-300" />
+              <div className="flex-1 flex items-center justify-center">
+                <svg width="100%" height="2" className="text-gray-400">
+                  <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
+                </svg>
+              </div>
             </div>
             {mode === 'edit' && (
               <div className="flex items-center space-x-2">
@@ -115,8 +135,10 @@ export const RowCard = ({
     );
   }
 
+  const isCompleted = mode === 'make' && row.make_mode_status === 'complete';
+
   return (
-    <Card className="mb-3">
+    <Card className={`mb-3 ${getCardStyling()}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -160,46 +182,49 @@ export const RowCard = ({
           />
           
           {row.type === 'row' && (
-            <div className="flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-3">
+            <div className="relative flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-3">
               {mode === 'edit' ? (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onUpdateCounter(row.id, Math.max(1, row.counter - 1))}
-                    disabled={row.counter <= 1 || row.is_locked}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="bg-white border rounded-md px-4 py-2 min-w-[60px] text-center font-semibold">
-                    {row.counter}
+                  <div className="flex items-center justify-center space-x-3 flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onUpdateCounter(row.id, Math.max(1, row.counter - 1))}
+                      disabled={row.counter <= 1 || row.is_locked}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="bg-white border rounded-md px-4 py-2 min-w-[60px] text-center font-semibold">
+                      {row.counter}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onUpdateCounter(row.id, row.counter + 1)}
+                      disabled={row.is_locked}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
                   
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onUpdateCounter(row.id, row.counter + 1)}
-                    disabled={row.is_locked}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => onToggleLock(row.id, !row.is_locked)}
+                    className="absolute right-3"
                   >
                     {row.is_locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
                   </Button>
                 </>
               ) : (
-                <>
+                <div className="flex items-center justify-center space-x-3 flex-1">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleMakeModeCounterChange(Math.max(0, row.make_mode_counter - 1))}
-                    disabled={row.make_mode_counter <= 0}
+                    disabled={row.make_mode_counter <= 0 || isCompleted}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
@@ -212,11 +237,11 @@ export const RowCard = ({
                     variant="outline"
                     size="sm"
                     onClick={() => handleMakeModeCounterChange(row.make_mode_counter + 1)}
-                    disabled={row.make_mode_counter >= row.counter}
+                    disabled={row.make_mode_counter >= row.counter || isCompleted}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
-                </>
+                </div>
               )}
             </div>
           )}

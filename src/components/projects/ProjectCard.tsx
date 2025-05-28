@@ -25,7 +25,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onToggleFavorite }: Pro
       <CardHeader className="flex-shrink-0 pb-3">
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <button onClick={handleFavoriteClick} className="flex-shrink-0">
                 <Star 
                   className={`h-4 w-4 ${project.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`} 

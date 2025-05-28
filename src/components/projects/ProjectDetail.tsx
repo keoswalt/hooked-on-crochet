@@ -78,19 +78,21 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
     <div className="space-y-6">
       <ProjectHeader project={project} onBack={onBack} onEdit={handleEditProject} />
 
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">
-          {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-        </h2>
-        <div className="flex items-center gap-4">
-          <ModeToggle mode={mode} onModeChange={setMode} />
-          {mode === 'edit' && (
-            <RowTypeSelector
-              onAddRow={addRow}
-              onAddNote={addNote}
-              onAddDivider={addDivider}
-            />
-          )}
+      <div className="sticky top-0 bg-white z-10 py-4 border-b">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">
+            {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+          </h2>
+          <div className="flex items-center gap-4">
+            <ModeToggle mode={mode} onModeChange={setMode} />
+            {mode === 'edit' && (
+              <RowTypeSelector
+                onAddRow={addRow}
+                onAddNote={addNote}
+                onAddDivider={addDivider}
+              />
+            )}
+          </div>
         </div>
       </div>
 
