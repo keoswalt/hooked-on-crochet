@@ -40,7 +40,7 @@ export const StickyHeader = ({
       </div>
 
       {/* Mobile layout - two rows */}
-      <div className="lg:hidden flex flex-col sm:flex-row gap-4">
+      <div className="lg:hidden flex flex-col gap-4">
         {/* Row 1: Title */}
         <h2 className="text-xl font-semibold">
           {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
@@ -80,6 +80,16 @@ export const StickyHeader = ({
           width: rect.width,
           height: rect.height
         });
+        
+        // Check for body/html margins that might be causing the gap
+        const bodyStyles = window.getComputedStyle(document.body);
+        const htmlStyles = window.getComputedStyle(document.documentElement);
+        console.log('Body margin/padding:', {
+          bodyMargin: bodyStyles.margin,
+          bodyPadding: bodyStyles.padding,
+          htmlMargin: htmlStyles.margin,
+          htmlPadding: htmlStyles.padding
+        });
       }
     }, 100);
   }
@@ -101,13 +111,15 @@ export const StickyHeader = ({
       {isSticky && (
         <div 
           data-sticky-header
-          className="fixed inset-x-0 top-0 w-full bg-white border-b border-gray-200 shadow-sm"
+          className="fixed inset-0 top-0 w-screen bg-white border-b border-gray-200 shadow-sm"
           style={{ 
             zIndex: 9999,
             position: 'fixed',
-            top: '0px',
-            left: '0px',
-            right: '0px'
+            top: '0px !important',
+            left: '0px !important',
+            right: '0px !important',
+            margin: '0px !important',
+            padding: '0px'
           }}
         >
           <div className="max-w-6xl mx-auto px-4 py-4">
