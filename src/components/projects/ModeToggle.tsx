@@ -8,7 +8,7 @@ interface ModeToggleProps {
 
 export const ModeToggle = ({ mode, onModeChange }: ModeToggleProps) => {
   return (
-    <div className="flex rounded-lg border overflow-hidden">
+    <div className="inline-flex rounded-lg border overflow-hidden">
       <Button
         variant={mode === 'edit' ? 'default' : 'outline'}
         onClick={() => onModeChange('edit')}
