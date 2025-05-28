@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,16 +33,26 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       
-      // Initialize make mode for new projects
+      // Initialize make mode - ensure first row/note is in_progress
       if (data && data.length > 0) {
         const hasInProgress = data.some(row => row.make_mode_status === 'in_progress');
         if (!hasInProgress) {
-          const firstRow = data.find(row => row.type === 'row');
-          if (firstRow) {
+          const firstRowOrNote = data.find(row => row.type === 'row' || row.type === 'note');
+          if (firstRowOrNote) {
             await supabase
               .from('project_rows')
               .update({ make_mode_status: 'in_progress' })
-              .eq('id', firstRow.id);
+              .eq('id', firstRowOrNote.id);
+            
+            // Update local data
+            const updatedData = data.map(row => 
+              row.id === firstRowOrNote.id 
+                ? { ...row, make_mode_status: 'in_progress' }
+                : row
+            );
+            setRows(updatedData);
+            setLoading(false);
+            return;
           }
         }
       }
@@ -55,18 +66,6 @@ export const useProjectRows = (projectId: string) => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const initializeMakeMode = async (rowsData: any[]) => {
-    if (rowsData.length === 0) return;
-    
-    const firstRow = rowsData.find(row => row.type === 'row');
-    if (firstRow) {
-      await supabase
-        .from('project_rows')
-        .update({ make_mode_status: 'in_progress' })
-        .eq('id', firstRow.id);
     }
   };
 

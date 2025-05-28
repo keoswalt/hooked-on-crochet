@@ -96,7 +96,7 @@ export const RowCard = ({
       case 'complete':
         return 'bg-green-50 border-green-200';
       case 'in_progress':
-        return 'bg-white border-blue-200 shadow-md ring-2 ring-blue-100';
+        return 'bg-white border-blue-300 shadow-lg ring-2 ring-blue-200';
       case 'not_started':
         return 'bg-gray-50 border-gray-200 opacity-60';
       default:
