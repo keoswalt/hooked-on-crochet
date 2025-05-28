@@ -16,6 +16,10 @@ interface ProjectRow {
 export const useProjectRows = (projectId: string) => {
   const [rows, setRows] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    onConfirm: () => void;
+  }>({ open: false, onConfirm: () => {} });
   const { toast } = useToast();
 
   const fetchRows = async () => {
@@ -30,9 +34,15 @@ export const useProjectRows = (projectId: string) => {
       
       // Initialize make mode for new projects
       if (data && data.length > 0) {
-        const needsInitialization = data.every(row => row.make_mode_status === 'not_started');
-        if (needsInitialization) {
-          await initializeMakeMode(data);
+        const hasInProgress = data.some(row => row.make_mode_status === 'in_progress');
+        if (!hasInProgress) {
+          const firstRow = data.find(row => row.type === 'row');
+          if (firstRow) {
+            await supabase
+              .from('project_rows')
+              .update({ make_mode_status: 'in_progress' })
+              .eq('id', firstRow.id);
+          }
         }
       }
       
@@ -81,6 +91,11 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       setRows([...rows, data]);
+      
+      toast({
+        title: "Success",
+        description: "New row added successfully.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -107,6 +122,11 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       setRows([...rows, data]);
+      
+      toast({
+        title: "Success",
+        description: "New note added successfully.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -133,6 +153,11 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       setRows([...rows, data]);
+      
+      toast({
+        title: "Success",
+        description: "New divider added successfully.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -219,35 +244,36 @@ export const useProjectRows = (projectId: string) => {
             .eq('id', nextRow.id);
         }
       } else if (currentRow.make_mode_status === 'complete' && status === 'in_progress') {
-        // Unchecking a completed row - mark subsequent rows as not_started
-        const currentIndex = rows.findIndex(row => row.id === id);
-        const subsequentRows = rows.slice(currentIndex + 1);
-        
-        // Confirm with user
-        const confirmUncheck = window.confirm(
-          'Marking this row as incomplete will also mark all subsequent rows as incomplete. Are you sure?'
-        );
-        
-        if (!confirmUncheck) return;
-
-        // Update current row
-        await supabase
-          .from('project_rows')
-          .update({ make_mode_status: status })
-          .eq('id', id);
-
-        // Update subsequent rows
-        for (const row of subsequentRows) {
-          if (row.type === 'row') {
+        // Show confirmation dialog for unchecking completed row
+        setConfirmDialog({
+          open: true,
+          onConfirm: async () => {
+            const currentIndex = rows.findIndex(row => row.id === id);
+            const subsequentRows = rows.slice(currentIndex + 1);
+            
+            // Update current row
             await supabase
               .from('project_rows')
-              .update({ 
-                make_mode_status: 'not_started',
-                make_mode_counter: 0 
-              })
-              .eq('id', row.id);
+              .update({ make_mode_status: status })
+              .eq('id', id);
+
+            // Update subsequent rows
+            for (const row of subsequentRows) {
+              if (row.type === 'row') {
+                await supabase
+                  .from('project_rows')
+                  .update({ 
+                    make_mode_status: 'not_started',
+                    make_mode_counter: 0 
+                  })
+                  .eq('id', row.id);
+              }
+            }
+            
+            fetchRows(); // Refresh to get updated state
           }
-        }
+        });
+        return; // Don't proceed until user confirms
       } else {
         await supabase
           .from('project_rows')
@@ -380,6 +406,8 @@ export const useProjectRows = (projectId: string) => {
   return {
     rows,
     loading,
+    confirmDialog,
+    setConfirmDialog,
     addRow,
     addNote,
     addDivider,

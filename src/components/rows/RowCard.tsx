@@ -18,6 +18,7 @@ interface ProjectRow {
 interface RowCardProps {
   row: ProjectRow;
   mode: 'edit' | 'make';
+  rowNumber?: number;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
@@ -45,6 +46,7 @@ const useDebounce = (callback: Function, delay: number) => {
 export const RowCard = ({ 
   row, 
   mode,
+  rowNumber,
   onUpdateCounter, 
   onUpdateInstructions,
   onUpdateMakeModeCounter,
@@ -110,9 +112,6 @@ export const RowCard = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1">
               {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
-              {mode === 'make' && (
-                <div className="w-6 h-6 rounded-full border-2 border-gray-300 bg-gray-100"></div>
-              )}
               <div className="flex-1 flex items-center justify-center">
                 <svg width="100%" height="2" className="text-gray-400">
                   <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
@@ -136,6 +135,7 @@ export const RowCard = ({
   }
 
   const isCompleted = mode === 'make' && row.make_mode_status === 'complete';
+  const isCheckboxDisabled = mode === 'make' && row.make_mode_status === 'not_started';
 
   return (
     <Card className={`mb-3 ${getCardStyling()}`}>
@@ -143,12 +143,15 @@ export const RowCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
-            {mode === 'make' && (
+            {mode === 'make' && row.type !== 'divider' && (
               <button 
                 onClick={handleMakeModeCheck}
+                disabled={isCheckboxDisabled}
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                   row.make_mode_status === 'complete' 
                     ? 'bg-green-500 border-green-500 text-white' 
+                    : isCheckboxDisabled
+                    ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
@@ -156,7 +159,7 @@ export const RowCard = ({
               </button>
             )}
             <h3 className="font-semibold">
-              {row.type === 'note' ? 'Note' : `Row ${row.position}`}
+              {row.type === 'note' ? 'Note' : `Row ${rowNumber || row.position}`}
             </h3>
           </div>
           {mode === 'edit' && (

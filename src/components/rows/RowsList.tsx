@@ -39,6 +39,20 @@ export const RowsList = ({
   onDuplicate,
   onDelete
 }: RowsListProps) => {
+  // Calculate row numbers for actual rows (excluding notes and dividers)
+  const getRowNumber = (currentIndex: number): number | undefined => {
+    const currentRow = rows[currentIndex];
+    if (currentRow.type !== 'row') return undefined;
+    
+    let rowCount = 0;
+    for (let i = 0; i <= currentIndex; i++) {
+      if (rows[i].type === 'row') {
+        rowCount++;
+      }
+    }
+    return rowCount;
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="rows" isDropDisabled={mode === 'make'}>
@@ -56,6 +70,7 @@ export const RowsList = ({
                     <RowCard
                       row={row}
                       mode={mode}
+                      rowNumber={getRowNumber(index)}
                       onUpdateCounter={onUpdateCounter}
                       onUpdateInstructions={onUpdateInstructions}
                       onUpdateMakeModeCounter={onUpdateMakeModeCounter}

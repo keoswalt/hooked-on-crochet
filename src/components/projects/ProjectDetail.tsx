@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { ModeToggle } from './ModeToggle';
 import { RowTypeSelector } from '../rows/RowTypeSelector';
 import { RowsList } from '../rows/RowsList';
 import { ProjectForm } from './ProjectForm';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useProjectRows } from '@/hooks/useProjectRows';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -24,6 +26,8 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
   const {
     rows,
     loading,
+    confirmDialog,
+    setConfirmDialog,
     addRow,
     addNote,
     addDivider,
@@ -107,6 +111,16 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
         onToggleLock={toggleLock}
         onDuplicate={duplicateRow}
         onDelete={deleteRow}
+      />
+
+      <ConfirmationDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        title="Mark Row as Incomplete?"
+        description="Marking this row as incomplete will also mark all subsequent rows as incomplete and reset their progress. Are you sure you want to continue?"
+        onConfirm={confirmDialog.onConfirm}
+        confirmText="Yes, mark incomplete"
+        cancelText="Cancel"
       />
     </div>
   );
