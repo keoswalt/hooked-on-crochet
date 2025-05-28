@@ -1,4 +1,5 @@
 
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Copy, Trash2, GripVertical } from 'lucide-react';
@@ -18,6 +19,21 @@ interface RowCardProps {
   onDelete: (id: string) => void;
 }
 
+// Debounce function
+const useDebounce = (callback: Function, delay: number) => {
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
+
+  const debouncedCallback = useCallback((...args: any[]) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    const timer = setTimeout(() => callback(...args), delay);
+    setDebounceTimer(timer);
+  }, [callback, delay, debounceTimer]);
+
+  return debouncedCallback;
+};
+
 export const RowCard = ({ 
   row, 
   onUpdateCounter, 
@@ -25,6 +41,24 @@ export const RowCard = ({
   onDuplicate, 
   onDelete 
 }: RowCardProps) => {
+  const [localInstructions, setLocalInstructions] = useState(row.instructions);
+
+  // Update local state when row prop changes
+  useEffect(() => {
+    setLocalInstructions(row.instructions);
+  }, [row.instructions]);
+
+  // Debounced function to update instructions in database
+  const debouncedUpdateInstructions = useDebounce((id: string, instructions: string) => {
+    onUpdateInstructions(id, instructions);
+  }, 500);
+
+  const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setLocalInstructions(newValue);
+    debouncedUpdateInstructions(row.id, newValue);
+  };
+
   return (
     <Card className="mb-3">
       <CardHeader className="pb-3">
@@ -46,8 +80,8 @@ export const RowCard = ({
       <CardContent className="pt-0">
         <div className="space-y-3">
           <textarea
-            value={row.instructions}
-            onChange={(e) => onUpdateInstructions(row.id, e.target.value)}
+            value={localInstructions}
+            onChange={handleInstructionsChange}
             className="w-full p-2 border rounded-md min-h-[80px] resize-none"
             placeholder="Enter row instructions..."
           />

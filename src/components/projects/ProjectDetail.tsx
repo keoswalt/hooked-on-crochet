@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,6 +178,51 @@ export const ProjectDetail = ({ project, onBack }: ProjectDetailProps) => {
     }
   };
 
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    if (sourceIndex === destinationIndex) return;
+
+    // Reorder rows locally
+    const reorderedRows = [...rows];
+    const [removed] = reorderedRows.splice(sourceIndex, 1);
+    reorderedRows.splice(destinationIndex, 0, removed);
+
+    // Update positions
+    const updatedRows = reorderedRows.map((row, index) => ({
+      ...row,
+      position: index + 1
+    }));
+
+    setRows(updatedRows);
+
+    // Update positions in database
+    try {
+      for (const row of updatedRows) {
+        await supabase
+          .from('project_rows')
+          .update({ position: row.position })
+          .eq('id', row.id);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Row order updated successfully.",
+      });
+    } catch (error: any) {
+      // Revert on error
+      fetchRows();
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
@@ -210,25 +256,42 @@ export const ProjectDetail = ({ project, onBack }: ProjectDetailProps) => {
         </Button>
       </div>
 
-      <div className="space-y-3">
-        {rows.map((row) => (
-          <RowCard
-            key={row.id}
-            row={row}
-            onUpdateCounter={updateCounter}
-            onUpdateInstructions={updateInstructions}
-            onDuplicate={duplicateRow}
-            onDelete={deleteRow}
-          />
-        ))}
-        {rows.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-gray-500">No rows yet. Add your first row to get started!</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="rows">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+              {rows.map((row, index) => (
+                <Draggable key={row.id} draggableId={row.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`${snapshot.isDragging ? 'opacity-75' : ''}`}
+                    >
+                      <RowCard
+                        row={row}
+                        onUpdateCounter={updateCounter}
+                        onUpdateInstructions={updateInstructions}
+                        onDuplicate={duplicateRow}
+                        onDelete={deleteRow}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+              {rows.length === 0 && (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <p className="text-gray-500">No rows yet. Add your first row to get started!</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 };
