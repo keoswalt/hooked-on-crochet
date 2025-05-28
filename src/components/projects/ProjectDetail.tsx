@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -134,14 +135,18 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
                   <h2 className="text-xl font-semibold">
                     {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
                   </h2>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <ModeToggle mode={mode} onModeChange={setMode} />
+                  <div className="flex justify-between items-center gap-4 min-h-[40px]">
+                    <div className="flex-shrink-0">
+                      <ModeToggle mode={mode} onModeChange={setMode} />
+                    </div>
                     {mode === 'edit' && (
-                      <RowTypeSelector
-                        onAddRow={addRow}
-                        onAddNote={addNote}
-                        onAddDivider={addDivider}
-                      />
+                      <div className="flex-shrink-0">
+                        <RowTypeSelector
+                          onAddRow={addRow}
+                          onAddNote={addNote}
+                          onAddDivider={addDivider}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -188,14 +193,18 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
               <h2 className="text-xl font-semibold">
                 {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
               </h2>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <ModeToggle mode={mode} onModeChange={setMode} />
+              <div className="flex justify-between items-center gap-4 min-h-[40px]">
+                <div className="flex-shrink-0">
+                  <ModeToggle mode={mode} onModeChange={setMode} />
+                </div>
                 {mode === 'edit' && (
-                  <RowTypeSelector
-                    onAddRow={addRow}
-                    onAddNote={addNote}
-                    onAddDivider={addDivider}
-                  />
+                  <div className="flex-shrink-0">
+                    <RowTypeSelector
+                      onAddRow={addRow}
+                      onAddNote={addNote}
+                      onAddDivider={addDivider}
+                    />
+                  </div>
                 )}
               </div>
             </div>
