@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
@@ -49,7 +48,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
       )}
 
       <div className="bg-gray-800 p-3 rounded-b-lg mt-auto">
-        <div className="flex justify-start space-x-1">
+        <div className="flex justify-end space-x-1">
           <Button variant="outline" size="sm" onClick={onEdit} className="bg-white hover:bg-gray-100">
             <Edit className="h-4 w-4" />
           </Button>
