@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Scissors } from 'lucide-react';
 
 interface AuthFormProps {
   mode: 'signin' | 'signup';
@@ -30,7 +31,7 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
         });
         if (error) throw error;
         toast({
-          title: "Account created!",
+          title: "Account created",
           description: "Please check your email to verify your account.",
         });
       } else {
@@ -57,19 +58,21 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">
-          {mode === 'signin' ? 'Sign In' : 'Create Account'}
+      <CardHeader className="text-center">
+        <div className="flex justify-center mb-4">
+          <Scissors className="h-8 w-8 text-green-600" />
+        </div>
+        <CardTitle className="text-2xl">
+          {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
         </CardTitle>
-        <CardDescription className="text-center">
-          {mode === 'signin' 
-            ? 'Welcome back to your crochet projects' 
-            : 'Start tracking your crochet projects today'
-          }
+        <CardDescription>
+          {mode === 'signin'
+            ? 'Sign in to your crochet projects'
+            : 'Start tracking your crochet projects'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -78,6 +81,7 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
           </div>
           <div className="space-y-2">
@@ -88,10 +92,11 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Loading...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
+            {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
           </Button>
         </form>
         <div className="mt-4 text-center">
@@ -99,10 +104,9 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
             variant="link"
             onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
           >
-            {mode === 'signin' 
-              ? "Don't have an account? Sign up" 
-              : "Already have an account? Sign in"
-            }
+            {mode === 'signin'
+              ? "Don't have an account? Sign up"
+              : 'Already have an account? Sign in'}
           </Button>
         </div>
       </CardContent>

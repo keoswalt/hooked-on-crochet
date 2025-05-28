@@ -27,10 +27,14 @@ export const Header = ({ userEmail }: HeaderProps) => {
     }
   };
 
+  const handleTitleClick = () => {
+    window.location.href = '/';
+  };
+
   return (
     <header className="bg-green-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={handleTitleClick}>
           <Scissors className="h-6 w-6" />
           <h1 className="text-xl font-bold">Crochet Projects</h1>
         </div>

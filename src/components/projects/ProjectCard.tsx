@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Star } from 'lucide-react';
 import { formatLastModified } from '@/utils/dateUtils';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -11,15 +11,28 @@ interface ProjectCardProps {
   project: Project;
   onEdit: (e: React.MouseEvent) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, isFavorite: boolean) => void;
 }
 
-export const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onEdit, onDelete, onToggleFavorite }: ProjectCardProps) => {
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite(project.id, !project.is_favorite);
+  };
+
   return (
     <Card className="hover:shadow-lg transition-shadow h-48 flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex justify-between items-start">
+      <CardHeader className="flex-shrink-0 pb-3">
+        <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg truncate">{project.name}</CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <button onClick={handleFavoriteClick} className="flex-shrink-0">
+                <Star 
+                  className={`h-4 w-4 ${project.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`} 
+                />
+              </button>
+              <CardTitle className="text-lg truncate flex-1">{project.name}</CardTitle>
+            </div>
             <CardDescription className="text-xs">
               Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
             </CardDescription>
@@ -27,7 +40,7 @@ export const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => 
               Last modified: {formatLastModified(project.updated_at)}
             </CardDescription>
           </div>
-          <div className="flex space-x-2 flex-shrink-0">
+          <div className="flex space-x-1 flex-shrink-0">
             <Button variant="outline" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
@@ -38,8 +51,8 @@ export const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => 
         </div>
       </CardHeader>
       {project.details && (
-        <CardContent className="flex-1 overflow-hidden">
-          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden">{project.details}</p>
+        <CardContent className="flex-1 overflow-hidden pt-0">
+          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden text-ellipsis">{project.details}</p>
         </CardContent>
       )}
     </Card>

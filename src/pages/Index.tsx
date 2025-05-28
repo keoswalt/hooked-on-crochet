@@ -64,13 +64,22 @@ const Index = () => {
     }
   };
 
-  // Filter projects based on search term
+  // Filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
-    if (!searchTerm.trim()) return projects;
+    let filtered = projects;
     
-    return projects.filter(project =>
-      project.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (searchTerm.trim()) {
+      filtered = projects.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Sort by favorite status first, then by updated_at
+    return filtered.sort((a, b) => {
+      if (a.is_favorite && !b.is_favorite) return -1;
+      if (!a.is_favorite && b.is_favorite) return 1;
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    });
   }, [projects, searchTerm]);
 
   const handleSaveProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
@@ -126,6 +135,32 @@ const Index = () => {
         description: "Your project has been deleted successfully.",
       });
       fetchProjects();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ is_favorite: isFavorite })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setProjects(projects.map(project => 
+        project.id === id ? { ...project, is_favorite: isFavorite } : project
+      ));
+      
+      toast({
+        title: isFavorite ? "Added to favorites" : "Removed from favorites",
+        description: `Project has been ${isFavorite ? 'added to' : 'removed from'} your favorites.`,
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -218,6 +253,7 @@ const Index = () => {
                 onDelete={(id) => {
                   handleDeleteProject(id);
                 }}
+                onToggleFavorite={handleToggleFavorite}
               />
             </div>
           ))}

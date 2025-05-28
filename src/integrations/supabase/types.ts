@@ -15,8 +15,12 @@ export type Database = {
           created_at: string
           id: string
           instructions: string
+          is_locked: boolean
+          make_mode_counter: number
+          make_mode_status: string
           position: number
           project_id: string
+          type: string
           updated_at: string
         }
         Insert: {
@@ -24,8 +28,12 @@ export type Database = {
           created_at?: string
           id?: string
           instructions: string
+          is_locked?: boolean
+          make_mode_counter?: number
+          make_mode_status?: string
           position: number
           project_id: string
+          type?: string
           updated_at?: string
         }
         Update: {
@@ -33,8 +41,12 @@ export type Database = {
           created_at?: string
           id?: string
           instructions?: string
+          is_locked?: boolean
+          make_mode_counter?: number
+          make_mode_status?: string
           position?: number
           project_id?: string
+          type?: string
           updated_at?: string
         }
         Relationships: [
@@ -53,6 +65,7 @@ export type Database = {
           details: string | null
           hook_size: Database["public"]["Enums"]["hook_size"]
           id: string
+          is_favorite: boolean
           name: string
           updated_at: string
           user_id: string
@@ -63,6 +76,7 @@ export type Database = {
           details?: string | null
           hook_size: Database["public"]["Enums"]["hook_size"]
           id?: string
+          is_favorite?: boolean
           name: string
           updated_at?: string
           user_id: string
@@ -73,6 +87,7 @@ export type Database = {
           details?: string | null
           hook_size?: Database["public"]["Enums"]["hook_size"]
           id?: string
+          is_favorite?: boolean
           name?: string
           updated_at?: string
           user_id?: string
