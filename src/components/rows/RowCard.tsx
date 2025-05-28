@@ -94,11 +94,11 @@ export const RowCard = ({
     
     switch (row.make_mode_status) {
       case 'complete':
-        return 'bg-green-50 border-green-200';
+        return 'bg-muted border-muted-foreground/30';
       case 'in_progress':
-        return 'bg-white border-blue-300 shadow-lg ring-2 ring-blue-200';
+        return 'bg-white border-blue-300 shadow-lg ring-2 ring-blue-200 dark:bg-card dark:border-blue-400 dark:ring-blue-300';
       case 'not_started':
-        return 'bg-gray-50 border-gray-200 opacity-60';
+        return 'bg-gray-50 border-gray-200 opacity-60 dark:bg-muted/50 dark:border-muted-foreground/20';
       default:
         return '';
     }
@@ -149,10 +149,10 @@ export const RowCard = ({
                 disabled={isCheckboxDisabled}
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                   row.make_mode_status === 'complete' 
-                    ? 'bg-green-500 border-green-500 text-white' 
+                    ? 'bg-foreground border-foreground text-background' 
                     : isCheckboxDisabled
-                    ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
-                    : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-gray-200 bg-gray-100 cursor-not-allowed dark:border-muted-foreground/30 dark:bg-muted/50'
+                    : 'border-gray-300 hover:border-gray-400 dark:border-muted-foreground dark:hover:border-muted-foreground/80'
                 }`}
               >
                 {row.make_mode_status === 'complete' && <Check className="h-4 w-4" />}

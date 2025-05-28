@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Scissors } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-green-600 text-white shadow-md">
+    <header className="bg-foreground text-background shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={handleTitleClick}>
           <Scissors className="h-6 w-6" />
@@ -41,7 +42,8 @@ export const Header = ({ userEmail }: HeaderProps) => {
         {userEmail && (
           <div className="flex items-center space-x-4">
             <span className="text-sm">{userEmail}</span>
-            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-green-600">
+            <ThemeToggle />
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-foreground bg-background border-background hover:bg-background/90">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
