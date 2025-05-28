@@ -40,7 +40,7 @@ export const StickyHeader = ({
       </div>
 
       {/* Mobile layout - two rows */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden flex flex-col sm:flex-row gap-4">
         {/* Row 1: Title */}
         <h2 className="text-xl font-semibold">
           {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
@@ -66,6 +66,24 @@ export const StickyHeader = ({
 
   console.log('StickyHeader rendering with isSticky:', isSticky);
 
+  // Add debugging for positioning when sticky
+  if (isSticky) {
+    console.log('Sticky header is active - checking positioning');
+    // Check if there are any elements that might be interfering
+    setTimeout(() => {
+      const stickyElement = document.querySelector('[data-sticky-header]');
+      if (stickyElement) {
+        const rect = stickyElement.getBoundingClientRect();
+        console.log('Sticky header position:', {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
+      }
+    }, 100);
+  }
+
   return (
     <>
       {/* Non-sticky header - shows in card format */}
@@ -81,7 +99,17 @@ export const StickyHeader = ({
 
       {/* Sticky header - full width when header goes out of view */}
       {isSticky && (
-        <div className="fixed top-0 left-0 right-0 w-full bg-white border-b border-gray-200 z-50 shadow-sm" style={{ top: 0, position: 'fixed' }}>
+        <div 
+          data-sticky-header
+          className="fixed inset-x-0 top-0 w-full bg-white border-b border-gray-200 shadow-sm"
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed',
+            top: '0px',
+            left: '0px',
+            right: '0px'
+          }}
+        >
           <div className="max-w-6xl mx-auto px-4 py-4">
             {headerContent}
           </div>
