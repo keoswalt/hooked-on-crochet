@@ -27,15 +27,19 @@ export const useStickyHeader = () => {
       }
     );
 
-    if (sentinelRef.current) {
-      console.log('Observer attached to sentinel element');
-      observer.observe(sentinelRef.current);
-    } else {
-      console.log('Sentinel element not found');
-    }
+    // Use a timeout to ensure the DOM has been rendered
+    const timeoutId = setTimeout(() => {
+      if (sentinelRef.current) {
+        console.log('Observer attached to sentinel element');
+        observer.observe(sentinelRef.current);
+      } else {
+        console.log('Sentinel element still not found after timeout');
+      }
+    }, 100);
 
     return () => {
       console.log('Cleaning up intersection observer');
+      clearTimeout(timeoutId);
       observer.disconnect();
     };
   }, []);
