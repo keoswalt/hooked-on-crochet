@@ -96,7 +96,7 @@ export const RowCard = ({
       case 'complete':
         return 'bg-green-50 border-green-200';
       case 'in_progress':
-        return 'bg-white border-blue-200 shadow-md';
+        return 'bg-white border-blue-200 shadow-md ring-2 ring-blue-100';
       case 'not_started':
         return 'bg-gray-50 border-gray-200 opacity-60';
       default:
@@ -112,7 +112,7 @@ export const RowCard = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1">
               {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center px-4">
                 <svg width="100%" height="2" className="text-gray-400">
                   <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
                 </svg>

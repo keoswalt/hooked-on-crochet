@@ -233,15 +233,15 @@ export const useProjectRows = (projectId: string) => {
           .update({ make_mode_status: status })
           .eq('id', id);
 
-        // Find next row and mark as in_progress
+        // Find next row or note (skip dividers) and mark as in_progress
         const currentIndex = rows.findIndex(row => row.id === id);
-        const nextRow = rows.slice(currentIndex + 1).find(row => row.type === 'row');
+        const nextRowOrNote = rows.slice(currentIndex + 1).find(row => row.type === 'row' || row.type === 'note');
         
-        if (nextRow) {
+        if (nextRowOrNote) {
           await supabase
             .from('project_rows')
             .update({ make_mode_status: 'in_progress' })
-            .eq('id', nextRow.id);
+            .eq('id', nextRowOrNote.id);
         }
       } else if (currentRow.make_mode_status === 'complete' && status === 'in_progress') {
         // Show confirmation dialog for unchecking completed row
@@ -257,9 +257,9 @@ export const useProjectRows = (projectId: string) => {
               .update({ make_mode_status: status })
               .eq('id', id);
 
-            // Update subsequent rows
+            // Update subsequent rows (only rows and notes, not dividers)
             for (const row of subsequentRows) {
-              if (row.type === 'row') {
+              if (row.type === 'row' || row.type === 'note') {
                 await supabase
                   .from('project_rows')
                   .update({ 

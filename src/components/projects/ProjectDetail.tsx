@@ -7,7 +7,7 @@ import { ModeToggle } from './ModeToggle';
 import { RowTypeSelector } from '../rows/RowTypeSelector';
 import { RowsList } from '../rows/RowsList';
 import { ProjectForm } from './ProjectForm';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { CustomConfirmationDialog } from '@/components/ui/custom-confirmation-dialog';
 import { useProjectRows } from '@/hooks/useProjectRows';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -82,7 +82,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
     <div className="space-y-6">
       <ProjectHeader project={project} onBack={onBack} onEdit={handleEditProject} />
 
-      <div className="sticky top-0 bg-white z-10 py-4 border-b">
+      <div className="sticky top-0 bg-white z-10 py-4 border-b mx-[-1.5rem] px-6">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">
             {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
@@ -113,14 +113,10 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
         onDelete={deleteRow}
       />
 
-      <ConfirmationDialog
+      <CustomConfirmationDialog
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
-        title="Mark Row as Incomplete?"
-        description="Marking this row as incomplete will also mark all subsequent rows as incomplete and reset their progress. Are you sure you want to continue?"
         onConfirm={confirmDialog.onConfirm}
-        confirmText="Yes, mark incomplete"
-        cancelText="Cancel"
       />
     </div>
   );
