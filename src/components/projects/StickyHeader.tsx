@@ -21,25 +21,51 @@ export const StickyHeader = ({
   onAddDivider 
 }: StickyHeaderProps) => {
   const headerContent = (
-    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-      <h2 className="text-xl font-semibold">
-        {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-      </h2>
-      <div className="flex justify-between sm:justify-start sm:gap-4 lg:gap-4">
-        <div className="flex-shrink-0">
-          <ModeToggle mode={mode} onModeChange={onModeChange} />
-        </div>
-        {mode === 'edit' && (
+    <>
+      {/* Desktop layout - single row */}
+      <div className="hidden lg:flex lg:justify-between lg:items-center">
+        <h2 className="text-xl font-semibold">
+          {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+        </h2>
+        <div className="flex gap-4">
           <div className="flex-shrink-0">
-            <RowTypeSelector
-              onAddRow={onAddRow}
-              onAddNote={onAddNote}
-              onAddDivider={onAddDivider}
-            />
+            <ModeToggle mode={mode} onModeChange={onModeChange} />
           </div>
-        )}
+          {mode === 'edit' && (
+            <div className="flex-shrink-0">
+              <RowTypeSelector
+                onAddRow={onAddRow}
+                onAddNote={onAddNote}
+                onAddDivider={onAddDivider}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Mobile layout - two rows */}
+      <div className="lg:hidden space-y-4">
+        {/* Row 1: Title */}
+        <h2 className="text-xl font-semibold">
+          {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+        </h2>
+        {/* Row 2: Controls */}
+        <div className="flex justify-between items-center">
+          <div className="flex-shrink-0">
+            <ModeToggle mode={mode} onModeChange={onModeChange} />
+          </div>
+          {mode === 'edit' && (
+            <div className="flex-shrink-0">
+              <RowTypeSelector
+                onAddRow={onAddRow}
+                onAddNote={onAddNote}
+                onAddDivider={onAddDivider}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 
   console.log('StickyHeader rendering with isSticky:', isSticky);
