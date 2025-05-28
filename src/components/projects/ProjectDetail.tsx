@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -48,9 +47,20 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
   } = useProjectRows(project.id);
 
   useEffect(() => {
+    console.log('Setting up intersection observer');
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsSticky(!entry.isIntersecting);
+        console.log('Intersection observer triggered:', {
+          isIntersecting: entry.isIntersecting,
+          intersectionRatio: entry.intersectionRatio,
+          boundingClientRect: entry.boundingClientRect,
+          rootBounds: entry.rootBounds
+        });
+        
+        const shouldBeSticky = !entry.isIntersecting;
+        console.log('Setting isSticky to:', shouldBeSticky);
+        setIsSticky(shouldBeSticky);
       },
       { 
         threshold: 0,
@@ -59,11 +69,22 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
     );
 
     if (sentinelRef.current) {
+      console.log('Observer attached to sentinel element');
       observer.observe(sentinelRef.current);
+    } else {
+      console.log('Sentinel element not found');
     }
 
-    return () => observer.disconnect();
+    return () => {
+      console.log('Cleaning up intersection observer');
+      observer.disconnect();
+    };
   }, []);
+
+  // Add effect to log when isSticky changes
+  useEffect(() => {
+    console.log('isSticky state changed to:', isSticky);
+  }, [isSticky]);
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination || mode === 'make') return;
@@ -113,6 +134,8 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
     );
   }
 
+  console.log('Rendering ProjectDetail with isSticky:', isSticky);
+
   return (
     <>
       <div className="space-y-6">
@@ -124,7 +147,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
         />
 
         {/* Sentinel element to detect when header should become sticky */}
-        <div ref={sentinelRef} className="h-0" />
+        <div ref={sentinelRef} className="h-0" style={{ backgroundColor: 'red', height: '1px' }} />
 
         <div className="sticky top-0 z-10">
           {!isSticky ? (
