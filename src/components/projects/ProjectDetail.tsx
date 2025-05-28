@@ -1,12 +1,10 @@
 
-import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { supabase } from '@/integrations/supabase/client';
+import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { RowCard } from '../rows/RowCard';
-import { useToast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
+import { ProjectHeader } from './ProjectHeader';
+import { RowsList } from '../rows/RowsList';
+import { useProjectRows } from '@/hooks/useProjectRows';
 
 interface Project {
   id: string;
@@ -16,211 +14,26 @@ interface Project {
   details?: string;
 }
 
-interface ProjectRow {
-  id: string;
-  position: number;
-  instructions: string;
-  counter: number;
-}
-
 interface ProjectDetailProps {
   project: Project;
   onBack: () => void;
 }
 
 export const ProjectDetail = ({ project, onBack }: ProjectDetailProps) => {
-  const [rows, setRows] = useState<ProjectRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const {
+    rows,
+    loading,
+    addRow,
+    updateCounter,
+    updateInstructions,
+    duplicateRow,
+    deleteRow,
+    reorderRows,
+  } = useProjectRows(project.id);
 
-  useEffect(() => {
-    fetchRows();
-  }, [project.id]);
-
-  const fetchRows = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('project_rows')
-        .select('*')
-        .eq('project_id', project.id)
-        .order('position');
-
-      if (error) throw error;
-      setRows(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addRow = async () => {
-    try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: project.id,
-          position: newPosition,
-          instructions: '',
-          counter: 1,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      setRows([...rows, data]);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateCounter = async (id: string, newCounter: number) => {
-    try {
-      const { error } = await supabase
-        .from('project_rows')
-        .update({ counter: newCounter })
-        .eq('id', id);
-
-      if (error) throw error;
-      setRows(rows.map(row => row.id === id ? { ...row, counter: newCounter } : row));
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateInstructions = async (id: string, instructions: string) => {
-    try {
-      const { error } = await supabase
-        .from('project_rows')
-        .update({ instructions })
-        .eq('id', id);
-
-      if (error) throw error;
-      setRows(rows.map(row => row.id === id ? { ...row, instructions } : row));
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const duplicateRow = async (rowToDuplicate: ProjectRow) => {
-    try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: project.id,
-          position: newPosition,
-          instructions: rowToDuplicate.instructions,
-          counter: 1,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      setRows([...rows, data]);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteRow = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('project_rows')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      const updatedRows = rows.filter(row => row.id !== id);
-      // Reorder positions
-      const reorderedRows = updatedRows.map((row, index) => ({
-        ...row,
-        position: index + 1
-      }));
-      
-      // Update positions in database
-      for (const row of reorderedRows) {
-        await supabase
-          .from('project_rows')
-          .update({ position: row.position })
-          .eq('id', row.id);
-      }
-      
-      setRows(reorderedRows);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const onDragEnd = async (result: DropResult) => {
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    if (sourceIndex === destinationIndex) return;
-
-    // Reorder rows locally
-    const reorderedRows = [...rows];
-    const [removed] = reorderedRows.splice(sourceIndex, 1);
-    reorderedRows.splice(destinationIndex, 0, removed);
-
-    // Update positions
-    const updatedRows = reorderedRows.map((row, index) => ({
-      ...row,
-      position: index + 1
-    }));
-
-    setRows(updatedRows);
-
-    // Update positions in database
-    try {
-      for (const row of updatedRows) {
-        await supabase
-          .from('project_rows')
-          .update({ position: row.position })
-          .eq('id', row.id);
-      }
-      
-      toast({
-        title: "Success",
-        description: "Row order updated successfully.",
-      });
-    } catch (error: any) {
-      // Revert on error
-      fetchRows();
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    reorderRows(result.source.index, result.destination.index);
   };
 
   if (loading) {
@@ -229,24 +42,7 @@ export const ProjectDetail = ({ project, onBack }: ProjectDetailProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">{project.name}</CardTitle>
-          <div className="text-sm text-gray-600">
-            Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
-          </div>
-          {project.details && (
-            <p className="text-gray-700 mt-2">{project.details}</p>
-          )}
-        </CardHeader>
-      </Card>
+      <ProjectHeader project={project} onBack={onBack} />
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Rows</h2>
@@ -256,42 +52,14 @@ export const ProjectDetail = ({ project, onBack }: ProjectDetailProps) => {
         </Button>
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="rows">
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-              {rows.map((row, index) => (
-                <Draggable key={row.id} draggableId={row.id} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`${snapshot.isDragging ? 'opacity-75' : ''}`}
-                    >
-                      <RowCard
-                        row={row}
-                        onUpdateCounter={updateCounter}
-                        onUpdateInstructions={updateInstructions}
-                        onDuplicate={duplicateRow}
-                        onDelete={deleteRow}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-              {rows.length === 0 && (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-gray-500">No rows yet. Add your first row to get started!</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <RowsList
+        rows={rows}
+        onDragEnd={onDragEnd}
+        onUpdateCounter={updateCounter}
+        onUpdateInstructions={updateInstructions}
+        onDuplicate={duplicateRow}
+        onDelete={deleteRow}
+      />
     </div>
   );
 };
