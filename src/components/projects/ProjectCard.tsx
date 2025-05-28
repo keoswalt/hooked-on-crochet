@@ -22,7 +22,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow h-48 flex flex-col">
+    <Card className="hover:shadow-lg transition-shadow flex flex-col">
       <CardHeader className="p-4 flex-shrink-0">
         <div className="flex items-center gap-2 mb-3">
           <button onClick={handleFavoriteClick} className="flex-shrink-0">
@@ -33,7 +33,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
           <CardTitle className="text-lg truncate flex-1">{project.name}</CardTitle>
         </div>
         
-        <div className="flex justify-end space-x-1 mb-3">
+        <div className="flex justify-start space-x-1 mb-3">
           <Button variant="outline" size="sm" onClick={onEdit}>
             <Edit className="h-4 w-4" />
           </Button>
