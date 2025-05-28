@@ -46,6 +46,23 @@ const Index = () => {
     }
   }, [user]);
 
+  // Check for project URL parameter when projects are loaded
+  useEffect(() => {
+    if (projects.length > 0 && user) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get('project');
+      
+      if (projectId && !selectedProject) {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+          setSelectedProject(project);
+          // Clear URL parameter after selecting project
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [projects, user, selectedProject]);
+
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase

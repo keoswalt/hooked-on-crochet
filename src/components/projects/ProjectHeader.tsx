@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { QRCodeGenerator } from './QRCodeGenerator';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -40,6 +41,7 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHead
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Project
               </Button>
+              <QRCodeGenerator project={project} />
               <Button variant="outline" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
