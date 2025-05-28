@@ -253,7 +253,7 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <AuthForm mode={authMode} onModeChange={setAuthMode} />
       </div>
     );
@@ -296,21 +296,22 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Header userEmail={user.email} />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8 gap-4">
+        <div className="space-y-6">
           <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
-          <div className="flex items-center gap-4">
+          
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <ProjectSearch 
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
             />
-            <Button onClick={() => setShowForm(true)}>
+            <Button onClick={() => setShowForm(true)} className="w-full md:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           {filteredProjects.map((project) => (
             <div key={project.id} onClick={() => setSelectedProject(project)} className="cursor-pointer">
               <ProjectCard
