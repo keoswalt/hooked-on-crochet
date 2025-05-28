@@ -39,8 +39,8 @@ export const StickyHeader = ({
         </div>
       </div>
 
-      {/* Mobile layout - responsive flex */}
-      <div className="lg:hidden flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+      {/* Mobile layout - two rows */}
+      <div className="lg:hidden space-y-4">
         {/* Row 1: Title */}
         <h2 className="text-xl font-semibold">
           {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
