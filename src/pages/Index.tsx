@@ -1,12 +1,228 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthForm } from '@/components/auth/AuthForm';
+import { Header } from '@/components/layout/Header';
+import { ProjectCard } from '@/components/projects/ProjectCard';
+import { ProjectForm } from '@/components/projects/ProjectForm';
+import { ProjectDetail } from '@/components/projects/ProjectDetail';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import type { User } from '@supabase/supabase-js';
+
+interface Project {
+  id: string;
+  name: string;
+  hook_size: string;
+  yarn_weight: string;
+  details?: string;
+  created_at: string;
+}
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+  const [user, setUser] = useState<User | null>(null);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchProjects();
+    }
+  }, [user]);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveProject = async (projectData: Omit<Project, 'id'>) => {
+    try {
+      if (editingProject) {
+        const { error } = await supabase
+          .from('projects')
+          .update(projectData)
+          .eq('id', editingProject.id);
+
+        if (error) throw error;
+        toast({
+          title: "Project updated",
+          description: "Your project has been updated successfully.",
+        });
+      } else {
+        const { error } = await supabase
+          .from('projects')
+          .insert({
+            ...projectData,
+            user_id: user!.id,
+          });
+
+        if (error) throw error;
+        toast({
+          title: "Project created",
+          description: "Your new project has been created successfully.",
+        });
+      }
+
+      setShowForm(false);
+      setEditingProject(null);
+      fetchProjects();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast({
+        title: "Project deleted",
+        description: "Your project has been deleted successfully.",
+      });
+      fetchProjects();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setShowForm(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">Loading...</div>
       </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+        <AuthForm mode={authMode} onModeChange={setAuthMode} />
+      </div>
+    );
+  }
+
+  if (selectedProject) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header userEmail={user.email} />
+        <main className="container mx-auto px-4 py-8">
+          <ProjectDetail 
+            project={selectedProject} 
+            onBack={() => setSelectedProject(null)} 
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header userEmail={user.email} />
+        <main className="container mx-auto px-4 py-8">
+          <ProjectForm
+            project={editingProject || undefined}
+            onSave={handleSaveProject}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingProject(null);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header userEmail={user.email} />
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <div key={project.id} onClick={() => setSelectedProject(project)} className="cursor-pointer">
+              <ProjectCard
+                project={project}
+                onEdit={(e) => {
+                  e.stopPropagation();
+                  handleEditProject(project);
+                }}
+                onDelete={(id) => {
+                  handleDeleteProject(id);
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {projects.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-4">No projects yet!</p>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Project
+            </Button>
+          </div>
+        )}
+      </main>
     </div>
   );
 };

@@ -9,7 +9,77 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      project_rows: {
+        Row: {
+          counter: number
+          created_at: string
+          id: string
+          instructions: string
+          position: number
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          counter?: number
+          created_at?: string
+          id?: string
+          instructions: string
+          position: number
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          counter?: number
+          created_at?: string
+          id?: string
+          instructions?: string
+          position?: number
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_rows_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          details: string | null
+          hook_size: Database["public"]["Enums"]["hook_size"]
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          yarn_weight: Database["public"]["Enums"]["yarn_weight"]
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          hook_size: Database["public"]["Enums"]["hook_size"]
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          yarn_weight: Database["public"]["Enums"]["yarn_weight"]
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          hook_size?: Database["public"]["Enums"]["hook_size"]
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          yarn_weight?: Database["public"]["Enums"]["yarn_weight"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +88,20 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      hook_size:
+        | "2mm"
+        | "2.2mm"
+        | "3mm"
+        | "3.5mm"
+        | "4mm"
+        | "4.5mm"
+        | "5mm"
+        | "5.5mm"
+        | "6mm"
+        | "6.5mm"
+        | "9mm"
+        | "10mm"
+      yarn_weight: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +216,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      hook_size: [
+        "2mm",
+        "2.2mm",
+        "3mm",
+        "3.5mm",
+        "4mm",
+        "4.5mm",
+        "5mm",
+        "5.5mm",
+        "6mm",
+        "6.5mm",
+        "9mm",
+        "10mm",
+      ],
+      yarn_weight: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    },
   },
 } as const
