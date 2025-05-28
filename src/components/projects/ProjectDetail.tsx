@@ -131,18 +131,24 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
             // Regular card header
             <Card className="border border-gray-200 rounded-lg shadow-sm">
               <CardContent className="py-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold">
-                    {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-                  </h2>
-                  <div className="flex items-center gap-4">
-                    <ModeToggle mode={mode} onModeChange={setMode} />
+                <div className="flex flex-col space-y-4 sm:space-y-0">
+                  <div className="w-full">
+                    <h2 className="text-xl font-semibold">
+                      {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+                    </h2>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="sm:flex-1">
+                      <ModeToggle mode={mode} onModeChange={setMode} />
+                    </div>
                     {mode === 'edit' && (
-                      <RowTypeSelector
-                        onAddRow={addRow}
-                        onAddNote={addNote}
-                        onAddDivider={addDivider}
-                      />
+                      <div className="flex justify-end">
+                        <RowTypeSelector
+                          onAddRow={addRow}
+                          onAddNote={addNote}
+                          onAddDivider={addDivider}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -185,18 +191,24 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
       {isSticky && (
         <div className="fixed top-0 left-0 right-0 w-full bg-white border-b border-gray-200 z-50">
           <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-              </h2>
-              <div className="flex items-center gap-4">
-                <ModeToggle mode={mode} onModeChange={setMode} />
+            <div className="flex flex-col space-y-4 sm:space-y-0">
+              <div className="w-full">
+                <h2 className="text-xl font-semibold">
+                  {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+                </h2>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div className="sm:flex-1">
+                  <ModeToggle mode={mode} onModeChange={setMode} />
+                </div>
                 {mode === 'edit' && (
-                  <RowTypeSelector
-                    onAddRow={addRow}
-                    onAddNote={addNote}
-                    onAddDivider={addDivider}
-                  />
+                  <div className="flex justify-end">
+                    <RowTypeSelector
+                      onAddRow={addRow}
+                      onAddNote={addNote}
+                      onAddDivider={addDivider}
+                    />
+                  </div>
                 )}
               </div>
             </div>

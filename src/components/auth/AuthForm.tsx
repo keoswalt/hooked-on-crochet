@@ -57,59 +57,61 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <Scissors className="h-8 w-8 text-green-600" />
-        </div>
-        <CardTitle className="text-2xl">
-          {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
-        </CardTitle>
-        <CardDescription>
-          {mode === 'signin'
-            ? 'Sign in to your crochet projects'
-            : 'Start tracking your crochet projects'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
+    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+      <Card className="border-0 shadow-none sm:border sm:shadow-sm">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Scissors className="h-8 w-8 text-green-600" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
-          </Button>
-        </form>
-        <div className="mt-4 text-center">
-          <Button
-            variant="link"
-            onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
-          >
+          <CardTitle className="text-2xl">
+            {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+          </CardTitle>
+          <CardDescription>
             {mode === 'signin'
-              ? "Don't have an account? Sign up"
-              : 'Already have an account? Sign in'}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+              ? 'Sign in to your crochet projects'
+              : 'Start tracking your crochet projects'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+            </Button>
+          </form>
+          <div className="mt-4 text-center">
+            <Button
+              variant="link"
+              onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
+            >
+              {mode === 'signin'
+                ? "Don't have an account? Sign up"
+                : 'Already have an account? Sign in'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

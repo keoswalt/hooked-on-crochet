@@ -253,7 +253,7 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 sm:bg-gradient-to-br sm:from-green-50 sm:to-green-100 flex items-center justify-center">
         <AuthForm mode={authMode} onModeChange={setAuthMode} />
       </div>
     );
@@ -296,17 +296,20 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Header userEmail={user.email} />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
-          <div className="flex items-center gap-4">
-            <ProjectSearch 
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">My Crochet Projects</h1>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div className="sm:hidden"></div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-4">
+              <ProjectSearch 
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+              <Button onClick={() => setShowForm(true)} className="whitespace-nowrap">
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+            </div>
           </div>
         </div>
 

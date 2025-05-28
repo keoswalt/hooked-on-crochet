@@ -25,8 +25,8 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHead
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
+          <div className="flex flex-col space-y-4">
+            <div className="w-full">
               <CardTitle className="text-2xl">{project.name}</CardTitle>
               <div className="text-sm text-gray-600">
                 Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
@@ -35,8 +35,8 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHead
                 <p className="text-gray-700 mt-2">{project.details}</p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={onEdit}>
+            <div className="flex items-center gap-2 w-full">
+              <Button variant="outline" onClick={onEdit} className="flex-1 sm:flex-none">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Project
               </Button>

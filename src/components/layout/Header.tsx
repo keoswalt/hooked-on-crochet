@@ -40,10 +40,10 @@ export const Header = ({ userEmail }: HeaderProps) => {
         </div>
         {userEmail && (
           <div className="flex items-center space-x-4">
-            <span className="text-sm">{userEmail}</span>
+            <span className="text-sm hidden sm:block">{userEmail}</span>
             <Button variant="outline" size="sm" onClick={handleSignOut} className="text-gray-900 bg-white border-white hover:bg-gray-100">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         )}
