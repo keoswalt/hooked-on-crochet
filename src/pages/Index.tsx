@@ -314,10 +314,9 @@ const Index = () => {
       <Header userEmail={user.email} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">My Crochet Projects</h1>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <div className="sm:hidden"></div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <ProjectSearch 
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
