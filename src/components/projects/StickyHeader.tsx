@@ -25,7 +25,7 @@ export const StickyHeader = ({
       <h2 className="text-xl font-semibold">
         {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
       </h2>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-4">
+      <div className="flex justify-between sm:justify-start sm:gap-4 lg:gap-4">
         <div className="flex-shrink-0">
           <ModeToggle mode={mode} onModeChange={onModeChange} />
         </div>
