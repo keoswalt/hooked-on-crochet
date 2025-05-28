@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { ProjectHeader } from './ProjectHeader';
 import { ModeToggle } from './ModeToggle';
 import { RowTypeSelector } from '../rows/RowTypeSelector';
@@ -82,23 +83,25 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
     <div className="space-y-6">
       <ProjectHeader project={project} onBack={onBack} onEdit={handleEditProject} />
 
-      <div className="sticky top-0 bg-white z-10 py-4 border-b mx-[-1.5rem] px-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-          </h2>
-          <div className="flex items-center gap-4">
-            <ModeToggle mode={mode} onModeChange={setMode} />
-            {mode === 'edit' && (
-              <RowTypeSelector
-                onAddRow={addRow}
-                onAddNote={addNote}
-                onAddDivider={addDivider}
-              />
-            )}
+      <Card className="sticky top-0 bg-background z-10 shadow-md">
+        <CardContent className="py-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">
+              {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+            </h2>
+            <div className="flex items-center gap-4">
+              <ModeToggle mode={mode} onModeChange={setMode} />
+              {mode === 'edit' && (
+                <RowTypeSelector
+                  onAddRow={addRow}
+                  onAddNote={addNote}
+                  onAddDivider={addDivider}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <RowsList
         rows={rows}

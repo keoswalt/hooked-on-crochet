@@ -144,6 +144,67 @@ const Index = () => {
     }
   };
 
+  const handleDuplicateProject = async (project: Project) => {
+    try {
+      // Create new project with same basic info but reset progress
+      const { data: newProject, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          name: `${project.name} (Copy)`,
+          hook_size: project.hook_size,
+          yarn_weight: project.yarn_weight,
+          details: project.details,
+          user_id: user!.id,
+          is_favorite: false,
+        })
+        .select()
+        .single();
+
+      if (projectError) throw projectError;
+
+      // Get original project rows (only edit mode data)
+      const { data: originalRows, error: rowsError } = await supabase
+        .from('project_rows')
+        .select('type, position, instructions, counter')
+        .eq('project_id', project.id)
+        .order('position');
+
+      if (rowsError) throw rowsError;
+
+      // Insert rows with only edit mode data, reset make mode data
+      if (originalRows && originalRows.length > 0) {
+        const rowsToInsert = originalRows.map(row => ({
+          project_id: newProject.id,
+          type: row.type,
+          position: row.position,
+          instructions: row.instructions,
+          counter: row.counter,
+          make_mode_counter: 0,
+          make_mode_status: 'not_started',
+          is_locked: false,
+        }));
+
+        const { error: insertError } = await supabase
+          .from('project_rows')
+          .insert(rowsToInsert);
+
+        if (insertError) throw insertError;
+      }
+
+      toast({
+        title: "Project duplicated",
+        description: "Your project has been duplicated successfully.",
+      });
+      fetchProjects();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
     try {
       const { error } = await supabase
@@ -252,6 +313,10 @@ const Index = () => {
                 }}
                 onDelete={(id) => {
                   handleDeleteProject(id);
+                }}
+                onDuplicate={(e) => {
+                  e.stopPropagation();
+                  handleDuplicateProject(project);
                 }}
                 onToggleFavorite={handleToggleFavorite}
               />
