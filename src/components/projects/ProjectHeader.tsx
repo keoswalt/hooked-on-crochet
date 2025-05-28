@@ -2,14 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
 
-interface Project {
-  id: string;
-  name: string;
-  hook_size: string;
-  yarn_weight: string;
-  details?: string;
-}
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectHeaderProps {
   project: Project;

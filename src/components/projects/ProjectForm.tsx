@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +52,7 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
         hook_size: formData.hook_size,
         yarn_weight: formData.yarn_weight,
         details: formData.details || null,
+        is_favorite: project?.is_favorite || false,
       });
     }
   };

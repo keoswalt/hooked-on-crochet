@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -8,14 +7,9 @@ import { RowTypeSelector } from '../rows/RowTypeSelector';
 import { RowsList } from '../rows/RowsList';
 import { ProjectForm } from './ProjectForm';
 import { useProjectRows } from '@/hooks/useProjectRows';
+import type { Database } from '@/integrations/supabase/types';
 
-interface Project {
-  id: string;
-  name: string;
-  hook_size: string;
-  yarn_weight: string;
-  details?: string;
-}
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectDetailProps {
   project: Project;
