@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ProjectDetail } from '@/components/projects/ProjectDetail';
+import { ProjectSearch } from '@/components/projects/ProjectSearch';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +22,7 @@ const Index = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,7 +51,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
       setProjects(data || []);
@@ -61,6 +63,15 @@ const Index = () => {
       });
     }
   };
+
+  // Filter projects based on search term
+  const filteredProjects = useMemo(() => {
+    if (!searchTerm.trim()) return projects;
+    
+    return projects.filter(project =>
+      project.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [projects, searchTerm]);
 
   const handleSaveProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
@@ -181,16 +192,22 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Header userEmail={user.email} />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
-          </Button>
+          <div className="flex items-center gap-4">
+            <ProjectSearch 
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div key={project.id} onClick={() => setSelectedProject(project)} className="cursor-pointer">
               <ProjectCard
                 project={project}
@@ -206,12 +223,21 @@ const Index = () => {
           ))}
         </div>
 
-        {projects.length === 0 && (
+        {filteredProjects.length === 0 && !searchTerm && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg mb-4">No projects yet!</p>
             <Button onClick={() => setShowForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Project
+            </Button>
+          </div>
+        )}
+
+        {filteredProjects.length === 0 && searchTerm && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-4">No projects found matching "{searchTerm}"</p>
+            <Button onClick={() => setSearchTerm('')} variant="outline">
+              Clear Search
             </Button>
           </div>
         )}
