@@ -236,6 +236,13 @@ const Index = () => {
     setShowForm(true);
   };
 
+  const handleDeleteProjectFromDetail = () => {
+    if (selectedProject) {
+      handleDeleteProject(selectedProject.id);
+      setSelectedProject(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -259,7 +266,8 @@ const Index = () => {
         <main className="container mx-auto px-4 py-8">
           <ProjectDetail 
             project={selectedProject} 
-            onBack={() => setSelectedProject(null)} 
+            onBack={() => setSelectedProject(null)}
+            onProjectDelete={handleDeleteProjectFromDetail}
           />
         </main>
       </div>

@@ -18,9 +18,10 @@ interface ProjectDetailProps {
   project: Project;
   onBack: () => void;
   onProjectUpdate?: (updatedProject: Project) => void;
+  onProjectDelete?: () => void;
 }
 
-export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetailProps) => {
+export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelete }: ProjectDetailProps) => {
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
   const [showEditForm, setShowEditForm] = useState(false);
 
@@ -49,6 +50,12 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
 
   const handleEditProject = () => {
     setShowEditForm(true);
+  };
+
+  const handleDeleteProject = () => {
+    if (onProjectDelete) {
+      onProjectDelete();
+    }
   };
 
   const handleProjectSave = (updatedData: any) => {
@@ -81,9 +88,14 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate }: ProjectDetai
 
   return (
     <div className="space-y-6">
-      <ProjectHeader project={project} onBack={onBack} onEdit={handleEditProject} />
+      <ProjectHeader 
+        project={project} 
+        onBack={onBack} 
+        onEdit={handleEditProject}
+        onDelete={handleDeleteProject}
+      />
 
-      <Card className="sticky top-0 bg-background z-10 shadow-md">
+      <Card className="sticky top-0 bg-white z-10 shadow-md transition-all duration-200 data-[stuck=true]:rounded-none data-[stuck=true]:border-l-0 data-[stuck=true]:border-r-0 data-[stuck=true]:w-screen data-[stuck=true]:ml-[-1rem] data-[stuck=true]:mr-[-1rem] data-[stuck=true]:px-4">
         <CardContent className="py-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">

@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -10,9 +10,10 @@ interface ProjectHeaderProps {
   project: Project;
   onBack: () => void;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
-export const ProjectHeader = ({ project, onBack, onEdit }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHeaderProps) => {
   return (
     <>
       <div className="flex items-center space-x-4">
@@ -34,10 +35,15 @@ export const ProjectHeader = ({ project, onBack, onEdit }: ProjectHeaderProps) =
                 <p className="text-gray-700 mt-2">{project.details}</p>
               )}
             </div>
-            <Button variant="outline" onClick={onEdit}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Project
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={onEdit}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Project
+              </Button>
+              <Button variant="outline" onClick={onDelete}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>
