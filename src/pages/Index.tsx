@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
@@ -10,15 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
-interface Project {
-  id: string;
-  name: string;
-  hook_size: string;
-  yarn_weight: string;
-  details?: string;
-  created_at: string;
-}
+type Project = Database['public']['Tables']['projects']['Row'];
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -69,7 +62,7 @@ const Index = () => {
     }
   };
 
-  const handleSaveProject = async (projectData: Omit<Project, 'id'>) => {
+  const handleSaveProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
       if (editingProject) {
         const { error } = await supabase

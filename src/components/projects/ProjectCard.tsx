@@ -2,19 +2,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
 
-interface Project {
-  id: string;
-  name: string;
-  hook_size: string;
-  yarn_weight: string;
-  details?: string;
-  created_at: string;
-}
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectCardProps {
   project: Project;
-  onEdit: (project: Project) => void;
+  onEdit: (e: React.MouseEvent) => void;
   onDelete: (id: string) => void;
 }
 
@@ -30,7 +24,7 @@ export const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => 
             </CardDescription>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={() => onEdit(project)}>
+            <Button variant="outline" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={() => onDelete(project.id)}>
