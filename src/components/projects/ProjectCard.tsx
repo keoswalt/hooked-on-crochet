@@ -22,7 +22,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow flex flex-col">
+    <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col">
       <CardHeader className="p-4 flex-shrink-0">
         <div className="flex items-center gap-2 mb-3">
           <button onClick={handleFavoriteClick} className="flex-shrink-0">
@@ -31,18 +31,6 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
             />
           </button>
           <CardTitle className="text-lg truncate flex-1">{project.name}</CardTitle>
-        </div>
-        
-        <div className="flex justify-start space-x-1 mb-3">
-          <Button variant="outline" size="sm" onClick={onEdit}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDuplicate}>
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => onDelete(project.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
 
         <CardDescription className="text-xs w-full">
@@ -59,6 +47,20 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
           <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden text-ellipsis">{project.details}</p>
         </CardContent>
       )}
+
+      <div className="bg-gray-800 p-3 rounded-b-lg mt-auto">
+        <div className="flex justify-start space-x-1">
+          <Button variant="outline" size="sm" onClick={onEdit} className="bg-white hover:bg-gray-100">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicate} className="bg-white hover:bg-gray-100">
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onDelete(project.id)} className="bg-white hover:bg-gray-100">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 };
