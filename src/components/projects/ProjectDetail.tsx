@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -113,91 +114,95 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
   }
 
   return (
-    <div className="space-y-6">
-      <ProjectHeader 
-        project={project} 
-        onBack={onBack} 
-        onEdit={handleEditProject}
-        onDelete={handleDeleteProject}
-      />
+    <>
+      <div className="space-y-6">
+        <ProjectHeader 
+          project={project} 
+          onBack={onBack} 
+          onEdit={handleEditProject}
+          onDelete={handleDeleteProject}
+        />
 
-      {/* Sentinel element to detect when header should become sticky */}
-      <div ref={sentinelRef} className="h-0" />
+        {/* Sentinel element to detect when header should become sticky */}
+        <div ref={sentinelRef} className="h-0" />
 
-      <div className="sticky top-0 z-10">
-        {isSticky ? (
-          // Full-width sticky header
-          <div className="w-full bg-white border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-4 py-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">
-                  {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <ModeToggle mode={mode} onModeChange={setMode} />
-                  {mode === 'edit' && (
-                    <RowTypeSelector
-                      onAddRow={addRow}
-                      onAddNote={addNote}
-                      onAddDivider={addDivider}
-                    />
-                  )}
+        <div className="sticky top-0 z-10">
+          {!isSticky ? (
+            // Regular card header
+            <Card className="border border-gray-200 rounded-lg shadow-sm">
+              <CardContent className="py-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">
+                    {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <ModeToggle mode={mode} onModeChange={setMode} />
+                    {mode === 'edit' && (
+                      <RowTypeSelector
+                        onAddRow={addRow}
+                        onAddNote={addNote}
+                        onAddDivider={addDivider}
+                      />
+                    )}
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+
+        <RowsList
+          rows={rows}
+          mode={mode}
+          onDragEnd={onDragEnd}
+          onUpdateCounter={updateCounter}
+          onUpdateInstructions={updateInstructions}
+          onUpdateMakeModeCounter={updateMakeModeCounter}
+          onUpdateMakeModeStatus={updateMakeModeStatus}
+          onToggleLock={toggleLock}
+          onDuplicate={duplicateRow}
+          onDelete={deleteRow}
+        />
+
+        <CustomConfirmationDialog
+          open={confirmDialog.open}
+          onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+          onConfirm={confirmDialog.onConfirm}
+        />
+
+        <ConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title="Delete Project"
+          description="Are you sure you want to delete this project? This action cannot be undone and will remove all rows and progress data."
+          onConfirm={handleConfirmDelete}
+          confirmText="Delete Project"
+          cancelText="Cancel"
+        />
+      </div>
+
+      {/* Full-width sticky header that breaks out of container */}
+      {isSticky && (
+        <div className="fixed top-0 left-0 right-0 w-full bg-white border-b border-gray-200 z-50">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
+              </h2>
+              <div className="flex items-center gap-4">
+                <ModeToggle mode={mode} onModeChange={setMode} />
+                {mode === 'edit' && (
+                  <RowTypeSelector
+                    onAddRow={addRow}
+                    onAddNote={addNote}
+                    onAddDivider={addDivider}
+                  />
+                )}
               </div>
             </div>
           </div>
-        ) : (
-          // Regular card header
-          <Card className="border border-gray-200 rounded-lg shadow-sm">
-            <CardContent className="py-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">
-                  {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <ModeToggle mode={mode} onModeChange={setMode} />
-                  {mode === 'edit' && (
-                    <RowTypeSelector
-                      onAddRow={addRow}
-                      onAddNote={addNote}
-                      onAddDivider={addDivider}
-                    />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <RowsList
-        rows={rows}
-        mode={mode}
-        onDragEnd={onDragEnd}
-        onUpdateCounter={updateCounter}
-        onUpdateInstructions={updateInstructions}
-        onUpdateMakeModeCounter={updateMakeModeCounter}
-        onUpdateMakeModeStatus={updateMakeModeStatus}
-        onToggleLock={toggleLock}
-        onDuplicate={duplicateRow}
-        onDelete={deleteRow}
-      />
-
-      <CustomConfirmationDialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
-        onConfirm={confirmDialog.onConfirm}
-      />
-
-      <ConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title="Delete Project"
-        description="Are you sure you want to delete this project? This action cannot be undone and will remove all rows and progress data."
-        onConfirm={handleConfirmDelete}
-        confirmText="Delete Project"
-        cancelText="Cancel"
-      />
-    </div>
+        </div>
+      )}
+    </>
   );
 };
