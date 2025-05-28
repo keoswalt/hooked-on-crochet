@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Star } from 'lucide-react';
+import { Edit, Trash2, Star, Copy } from 'lucide-react';
 import { formatLastModified } from '@/utils/dateUtils';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -11,10 +11,11 @@ interface ProjectCardProps {
   project: Project;
   onEdit: (e: React.MouseEvent) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (e: React.MouseEvent) => void;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
 }
 
-export const ProjectCard = ({ project, onEdit, onDelete, onToggleFavorite }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite }: ProjectCardProps) => {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite(project.id, !project.is_favorite);
@@ -43,6 +44,9 @@ export const ProjectCard = ({ project, onEdit, onDelete, onToggleFavorite }: Pro
           <div className="flex space-x-1 flex-shrink-0">
             <Button variant="outline" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={onDuplicate}>
+              <Copy className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={() => onDelete(project.id)}>
               <Trash2 className="h-4 w-4" />
