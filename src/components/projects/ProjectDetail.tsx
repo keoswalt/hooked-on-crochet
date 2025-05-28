@@ -134,7 +134,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
                   <h2 className="text-xl font-semibold">
                     {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                     <ModeToggle mode={mode} onModeChange={setMode} />
                     {mode === 'edit' && (
                       <RowTypeSelector
@@ -188,7 +188,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
               <h2 className="text-xl font-semibold">
                 {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
               </h2>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <ModeToggle mode={mode} onModeChange={setMode} />
                 {mode === 'edit' && (
                   <RowTypeSelector
