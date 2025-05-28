@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,6 +25,9 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const {
     rows,
@@ -44,6 +46,21 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
     deleteRow,
     reorderRows,
   } = useProjectRows(project.id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSticky(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination || mode === 'make') return;
@@ -102,10 +119,19 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
         onDelete={handleDeleteProject}
       />
 
-      <div className="sticky top-0 z-10">
-        <Card className="border border-gray-200 rounded-lg shadow-sm data-[stuck=true]:border-l-0 data-[stuck=true]:border-r-0 data-[stuck=true]:rounded-none data-[stuck=true]:w-screen data-[stuck=true]:relative data-[stuck=true]:left-1/2 data-[stuck=true]:right-1/2 data-[stuck=true]:-ml-[50vw] data-[stuck=true]:-mr-[50vw] data-[stuck=true]:bg-white">
+      {/* Sentinel element to detect when header should become sticky */}
+      <div ref={sentinelRef} className="h-0" />
+
+      <div className="sticky top-0 z-10" ref={stickyHeaderRef}>
+        <Card 
+          className={`border border-gray-200 rounded-lg shadow-sm transition-all duration-200 ${
+            isSticky 
+              ? 'border-l-0 border-r-0 rounded-none w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-white' 
+              : ''
+          }`}
+        >
           <CardContent className="py-4">
-            <div className="flex justify-between items-center max-w-full mx-auto px-4">
+            <div className={`flex justify-between items-center ${isSticky ? 'max-w-6xl mx-auto px-4' : ''}`}>
               <h2 className="text-xl font-semibold">
                 {mode === 'edit' ? 'Edit Mode' : 'Make Mode'}
               </h2>
