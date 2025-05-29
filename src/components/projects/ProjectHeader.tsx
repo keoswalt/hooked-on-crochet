@@ -40,13 +40,13 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onE
               )}
             </div>
             <div className="flex items-center gap-2 w-full flex-wrap">
-              <Button variant="outline" onClick={onEdit} className="flex-1 min-w-0 sm:flex-none">
+              <Button variant="outline" onClick={onEdit} className="flex-1 sm:flex-none">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Project
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex-1 min-w-0 sm:flex-none">
+                  <Button variant="outline" className="flex-1 sm:flex-none">
                     <Download className="h-4 w-4 mr-2" />
                     Export
                     <ChevronDown className="h-4 w-4 ml-2" />
