@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image } from 'lucide-react';
-import { ImageUploader } from '@/components/images/ImageUploader';
+import { ImageUploader, ImageUploaderRef } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -63,9 +64,10 @@ export const RowCard = ({
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
   const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
   const [localLabel, setLocalLabel] = useState(row.label || '');
-  const [showImageUploader, setShowImageUploader] = useState(false);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const { deleteImage } = useImageOperations();
   const { toast } = useToast();
+  const imageUploaderRef = useRef<ImageUploaderRef>(null);
 
   // Update local state when row prop changes
   useEffect(() => {
@@ -147,9 +149,30 @@ export const RowCard = ({
     }
   };
 
+  const handleImageButtonClick = () => {
+    if (row.image_url) {
+      setShowReplaceConfirm(true);
+    } else {
+      imageUploaderRef.current?.triggerUpload();
+    }
+  };
+
+  const handleReplaceConfirm = async () => {
+    if (row.image_url) {
+      const success = await deleteImage(row.image_url);
+      if (success) {
+        onUpdateRowImage(row.id, null);
+        // Trigger upload after deletion
+        setTimeout(() => {
+          imageUploaderRef.current?.triggerUpload();
+        }, 100);
+      }
+    }
+    setShowReplaceConfirm(false);
+  };
+
   const handleImageUploaded = (imageUrl: string) => {
     onUpdateRowImage(row.id, imageUrl);
-    setShowImageUploader(false);
   };
 
   const handleImageDelete = async () => {
@@ -239,7 +262,7 @@ export const RowCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowImageUploader(!showImageUploader)}
+                onClick={handleImageButtonClick}
                 className={row.image_url ? 'bg-blue-50 border-blue-200' : ''}
               >
                 <Image className="h-4 w-4" />
@@ -256,24 +279,13 @@ export const RowCard = ({
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
-          {showImageUploader && mode === 'edit' && (
-            <div className="p-3 border rounded-md bg-gray-50">
-              <ImageUploader
-                onImageUploaded={handleImageUploaded}
-                userId={userId}
-                folder="rows"
-                className="w-full"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowImageUploader(false)}
-                className="mt-2 w-full"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
+          <ImageUploader
+            ref={imageUploaderRef}
+            onImageUploaded={handleImageUploaded}
+            userId={userId}
+            folder="rows"
+            className="hidden"
+          />
 
           {row.image_url && (
             <div className="w-full">
@@ -376,6 +388,16 @@ export const RowCard = ({
           )}
         </div>
       </CardContent>
+
+      <ConfirmationDialog
+        open={showReplaceConfirm}
+        onOpenChange={setShowReplaceConfirm}
+        title="Replace existing image?"
+        description="This will delete the current image and cannot be undone. Do you want to continue?"
+        onConfirm={handleReplaceConfirm}
+        confirmText="Replace"
+        cancelText="Cancel"
+      />
     </Card>
   );
 };

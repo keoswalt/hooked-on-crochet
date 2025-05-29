@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Camera } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 interface ImageUploaderProps {
   onImageUploaded: (imageUrl: string) => void;
@@ -14,15 +14,25 @@ interface ImageUploaderProps {
   className?: string;
 }
 
-export const ImageUploader = ({ 
+export interface ImageUploaderRef {
+  triggerUpload: () => void;
+}
+
+export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(({ 
   onImageUploaded, 
   userId, 
   folder, 
   accept = "image/*",
   className = ""
-}: ImageUploaderProps) => {
+}, ref) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+
+  useImperativeHandle(ref, () => ({
+    triggerUpload: () => {
+      document.getElementById(`image-upload-${folder}`)?.click();
+    }
+  }));
 
   const uploadImage = async (file: File) => {
     try {
@@ -68,12 +78,6 @@ export const ImageUploader = ({
     }
   };
 
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    document.getElementById(`image-upload-${folder}`)?.click();
-  };
-
   return (
     <div className={className}>
       <Input
@@ -84,22 +88,11 @@ export const ImageUploader = ({
         className="hidden"
         id={`image-upload-${folder}`}
       />
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={uploading}
-        onClick={handleButtonClick}
-      >
-        {uploading ? (
-          "Uploading..."
-        ) : (
-          <>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Image
-          </>
-        )}
-      </Button>
+      {uploading && (
+        <div className="text-sm text-gray-500">Uploading...</div>
+      )}
     </div>
   );
-};
+});
+
+ImageUploader.displayName = 'ImageUploader';
