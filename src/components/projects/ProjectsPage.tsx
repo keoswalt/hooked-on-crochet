@@ -21,6 +21,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [returnToDetail, setReturnToDetail] = useState(false);
 
   const {
     loading: operationsLoading,
@@ -57,11 +58,13 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
 
   const handleCreateProject = () => {
     setEditingProject(null);
+    setReturnToDetail(false);
     setCurrentView('form');
   };
 
   const handleEditProject = (project: Project) => {
     setEditingProject(project);
+    setReturnToDetail(currentView === 'detail');
     setCurrentView('form');
   };
 
@@ -74,17 +77,32 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     setCurrentView('list');
     setSelectedProject(null);
     setEditingProject(null);
+    setReturnToDetail(false);
   };
 
   const handleFormCancel = () => {
-    setCurrentView('list');
+    if (returnToDetail && selectedProject) {
+      setCurrentView('detail');
+    } else {
+      setCurrentView('list');
+    }
     setEditingProject(null);
+    setReturnToDetail(false);
   };
 
   const handleFormSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    await handleSaveProject(projectData, editingProject);
-    setCurrentView('list');
+    const savedProject = await handleSaveProject(projectData, editingProject);
+    
+    if (returnToDetail && savedProject) {
+      // Update the selected project with the saved data
+      setSelectedProject(savedProject);
+      setCurrentView('detail');
+    } else {
+      setCurrentView('list');
+    }
+    
     setEditingProject(null);
+    setReturnToDetail(false);
   };
 
   const handleProjectDelete = async () => {

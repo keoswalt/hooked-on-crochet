@@ -1,91 +1,102 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import type { Database } from '@/integrations/supabase/types';
+import type { User } from '@supabase/supabase-js';
 
 type Project = Database['public']['Tables']['projects']['Row'];
-type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
-interface ExportedProject {
-  version: string;
-  exportedAt: string;
-  project: {
-    name: string;
-    hook_size: string;
-    yarn_weight: string;
-    details: string | null;
-    is_favorite: boolean;
-  };
-  rows: Array<{
-    type: string;
-    position: number;
-    instructions: string;
-    counter: number;
-    label: string | null;
-    total_stitches: number;
-  }>;
-}
-
-export const useProjectOperations = (user: any, fetchProjects: () => Promise<void>) => {
+export const useProjectOperations = (user: User, refreshProjects: () => Promise<void>) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSaveProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>, editingProject?: Project | null) => {
+  const handleSaveProject = async (
+    projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>,
+    editingProject?: Project | null
+  ): Promise<Project | null> => {
     try {
       setLoading(true);
+      
       if (editingProject) {
-        const { error } = await supabase
+        // Update existing project
+        const { data, error } = await supabase
           .from('projects')
-          .update(projectData)
-          .eq('id', editingProject.id);
+          .update({
+            ...projectData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingProject.id)
+          .select()
+          .single();
 
         if (error) throw error;
+
         toast({
           title: "Project updated",
           description: "Your project has been updated successfully.",
         });
+
+        await refreshProjects();
+        return data;
       } else {
-        const { error } = await supabase
+        // Create new project
+        const { data, error } = await supabase
           .from('projects')
           .insert({
             ...projectData,
-            user_id: user!.id,
-          });
+            user_id: user.id,
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+
         toast({
           title: "Project created",
           description: "Your new project has been created successfully.",
         });
-      }
 
-      await fetchProjects();
+        await refreshProjects();
+        return data;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteProject = async (id: string) => {
+  const handleDeleteProject = async (projectId: string) => {
     try {
       setLoading(true);
+      
+      // Delete associated rows first
+      await supabase
+        .from('project_rows')
+        .delete()
+        .eq('project_id', projectId);
+
+      // Delete the project
       const { error } = await supabase
         .from('projects')
         .delete()
-        .eq('id', id);
+        .eq('id', projectId);
 
       if (error) throw error;
+
       toast({
         title: "Project deleted",
-        description: "Your project has been deleted successfully.",
+        description: "The project has been deleted successfully.",
       });
-      await fetchProjects();
+
+      await refreshProjects();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -100,7 +111,8 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
   const handleDuplicateProject = async (project: Project) => {
     try {
       setLoading(true);
-      // Create new project with same basic info but reset progress
+      
+      // Create duplicate project
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert({
@@ -108,48 +120,54 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
           hook_size: project.hook_size,
           yarn_weight: project.yarn_weight,
           details: project.details,
-          user_id: user!.id,
+          featured_image_url: project.featured_image_url,
+          user_id: user.id,
           is_favorite: false,
+          last_mode: project.last_mode,
         })
         .select()
         .single();
 
       if (projectError) throw projectError;
 
-      // Get original project rows (only edit mode data)
-      const { data: originalRows, error: rowsError } = await supabase
+      // Get associated rows
+      const { data: rows, error: rowsError } = await supabase
         .from('project_rows')
-        .select('type, position, instructions, counter')
+        .select('*')
         .eq('project_id', project.id)
-        .order('position');
+        .order('position', { ascending: true });
 
       if (rowsError) throw rowsError;
 
-      // Insert rows with only edit mode data, reset make mode data
-      if (originalRows && originalRows.length > 0) {
-        const rowsToInsert = originalRows.map(row => ({
+      // Duplicate rows
+      if (rows && rows.length > 0) {
+        const duplicatedRows = rows.map(row => ({
           project_id: newProject.id,
           type: row.type,
-          position: row.position,
           instructions: row.instructions,
+          label: row.label,
           counter: row.counter,
-          make_mode_counter: 0,
-          make_mode_status: 'not_started',
-          is_locked: false,
+          total_stitches: row.total_stitches,
+          make_mode_counter: row.make_mode_counter,
+          make_mode_status: row.make_mode_status,
+          image_url: row.image_url,
+          is_locked: row.is_locked,
+          position: row.position,
         }));
 
         const { error: insertError } = await supabase
           .from('project_rows')
-          .insert(rowsToInsert);
+          .insert(duplicatedRows);
 
         if (insertError) throw insertError;
       }
 
       toast({
         title: "Project duplicated",
-        description: "Your project has been duplicated successfully.",
+        description: "The project has been duplicated successfully.",
       });
-      await fetchProjects();
+
+      await refreshProjects();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -161,21 +179,16 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
     }
   };
 
-  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+  const handleToggleFavorite = async (project: Project) => {
     try {
       const { error } = await supabase
         .from('projects')
-        .update({ is_favorite: isFavorite })
-        .eq('id', id);
+        .update({ is_favorite: !project.is_favorite })
+        .eq('id', project.id);
 
       if (error) throw error;
-      
-      toast({
-        title: isFavorite ? "Added to favorites" : "Removed from favorites",
-        description: `Project has been ${isFavorite ? 'added to' : 'removed from'} your favorites.`,
-      });
-      
-      await fetchProjects();
+
+      await refreshProjects();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -187,42 +200,37 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
 
   const handleExportProject = async (project: Project) => {
     try {
-      setLoading(true);
-      
-      // Fetch all rows for the project
-      const { data: rows, error: rowsError } = await supabase
+      // Get project rows
+      const { data: rows, error } = await supabase
         .from('project_rows')
-        .select('type, position, instructions, counter, label, total_stitches')
+        .select('*')
         .eq('project_id', project.id)
-        .order('position');
+        .order('position', { ascending: true });
 
-      if (rowsError) throw rowsError;
+      if (error) throw error;
 
-      // Create export data structure
-      const exportData: ExportedProject = {
-        version: '1.0',
-        exportedAt: new Date().toISOString(),
+      const exportData = {
         project: {
           name: project.name,
           hook_size: project.hook_size,
           yarn_weight: project.yarn_weight,
           details: project.details,
-          is_favorite: project.is_favorite,
         },
         rows: rows || [],
+        exportedAt: new Date().toISOString(),
       };
 
-      // Create and download file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.crochet`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.crochet`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       toast({
@@ -235,118 +243,74 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleExportPDF = async (project: Project) => {
     try {
-      setLoading(true);
-      
-      // Fetch all rows for the project
-      const { data: rows, error: rowsError } = await supabase
+      // Get project rows
+      const { data: rows, error } = await supabase
         .from('project_rows')
-        .select('type, position, instructions, counter, label, total_stitches')
+        .select('*')
         .eq('project_id', project.id)
-        .order('position');
+        .order('position', { ascending: true });
 
-      if (rowsError) throw rowsError;
+      if (error) throw error;
 
-      // Create PDF
       const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-      let yPosition = margin;
+      let yPosition = 20;
 
-      // Header
+      // Add title
       pdf.setFontSize(20);
-      pdf.setFont(undefined, 'bold');
-      pdf.text(project.name, margin, yPosition);
+      pdf.text(project.name, 20, yPosition);
+      yPosition += 20;
+
+      // Add project details
+      pdf.setFontSize(12);
+      pdf.text(`Hook Size: ${project.hook_size}`, 20, yPosition);
+      yPosition += 10;
+      pdf.text(`Yarn Weight: ${project.yarn_weight}`, 20, yPosition);
       yPosition += 15;
 
-      // Project details
-      pdf.setFontSize(12);
-      pdf.setFont(undefined, 'normal');
-      pdf.text(`Hook Size: ${project.hook_size}`, margin, yPosition);
-      yPosition += 8;
-      pdf.text(`Yarn Weight: ${project.yarn_weight}`, margin, yPosition);
-      yPosition += 8;
-
       if (project.details) {
-        const detailsLines = pdf.splitTextToSize(`Details: ${project.details}`, pageWidth - 2 * margin);
-        pdf.text(detailsLines, margin, yPosition);
-        yPosition += detailsLines.length * 6 + 5;
+        pdf.text('Details:', 20, yPosition);
+        yPosition += 10;
+        const splitDetails = pdf.splitTextToSize(project.details, 170);
+        pdf.text(splitDetails, 20, yPosition);
+        yPosition += splitDetails.length * 5 + 10;
       }
 
-      yPosition += 10;
+      // Add rows
+      if (rows && rows.length > 0) {
+        pdf.text('Pattern:', 20, yPosition);
+        yPosition += 15;
 
-      // Pattern rows
-      pdf.setFontSize(14);
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Pattern:', margin, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(11);
-      pdf.setFont(undefined, 'normal');
-
-      let rowNumber = 1;
-      rows?.forEach(row => {
-        // Check if we need a new page
-        if (yPosition > 270) {
-          pdf.addPage();
-          yPosition = margin;
-        }
-
-        let lineText = '';
-        
-        if (row.type === 'row') {
-          lineText = `Row ${rowNumber}: ${row.instructions}`;
-          if (row.counter > 1) {
-            lineText += ` (repeat ${row.counter} times)`;
+        rows.forEach((row, index) => {
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 20;
           }
-          if (row.total_stitches > 0) {
-            lineText += ` [${row.total_stitches} sts]`;
+
+          if (row.type === 'divider') {
+            pdf.text('--- Divider ---', 20, yPosition);
+            yPosition += 10;
+          } else if (row.type === 'note') {
+            pdf.text(`Note: ${row.instructions}`, 20, yPosition);
+            yPosition += 10;
+          } else {
+            const rowText = `Row ${row.counter}: ${row.instructions}`;
+            const splitText = pdf.splitTextToSize(rowText, 170);
+            pdf.text(splitText, 20, yPosition);
+            yPosition += splitText.length * 5 + 5;
           }
-          rowNumber++;
-        } else if (row.type === 'note') {
-          pdf.setFont(undefined, 'italic');
-          lineText = `Note: ${row.instructions}`;
-        } else if (row.type === 'divider') {
-          pdf.setFont(undefined, 'bold');
-          lineText = `--- ${row.instructions || 'Section Break'} ---`;
-        }
-
-        if (row.label) {
-          lineText = `${row.label}: ${lineText}`;
-        }
-
-        const textLines = pdf.splitTextToSize(lineText, pageWidth - 2 * margin);
-        pdf.text(textLines, margin, yPosition);
-        yPosition += textLines.length * 6 + 3;
-        
-        // Reset font style
-        pdf.setFont(undefined, 'normal');
-      });
-
-      // Footer
-      yPosition += 20;
-      if (yPosition > 270) {
-        pdf.addPage();
-        yPosition = margin;
+        });
       }
-      
-      pdf.setFontSize(8);
-      pdf.setTextColor(128);
-      pdf.text(`Exported on ${new Date().toLocaleDateString()}`, margin, yPosition);
 
-      // Save PDF
-      const filename = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_pattern.pdf`;
-      pdf.save(filename);
+      pdf.save(`${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
 
       toast({
         title: "PDF exported",
-        description: "Your pattern has been exported as PDF successfully.",
+        description: "Your project has been exported as PDF successfully.",
       });
     } catch (error: any) {
       toast({
@@ -354,8 +318,6 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -363,69 +325,55 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
     try {
       setLoading(true);
       
-      // Read file content
-      const fileContent = await file.text();
-      let importData: ExportedProject;
-      
-      try {
-        importData = JSON.parse(fileContent);
-      } catch {
-        throw new Error('Invalid file format. Please select a valid crochet project file.');
-      }
+      const text = await file.text();
+      const importData = JSON.parse(text);
 
-      // Validate file structure
-      if (!importData.version || !importData.project || !Array.isArray(importData.rows)) {
-        throw new Error('Invalid project file structure.');
-      }
-
-      // Create new project with correct property structure
+      // Create the project
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert({
-          name: `${importData.project.name} (Imported)`,
-          hook_size: importData.project.hook_size as Database['public']['Enums']['hook_size'],
-          yarn_weight: importData.project.yarn_weight as Database['public']['Enums']['yarn_weight'],
+          name: importData.project.name,
+          hook_size: importData.project.hook_size,
+          yarn_weight: importData.project.yarn_weight,
           details: importData.project.details,
-          user_id: user!.id,
-          is_favorite: false, // Reset favorite status for imported projects
+          user_id: user.id,
         })
         .select()
         .single();
 
       if (projectError) throw projectError;
 
-      // Insert rows if they exist
+      // Import rows if they exist
       if (importData.rows && importData.rows.length > 0) {
-        const rowsToInsert = importData.rows.map(row => ({
+        const rowsToInsert = importData.rows.map((row: any, index: number) => ({
           project_id: newProject.id,
-          type: row.type,
-          position: row.position,
-          instructions: row.instructions,
-          counter: row.counter,
-          label: row.label,
+          type: row.type || 'row',
+          instructions: row.instructions || '',
+          label: row.label || '',
+          counter: row.counter || 1,
           total_stitches: row.total_stitches || 0,
           make_mode_counter: 0,
           make_mode_status: 'not_started',
-          is_locked: false,
+          position: index,
         }));
 
-        const { error: insertError } = await supabase
+        const { error: rowsError } = await supabase
           .from('project_rows')
           .insert(rowsToInsert);
 
-        if (insertError) throw insertError;
+        if (rowsError) throw rowsError;
       }
 
       toast({
         title: "Project imported",
         description: "Your project has been imported successfully.",
       });
-      
-      await fetchProjects();
+
+      await refreshProjects();
     } catch (error: any) {
       toast({
         title: "Import failed",
-        description: error.message,
+        description: "Failed to import project. Please check the file format.",
         variant: "destructive",
       });
     } finally {
