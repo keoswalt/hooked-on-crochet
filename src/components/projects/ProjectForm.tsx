@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
+import { ImageUploader } from '@/components/images/ImageUploader';
+import { ImageViewer } from '@/components/images/ImageViewer';
+import { useImageOperations } from '@/hooks/useImageOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -16,23 +19,28 @@ interface ProjectFormProps {
   project?: Project;
   onSave: (project: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   onCancel: () => void;
+  userId: string;
 }
 
 const hookSizes: HookSize[] = ['2mm', '2.2mm', '3mm', '3.5mm', '4mm', '4.5mm', '5mm', '5.5mm', '6mm', '6.5mm', '9mm', '10mm'];
 const yarnWeights: YarnWeight[] = ['0', '1', '2', '3', '4', '5', '6', '7'];
 
-export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => {
+export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormProps) => {
   const [formData, setFormData] = useState<{
     name: string;
     hook_size: HookSize | '';
     yarn_weight: YarnWeight | '';
     details: string;
+    featured_image_url: string | null;
   }>({
     name: '',
     hook_size: '',
     yarn_weight: '',
     details: '',
+    featured_image_url: null,
   });
+
+  const { deleteImage } = useImageOperations();
 
   useEffect(() => {
     if (project) {
@@ -41,6 +49,7 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
         hook_size: project.hook_size,
         yarn_weight: project.yarn_weight,
         details: project.details || '',
+        featured_image_url: project.featured_image_url || null,
       });
     }
   }, [project]);
@@ -53,9 +62,23 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
         hook_size: formData.hook_size,
         yarn_weight: formData.yarn_weight,
         details: formData.details || null,
+        featured_image_url: formData.featured_image_url,
         is_favorite: project?.is_favorite || false,
         last_mode: project?.last_mode || 'edit',
       });
+    }
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    setFormData({ ...formData, featured_image_url: imageUrl });
+  };
+
+  const handleImageDelete = async () => {
+    if (formData.featured_image_url) {
+      const success = await deleteImage(formData.featured_image_url);
+      if (success) {
+        setFormData({ ...formData, featured_image_url: null });
+      }
     }
   };
 
@@ -118,6 +141,25 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
               className="w-full p-2 border rounded-md min-h-[100px] resize-none"
               placeholder="Add project details, notes, or pattern information..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Featured Image</Label>
+            {formData.featured_image_url ? (
+              <ImageViewer
+                imageUrl={formData.featured_image_url}
+                alt="Project featured image"
+                className="w-full h-32"
+                onDelete={handleImageDelete}
+              />
+            ) : (
+              <ImageUploader
+                onImageUploaded={handleImageUpload}
+                userId={userId}
+                folder="featured"
+                className="w-full"
+              />
+            )}
           </div>
 
           <div className="flex space-x-2">

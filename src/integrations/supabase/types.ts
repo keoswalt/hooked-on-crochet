@@ -14,6 +14,7 @@ export type Database = {
           counter: number
           created_at: string
           id: string
+          image_url: string | null
           instructions: string
           is_locked: boolean
           label: string | null
@@ -29,6 +30,7 @@ export type Database = {
           counter?: number
           created_at?: string
           id?: string
+          image_url?: string | null
           instructions: string
           is_locked?: boolean
           label?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           counter?: number
           created_at?: string
           id?: string
+          image_url?: string | null
           instructions?: string
           is_locked?: boolean
           label?: string | null
@@ -69,6 +72,7 @@ export type Database = {
         Row: {
           created_at: string
           details: string | null
+          featured_image_url: string | null
           hook_size: Database["public"]["Enums"]["hook_size"]
           id: string
           is_favorite: boolean
@@ -81,6 +85,7 @@ export type Database = {
         Insert: {
           created_at?: string
           details?: string | null
+          featured_image_url?: string | null
           hook_size: Database["public"]["Enums"]["hook_size"]
           id?: string
           is_favorite?: boolean
@@ -93,6 +98,7 @@ export type Database = {
         Update: {
           created_at?: string
           details?: string | null
+          featured_image_url?: string | null
           hook_size?: Database["public"]["Enums"]["hook_size"]
           id?: string
           is_favorite?: boolean

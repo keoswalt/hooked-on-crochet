@@ -1,13 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/layout/Header';
-import { ProjectForm } from './ProjectForm';
-import { ProjectDetail } from './ProjectDetail';
 import { ProjectListView } from './ProjectListView';
-import { useToast } from '@/hooks/use-toast';
+import { ProjectDetail } from './ProjectDetail';
+import { ProjectForm } from './ProjectForm';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
-import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import type { User } from '@supabase/supabase-js';
 
 type Project = Database['public']['Tables']['projects']['Row'];
 
@@ -17,50 +16,11 @@ interface ProjectsPageProps {
 
 export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [currentView, setCurrentView] = useState<'list' | 'detail' | 'form'>('list');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  // Check for project URL parameter when projects are loaded
-  useEffect(() => {
-    if (projects.length > 0) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const projectId = urlParams.get('project');
-      
-      if (projectId && !selectedProject) {
-        const project = projects.find(p => p.id === projectId);
-        if (project) {
-          setSelectedProject(project);
-          // Clear URL parameter after selecting project
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      }
-    }
-  }, [projects, selectedProject]);
-
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   const {
     loading: operationsLoading,
@@ -73,101 +33,121 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     handleImportProject,
   } = useProjectOperations(user, fetchProjects);
 
-  const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-    setShowForm(true);
-    // Don't clear selectedProject when editing - keep the user in detail view
+  async function fetchProjects() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error: any) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchProjects();
+  }, [user.id]);
+
+  const handleCreateProject = () => {
+    setEditingProject(null);
+    setCurrentView('form');
   };
 
-  const handleDeleteProjectFromDetail = () => {
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setCurrentView('form');
+  };
+
+  const handleCardClick = (project: Project) => {
+    setSelectedProject(project);
+    setCurrentView('detail');
+  };
+
+  const handleBackToList = () => {
+    setCurrentView('list');
+    setSelectedProject(null);
+    setEditingProject(null);
+  };
+
+  const handleFormCancel = () => {
+    setCurrentView('list');
+    setEditingProject(null);
+  };
+
+  const handleFormSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    await handleSaveProject(projectData, editingProject);
+    setCurrentView('list');
+    setEditingProject(null);
+  };
+
+  const handleProjectDelete = async () => {
     if (selectedProject) {
-      handleDeleteProject(selectedProject.id);
+      await handleDeleteProject(selectedProject.id);
+      setCurrentView('list');
       setSelectedProject(null);
     }
   };
 
-  const handleSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    await handleSaveProject(projectData, editingProject);
-    setShowForm(false);
-    setEditingProject(null);
-    
-    // If we were editing a selected project, update it with the latest data
-    if (editingProject && selectedProject && editingProject.id === selectedProject.id) {
-      try {
-        const { data: updatedProject, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', editingProject.id)
-          .single();
-        
-        if (error) throw error;
-        if (updatedProject) {
-          setSelectedProject(updatedProject);
-        }
-      } catch (error) {
-        console.error('Error fetching updated project:', error);
-      }
+  const handleProjectExport = async () => {
+    if (selectedProject) {
+      await handleExportProject(selectedProject);
     }
   };
 
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setEditingProject(null);
-    // Don't clear selectedProject - this will keep us in the detail view if we were editing from there
+  const handleProjectExportPDF = async () => {
+    if (selectedProject) {
+      await handleExportPDF(selectedProject);
+    }
   };
 
-  // Prioritize form over project detail
-  if (showForm) {
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (currentView === 'form') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header userEmail={user.email} />
-        <main className="container mx-auto px-4 py-8">
-          <ProjectForm
-            project={editingProject || undefined}
-            onSave={handleSave}
-            onCancel={handleFormCancel}
-          />
-        </main>
-      </div>
+      <ProjectForm
+        project={editingProject}
+        onSave={handleFormSave}
+        onCancel={handleFormCancel}
+        userId={user.id}
+      />
     );
   }
 
-  if (selectedProject) {
+  if (currentView === 'detail' && selectedProject) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header userEmail={user.email} />
-        <main className="container mx-auto px-4 py-8">
-          <ProjectDetail 
-            project={selectedProject} 
-            onBack={() => setSelectedProject(null)}
-            onProjectDelete={handleDeleteProjectFromDetail}
-            onProjectExport={() => handleExportProject(selectedProject)}
-            onProjectExportPDF={() => handleExportPDF(selectedProject)}
-            onEditProject={handleEditProject}
-          />
-        </main>
-      </div>
+      <ProjectDetail
+        project={selectedProject}
+        onBack={handleBackToList}
+        onProjectDelete={handleProjectDelete}
+        onProjectExport={handleProjectExport}
+        onProjectExportPDF={handleProjectExportPDF}
+        onEditProject={handleEditProject}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header userEmail={user.email} />
-      <main className="container mx-auto px-4 py-8">
-        <ProjectListView
-          projects={projects}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          onEditProject={handleEditProject}
-          onDeleteProject={handleDeleteProject}
-          onDuplicateProject={handleDuplicateProject}
-          onToggleFavorite={handleToggleFavorite}
-          onCardClick={setSelectedProject}
-          onCreateProject={() => setShowForm(true)}
-          onImportProject={handleImportProject}
-          operationsLoading={operationsLoading}
-        />
-      </main>
-    </div>
+    <ProjectListView
+      projects={projects}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+      onEditProject={handleEditProject}
+      onDeleteProject={handleDeleteProject}
+      onDuplicateProject={handleDuplicateProject}
+      onToggleFavorite={handleToggleFavorite}
+      onCardClick={handleCardClick}
+      onCreateProject={handleCreateProject}
+      onImportProject={handleImportProject}
+      operationsLoading={operationsLoading}
+    />
   );
 };

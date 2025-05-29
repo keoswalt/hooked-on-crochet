@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2, Download, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { QRCodeGenerator } from './QRCodeGenerator';
+import { ImageViewer } from '@/components/images/ImageViewer';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -39,6 +40,17 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onE
                 <p className="text-gray-700 mt-2">{project.details}</p>
               )}
             </div>
+            
+            {project.featured_image_url && (
+              <div className="w-full">
+                <ImageViewer
+                  imageUrl={project.featured_image_url}
+                  alt={`${project.name} featured image`}
+                  className="w-full h-64 rounded-lg"
+                />
+              </div>
+            )}
+            
             <div className="flex items-center gap-2 w-full flex-wrap">
               <Button variant="outline" onClick={onEdit} className="flex-1 sm:flex-none">
                 <Edit className="h-4 w-4 mr-2" />
