@@ -151,12 +151,12 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <DialogTitle>{editingProject ? 'Edit Project' : 'New Project'}</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto px-6">
+          <div className="flex-1 overflow-y-auto px-6 py-4">
             <ProjectForm
               project={editingProject}
               formData={formData}
@@ -166,17 +166,19 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
             />
           </div>
 
-          <DialogFooter className="px-6 py-4">
-            <Button type="button" variant="outline" onClick={handleFormCancel}>
-              Cancel
-            </Button>
-            <Button 
-              type="button" 
-              onClick={handleFormSubmit}
-              disabled={!formData.hook_size || !formData.yarn_weight}
-            >
-              {editingProject ? 'Update Project' : 'Create Project'}
-            </Button>
+          <DialogFooter className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end space-y-reverse space-y-4 sm:space-y-0 sm:space-x-2 w-full">
+              <Button type="button" variant="outline" onClick={handleFormCancel}>
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleFormSubmit}
+                disabled={!formData.hook_size || !formData.yarn_weight}
+              >
+                {editingProject ? 'Update Project' : 'Create Project'}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
