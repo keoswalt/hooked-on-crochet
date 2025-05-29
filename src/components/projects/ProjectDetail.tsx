@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -20,11 +21,23 @@ interface ProjectDetailProps {
 }
 
 export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelete }: ProjectDetailProps) => {
-  const [mode, setMode] = useState<'edit' | 'make'>('edit');
+  // Get the last saved mode for this project, defaulting to 'edit'
+  const getInitialMode = (): 'edit' | 'make' => {
+    const savedMode = localStorage.getItem(`project-mode-${project.id}`);
+    return (savedMode === 'make' || savedMode === 'edit') ? savedMode : 'edit';
+  };
+
+  const [mode, setMode] = useState<'edit' | 'make'>(getInitialMode);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Save mode to localStorage whenever it changes
+  const handleModeChange = (newMode: 'edit' | 'make') => {
+    setMode(newMode);
+    localStorage.setItem(`project-mode-${project.id}`, newMode);
+  };
 
   const {
     rows,
@@ -129,7 +142,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
           <StickyModeHeader
             mode={mode}
             isSticky={isSticky}
-            onModeChange={setMode}
+            onModeChange={handleModeChange}
             onAddRow={addRow}
             onAddNote={addNote}
             onAddDivider={addDivider}
