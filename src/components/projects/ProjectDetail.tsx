@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { ProjectHeader } from './ProjectHeader';
 import { RowsList } from '@/components/rows/RowsList';
 import { RowTypeSelector } from '@/components/rows/RowTypeSelector';
@@ -27,17 +29,28 @@ export const ProjectDetail = ({
 }: ProjectDetailProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
-  const { rows, isLoading, error, fetchRows, handleDragEnd, updateRow } = useProjectRows(project.id, mode);
-  const { addRow, addNote, addDivider, duplicateRow } = useRowOperations();
-
-  useEffect(() => {
-    fetchRows();
-  }, [project.id, mode]);
+  const { 
+    rows, 
+    loading, 
+    addRow, 
+    addNote, 
+    addDivider, 
+    updateCounter, 
+    updateInstructions, 
+    updateLabel, 
+    updateTotalStitches, 
+    updateMakeModeCounter, 
+    updateMakeModeStatus, 
+    toggleLock, 
+    duplicateRow, 
+    deleteRow, 
+    reorderRows 
+  } = useProjectRows(project.id);
+  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation } = useRowOperations();
 
   const handleAddRow = async () => {
     try {
-      await addRow(project.id, rows.length);
-      fetchRows();
+      await addRow();
     } catch (error) {
       console.error("Failed to add row:", error);
     }
@@ -45,8 +58,7 @@ export const ProjectDetail = ({
 
   const handleAddNote = async () => {
     try {
-      await addNote(project.id, rows.length);
-      fetchRows();
+      await addNote();
     } catch (error) {
       console.error("Failed to add note:", error);
     }
@@ -54,8 +66,7 @@ export const ProjectDetail = ({
 
   const handleAddDivider = async () => {
     try {
-      await addDivider(project.id, rows.length);
-      fetchRows();
+      await addDivider();
     } catch (error) {
       console.error("Failed to add divider:", error);
     }
@@ -63,8 +74,7 @@ export const ProjectDetail = ({
 
   const handleDuplicateRow = async (rowToDuplicate: Database['public']['Tables']['project_rows']['Row']) => {
     try {
-      await duplicateRow(rowToDuplicate, rows.length);
-      fetchRows();
+      await duplicateRow(rowToDuplicate);
     } catch (error) {
       console.error("Failed to duplicate row:", error);
     }
@@ -72,52 +82,47 @@ export const ProjectDetail = ({
 
   const handleDeleteRow = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('project_rows')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      fetchRows();
+      await deleteRow(id);
     } catch (error: any) {
       console.error("Failed to delete row:", error);
     }
   };
 
   const handleUpdateCounter = async (id: string, newCounter: number) => {
-    await updateRow(id, { counter: newCounter });
+    await updateCounter(id, newCounter);
   };
 
   const handleUpdateInstructions = async (id: string, instructions: string) => {
-    await updateRow(id, { instructions });
+    await updateInstructions(id, instructions);
   };
 
   const handleUpdateLabel = async (id: string, label: string) => {
-    await updateRow(id, { label });
+    await updateLabel(id, label);
   };
 
   const handleUpdateTotalStitches = async (id: string, total_stitches: number) => {
-    await updateRow(id, { total_stitches });
+    await updateTotalStitches(id, total_stitches);
   };
 
-   const handleUpdateMakeModeCounter = async (id: string, make_mode_counter: number) => {
-    await updateRow(id, { make_mode_counter });
+  const handleUpdateMakeModeCounter = async (id: string, make_mode_counter: number) => {
+    await updateMakeModeCounter(id, make_mode_counter);
   };
 
   const handleUpdateMakeModeStatus = async (id: string, make_mode_status: string) => {
-    await updateRow(id, { make_mode_status });
+    await updateMakeModeStatus(id, make_mode_status);
   };
 
   const handleToggleLock = async (id: string, is_locked: boolean) => {
-    await updateRow(id, { is_locked });
+    await toggleLock(id, is_locked);
   };
 
-  if (isLoading) {
-    return <div className="text-center">Loading...</div>;
-  }
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+    reorderRows(result.source.index, result.destination.index);
+  };
 
-  if (error) {
-    return <div className="text-red-500 text-center">Error: {error.message}</div>;
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
   }
 
   return (
@@ -131,16 +136,14 @@ export const ProjectDetail = ({
         onExportPDF={onProjectExportPDF}
       />
 
-      <StickyModeHeader>
-        <ModeToggle mode={mode} setMode={setMode} />
-        {mode === 'edit' && (
-          <RowTypeSelector 
-            onAddRow={handleAddRow}
-            onAddNote={handleAddNote}
-            onAddDivider={handleAddDivider}
-          />
-        )}
-      </StickyModeHeader>
+      <StickyModeHeader
+        mode={mode}
+        isSticky={false}
+        onModeChange={setMode}
+        onAddRow={handleAddRow}
+        onAddNote={handleAddNote}
+        onAddDivider={handleAddDivider}
+      />
 
       <RowsList
         rows={rows}
