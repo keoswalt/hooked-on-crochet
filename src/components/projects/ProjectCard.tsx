@@ -48,6 +48,11 @@ export const ProjectCard = ({
     setShowDeleteDialog(true);
   };
 
+  const handleConfirmDelete = () => {
+    onDelete(project.id);
+    setShowDeleteDialog(false);
+  };
+
   const handleCardClick = () => {
     onCardClick();
   };
@@ -70,7 +75,7 @@ export const ProjectCard = ({
           </div>
 
           {projectTags.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-2">
               <TagDisplay 
                 tags={projectTags} 
                 onRemoveTag={handleRemoveTagFromCard}
@@ -79,7 +84,7 @@ export const ProjectCard = ({
             </div>
           )}
 
-          <CardDescription className="text-xs w-full mb-1">
+          <CardDescription className="text-xs w-full mb-1 mt-4">
             Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
           </CardDescription>
           
