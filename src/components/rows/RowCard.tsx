@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -119,7 +118,7 @@ export const RowCard = ({
   const getCardStyling = () => {
     // Add darker background for dividers in edit mode
     if (row.type === 'divider' && mode === 'edit') {
-      return 'bg-gray-800 border-gray-600 text-white';
+      return 'bg-gray-500 border-gray-400';
     }
     
     if (mode !== 'make') return '';
@@ -143,13 +142,13 @@ export const RowCard = ({
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1 mr-3">
-              {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
+              {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-700 cursor-grab" />}
               {mode === 'edit' && (
                 <Input
                   value={localLabel}
                   onChange={handleLabelChange}
                   placeholder="Enter divider label (optional)"
-                  className="flex-1 text-lg font-medium bg-gray-700 border-gray-600 text-white placeholder:text-gray-300"
+                  className="flex-1 text-lg font-medium bg-gray-400 border-gray-300 text-white placeholder:text-gray-200"
                 />
               )}
               {mode === 'make' && localLabel && (
@@ -160,10 +159,10 @@ export const RowCard = ({
             </div>
             {mode === 'edit' && (
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" onClick={() => onDuplicate(row)} className="border-gray-600 text-white hover:bg-gray-700">
+                <Button variant="outline" size="sm" onClick={() => onDuplicate(row)} className="border-gray-300 text-gray-700 hover:bg-gray-400">
                   <Copy className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onDelete(row.id)} className="border-gray-600 text-white hover:bg-gray-700">
+                <Button variant="outline" size="sm" onClick={() => onDelete(row.id)} className="border-gray-300 text-gray-700 hover:bg-gray-400">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -172,7 +171,7 @@ export const RowCard = ({
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center justify-center px-4">
-            <svg width="100%" height="2" className="text-gray-500">
+            <svg width="100%" height="2" className="text-gray-300">
               <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
             </svg>
           </div>
