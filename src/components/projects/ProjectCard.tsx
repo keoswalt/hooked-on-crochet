@@ -31,7 +31,7 @@ export const ProjectCard = ({
   userId 
 }: ProjectCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { projectTags, handleRemoveTag } = useProjectTags(project.id, userId);
+  const { projectTags } = useProjectTags(project.id, userId);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,10 +57,6 @@ export const ProjectCard = ({
     onCardClick();
   };
 
-  const handleRemoveTagFromCard = (tagId: string) => {
-    handleRemoveTag(tagId);
-  };
-
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
@@ -75,10 +71,10 @@ export const ProjectCard = ({
           </div>
 
           {projectTags.length > 0 && (
-            <div className="mb-2">
+            <div className="mb-1">
               <TagDisplay 
                 tags={projectTags} 
-                onRemoveTag={handleRemoveTagFromCard}
+                showRemoveButton={false}
                 size="sm"
               />
             </div>

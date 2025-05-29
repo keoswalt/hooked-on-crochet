@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -97,15 +97,20 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden p-0">
-          <ProjectForm
-            project={editingProject}
-            onSave={onSave}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingProject(null);
-            }}
-            userId={user.id}
-          />
+          <DialogHeader className="sticky top-0 bg-white z-10 px-6 py-4 border-b">
+            <DialogTitle>{editingProject ? 'Edit Project' : 'New Project'}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1">
+            <ProjectForm
+              project={editingProject}
+              onSave={onSave}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingProject(null);
+              }}
+              userId={user.id}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
