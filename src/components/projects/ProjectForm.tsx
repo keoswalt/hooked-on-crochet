@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
 import { ImageUploader } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
-import { TagInput } from '@/components/tags/TagInput';
 import { useImageOperations } from '@/hooks/useImageOperations';
-import { useTagOperations } from '@/hooks/useTagOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
-type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface ProjectFormProps {
   project?: Project;
@@ -43,9 +39,7 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
     featured_image_url: null,
   });
 
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const { deleteImage } = useImageOperations();
-  const { fetchProjectTags } = useTagOperations(userId);
 
   useEffect(() => {
     if (project) {
@@ -56,18 +50,8 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
         details: project.details || '',
         featured_image_url: project.featured_image_url || null,
       });
-      
-      // Load project tags
-      loadProjectTags();
     }
   }, [project]);
-
-  const loadProjectTags = async () => {
-    if (project) {
-      const tags = await fetchProjectTags(project.id);
-      setSelectedTags(tags);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,13 +141,6 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
               placeholder="Add project details, notes, or pattern information..."
             />
           </div>
-
-          <TagInput
-            projectId={project?.id}
-            selectedTags={selectedTags}
-            onTagsChange={setSelectedTags}
-            userId={userId}
-          />
 
           <div className="space-y-2">
             <Label>Featured Image</Label>

@@ -1,35 +1,53 @@
 
 import { ProjectCard } from './ProjectCard';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectGridProps {
   projects: Project[];
+  searchTerm: string;
   onEditProject: (project: Project) => void;
-  onDeleteProject: (projectId: string) => void;
+  onDeleteProject: (id: string) => void;
   onDuplicateProject: (project: Project) => void;
-  onToggleFavorite: (projectId: string, isFavorite: boolean) => void;
+  onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onCardClick: (project: Project) => void;
-  operationsLoading: boolean;
-  userId: string;
+  onCreateProject: () => void;
+  onClearSearch: () => void;
 }
 
 export const ProjectGrid = ({
   projects,
+  searchTerm,
   onEditProject,
   onDeleteProject,
   onDuplicateProject,
   onToggleFavorite,
   onCardClick,
-  operationsLoading,
-  userId,
+  onCreateProject,
+  onClearSearch,
 }: ProjectGridProps) => {
-  if (projects.length === 0) {
+  if (projects.length === 0 && !searchTerm) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
-        <p className="text-gray-500 mb-4">Start by creating your first crochet project!</p>
+        <p className="text-gray-500 text-lg mb-4">No projects yet!</p>
+        <Button onClick={onCreateProject}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Your First Project
+        </Button>
+      </div>
+    );
+  }
+
+  if (projects.length === 0 && searchTerm) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-lg mb-4">No projects found matching "{searchTerm}"</p>
+        <Button onClick={onClearSearch} variant="outline">
+          Clear Search
+        </Button>
       </div>
     );
   }
@@ -51,7 +69,6 @@ export const ProjectGrid = ({
           }}
           onToggleFavorite={onToggleFavorite}
           onCardClick={() => onCardClick(project)}
-          userId={userId}
         />
       ))}
     </div>

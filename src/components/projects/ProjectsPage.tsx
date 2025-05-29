@@ -149,7 +149,6 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
       onCreateProject={handleCreateProject}
       onImportProject={handleImportProject}
       operationsLoading={operationsLoading}
-      userId={user.id}
     />
   );
 };

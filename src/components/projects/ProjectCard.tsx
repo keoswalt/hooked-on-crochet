@@ -4,13 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
 import { formatLastModified } from '@/utils/dateUtils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { TagDisplay } from '@/components/tags/TagDisplay';
-import { useState, useEffect } from 'react';
-import { useTagOperations } from '@/hooks/useTagOperations';
+import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
-type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface ProjectCardProps {
   project: Project;
@@ -19,22 +16,10 @@ interface ProjectCardProps {
   onDuplicate: (e: React.MouseEvent) => void;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onCardClick: () => void;
-  userId: string;
 }
 
-export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite, onCardClick, userId }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite, onCardClick }: ProjectCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [projectTags, setProjectTags] = useState<Tag[]>([]);
-  const { fetchProjectTags } = useTagOperations(userId);
-
-  useEffect(() => {
-    loadProjectTags();
-  }, [project.id]);
-
-  const loadProjectTags = async () => {
-    const tags = await fetchProjectTags(project.id);
-    setProjectTags(tags);
-  };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,7 +42,7 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-72 flex flex-col cursor-pointer" onClick={handleCardClick}>
+      <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
           <div className="flex items-center gap-2 mb-3">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
@@ -77,21 +62,9 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
           </CardDescription>
         </CardHeader>
         
-        {project.featured_image_url ? (
+        {project.details && (
           <CardContent className="flex-1 overflow-hidden p-4 pt-0">
-            <img 
-              src={project.featured_image_url} 
-              alt={`${project.name} featured image`}
-              className="w-full h-24 object-cover rounded-md"
-            />
-          </CardContent>
-        ) : (
-          <div className="flex-1"></div>
-        )}
-
-        {projectTags.length > 0 && (
-          <CardContent className="p-4 pt-0">
-            <TagDisplay tags={projectTags} variant="outline" />
+            <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden text-ellipsis">{project.details}</p>
           </CardContent>
         )}
 
