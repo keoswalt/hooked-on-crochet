@@ -131,6 +131,18 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     }
   };
 
+  const handleProjectUpdate = (updatedProject: Project) => {
+    console.log('Updating project in parent state:', updatedProject);
+    
+    // Update the projects array
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+    
+    // Update the selected project if it's the same one
+    if (selectedProject && selectedProject.id === updatedProject.id) {
+      setSelectedProject(updatedProject);
+    }
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -155,6 +167,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         onProjectExport={handleProjectExport}
         onProjectExportPDF={handleProjectExportPDF}
         onEditProject={handleEditProject}
+        onProjectUpdate={handleProjectUpdate}
         userId={user.id}
       />
     );

@@ -20,6 +20,7 @@ interface ProjectDetailProps {
   onProjectExport: () => void;
   onProjectExportPDF: () => void;
   onEditProject: (project: Project) => void;
+  onProjectUpdate?: (updatedProject: Project) => void;
   userId: string;
 }
 
@@ -30,6 +31,7 @@ export const ProjectDetail = ({
   onProjectExport,
   onProjectExportPDF,
   onEditProject,
+  onProjectUpdate,
   userId
 }: ProjectDetailProps) => {
   const [project, setProject] = useState<Project>(initialProject);
@@ -98,7 +100,13 @@ export const ProjectDetail = ({
   };
 
   const handleProjectUpdate = (updatedProject: Project) => {
+    console.log('Project updated in detail view:', updatedProject);
     setProject(updatedProject);
+    
+    // Also notify parent component
+    if (onProjectUpdate) {
+      onProjectUpdate(updatedProject);
+    }
   };
 
   const handleAddRow = async () => {
