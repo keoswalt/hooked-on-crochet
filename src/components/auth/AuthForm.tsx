@@ -17,6 +17,7 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +54,38 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/`,
+      });
+      if (error) throw error;
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for password reset instructions.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -100,6 +133,20 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
               {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
             </Button>
           </form>
+          
+          {mode === 'signin' && (
+            <div className="mt-4 text-center">
+              <Button
+                variant="link"
+                onClick={handleForgotPassword}
+                disabled={resetLoading}
+                className="text-sm"
+              >
+                {resetLoading ? 'Sending...' : 'Forgot your password?'}
+              </Button>
+            </div>
+          )}
+          
           <div className="mt-4 text-center">
             <Button
               variant="link"
