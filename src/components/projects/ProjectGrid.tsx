@@ -61,10 +61,7 @@ export const ProjectGrid = ({
           key={project.id}
           project={project}
           userId={userId}
-          onEdit={(e) => {
-            e.stopPropagation();
-            onEditProject(project);
-          }}
+          onEdit={onEditProject}
           onDelete={onDeleteProject}
           onDuplicate={(e) => {
             e.stopPropagation();
