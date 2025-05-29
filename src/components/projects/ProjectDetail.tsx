@@ -55,7 +55,8 @@ export const ProjectDetail = ({
     toggleLock, 
     duplicateRow, 
     deleteRow, 
-    reorderRows 
+    reorderRows,
+    updateRowImage
   } = useProjectRows(project.id);
 
   // Update project state when initialProject changes
@@ -195,6 +196,10 @@ export const ProjectDetail = ({
     onEditProject(project);
   };
 
+  const handleUpdateRowImage = async (id: string, imageUrl: string | null) => {
+    await updateRowImage(id, imageUrl);
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -223,6 +228,7 @@ export const ProjectDetail = ({
       <RowsList
         rows={rows}
         mode={mode}
+        userId={userId}
         onDragEnd={handleDragEnd}
         onUpdateCounter={handleUpdateCounter}
         onUpdateInstructions={handleUpdateInstructions}
@@ -233,6 +239,7 @@ export const ProjectDetail = ({
         onToggleLock={handleToggleLock}
         onDuplicate={handleDuplicateRow}
         onDelete={handleDeleteRow}
+        onUpdateRowImage={handleUpdateRowImage}
       />
 
       <DeleteConfirmationDialog
