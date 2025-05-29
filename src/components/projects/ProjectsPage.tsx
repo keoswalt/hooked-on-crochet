@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+
+import { useState } from 'react';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
+import { useProjectState } from '@/hooks/useProjectState';
+import { useProjectNavigation } from '@/hooks/useProjectNavigation';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
@@ -14,13 +16,26 @@ interface ProjectsPageProps {
 }
 
 export const ProjectsPage = ({ user }: ProjectsPageProps) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [currentView, setCurrentView] = useState<'list' | 'detail' | 'form'>('list');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [returnToDetail, setReturnToDetail] = useState(false);
+
+  const {
+    projects,
+    selectedProject,
+    setSelectedProject,
+    loading,
+    fetchProjects,
+    updateProject,
+  } = useProjectState(user);
+
+  const {
+    currentView,
+    editingProject,
+    navigateToList,
+    navigateToDetail,
+    navigateToForm,
+    handleFormCancel,
+    handleFormSave,
+  } = useProjectNavigation();
 
   const {
     loading: operationsLoading,
@@ -33,81 +48,41 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     handleImportProject,
   } = useProjectOperations(user, fetchProjects);
 
-  async function fetchProjects() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (error: any) {
-      console.error('Error fetching projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchProjects();
-  }, [user.id]);
-
   const handleCreateProject = () => {
-    setEditingProject(null);
-    setReturnToDetail(false);
-    setCurrentView('form');
+    navigateToForm();
   };
 
   const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-    setReturnToDetail(currentView === 'detail');
-    setCurrentView('form');
+    navigateToForm(project);
   };
 
   const handleCardClick = (project: Project) => {
     setSelectedProject(project);
-    setCurrentView('detail');
+    navigateToDetail(project);
   };
 
   const handleBackToList = () => {
-    setCurrentView('list');
+    navigateToList();
     setSelectedProject(null);
-    setEditingProject(null);
-    setReturnToDetail(false);
   };
 
-  const handleFormCancel = () => {
-    if (returnToDetail && selectedProject) {
-      setCurrentView('detail');
-    } else {
-      setCurrentView('list');
-    }
-    setEditingProject(null);
-    setReturnToDetail(false);
+  const onFormCancel = () => {
+    handleFormCancel(selectedProject);
   };
 
-  const handleFormSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+  const onFormSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     const savedProject = await handleSaveProject(projectData, editingProject);
+    const updatedProject = handleFormSave(selectedProject, savedProject);
     
-    if (returnToDetail && savedProject) {
-      // Update the selected project with the saved data
+    if (updatedProject && savedProject) {
       setSelectedProject(savedProject);
-      setCurrentView('detail');
-    } else {
-      setCurrentView('list');
     }
-    
-    setEditingProject(null);
-    setReturnToDetail(false);
   };
 
   const handleProjectDelete = async () => {
     if (selectedProject) {
       await handleDeleteProject(selectedProject.id);
-      setCurrentView('list');
+      navigateToList();
       setSelectedProject(null);
     }
   };
@@ -131,18 +106,6 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     }
   };
 
-  const handleProjectUpdate = (updatedProject: Project) => {
-    console.log('Updating project in parent state:', updatedProject);
-    
-    // Update the projects array
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    
-    // Update the selected project if it's the same one
-    if (selectedProject && selectedProject.id === updatedProject.id) {
-      setSelectedProject(updatedProject);
-    }
-  };
-
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -151,8 +114,8 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     return (
       <ProjectForm
         project={editingProject}
-        onSave={handleFormSave}
-        onCancel={handleFormCancel}
+        onSave={onFormSave}
+        onCancel={onFormCancel}
         userId={user.id}
       />
     );
@@ -167,7 +130,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         onProjectExport={handleProjectExport}
         onProjectExportPDF={handleProjectExportPDF}
         onEditProject={handleEditProject}
-        onProjectUpdate={handleProjectUpdate}
+        onProjectUpdate={updateProject}
         userId={user.id}
       />
     );

@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2, Download, ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { QRCodeGenerator } from './QRCodeGenerator';
+import { ArrowLeft } from 'lucide-react';
+import { ProjectInfo } from './ProjectInfo';
+import { ProjectActions } from './ProjectActions';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,7 +52,7 @@ export const ProjectHeader = ({
             .from('projects')
             .update({ featured_image_url: null })
             .eq('id', project.id)
-            .eq('user_id', userId) // Add user_id check for RLS
+            .eq('user_id', userId)
             .select()
             .single();
 
@@ -66,8 +67,6 @@ export const ProjectHeader = ({
           if (onProjectUpdate && data) {
             onProjectUpdate(data);
           }
-
-          // Don't show toast here since useImageOperations already shows one
         } catch (error: any) {
           console.error('Failed to update project in database:', error);
           toast({
@@ -94,15 +93,7 @@ export const ProjectHeader = ({
       <Card>
         <CardHeader>
           <div className="flex flex-col space-y-4">
-            <div className="w-full">
-              <CardTitle className="text-2xl mb-3">{project.name}</CardTitle>
-              <div className="text-sm text-gray-600">
-                Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
-              </div>
-              {project.details && (
-                <p className="text-gray-700 mt-2">{project.details}</p>
-              )}
-            </div>
+            <ProjectInfo project={project} />
             
             {project.featured_image_url && (
               <div className="w-full">
@@ -115,35 +106,13 @@ export const ProjectHeader = ({
               </div>
             )}
             
-            <div className="flex items-center gap-2 w-full flex-wrap">
-              <Button variant="outline" onClick={onEdit} className="flex-1 sm:flex-none">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Project
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex-1 sm:flex-none">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onExport}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Pattern File (.crochet)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onExportPDF}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export as PDF
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <QRCodeGenerator project={project} />
-              <Button variant="outline" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <ProjectActions
+              project={project}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onExport={onExport}
+              onExportPDF={onExportPDF}
+            />
           </div>
         </CardHeader>
       </Card>
