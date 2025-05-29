@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectHeader } from './ProjectHeader';
 import { RowsList } from '@/components/rows/RowsList';
 import { RowTypeSelector } from '@/components/rows/RowTypeSelector';
 import { ModeToggle } from './ModeToggle';
-import { StickyModeHeader } from './StickyModeHeader';
+import { ModeHeader } from './ModeHeader';
 import { CustomConfirmationDialog } from '@/components/ui/custom-confirmation-dialog';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { useProjectRows } from '@/hooks/useProjectRows';
@@ -32,7 +31,6 @@ export const ProjectDetail = ({
   onEditProject
 }: ProjectDetailProps) => {
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
-  const [isSticky, setIsSticky] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const { 
@@ -90,17 +88,6 @@ export const ProjectDetail = ({
       console.error('Error saving project mode:', error);
     }
   };
-
-  // Handle sticky header on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsSticky(scrollY > 200);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleAddRow = async () => {
     try {
@@ -203,9 +190,8 @@ export const ProjectDetail = ({
         onExportPDF={onProjectExportPDF}
       />
 
-      <StickyModeHeader
+      <ModeHeader
         mode={mode}
-        isSticky={isSticky}
         onModeChange={handleModeChange}
         onAddRow={handleAddRow}
         onAddNote={handleAddNote}
