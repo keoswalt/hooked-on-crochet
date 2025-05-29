@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
@@ -28,7 +27,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     handleSaveProject,
     handleDeleteProject,
     handleDuplicateProject,
-    handleToggleFavorite,
+    handleToggleFavorite: toggleFavorite,
     handleExportProject,
     handleExportPDF,
     handleImportProject,
@@ -122,6 +121,13 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const handleProjectExportPDF = async () => {
     if (selectedProject) {
       await handleExportPDF(selectedProject);
+    }
+  };
+
+  const handleToggleFavorite = async (projectId: string, isFavorite: boolean) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      await toggleFavorite(project);
     }
   };
 
