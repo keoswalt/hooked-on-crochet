@@ -16,6 +16,7 @@ interface ProjectGridProps {
   onCardClick: (project: Project) => void;
   onCreateProject: () => void;
   onClearSearch: () => void;
+  onTagsUpdate: () => void;
   userId: string;
 }
 
@@ -29,6 +30,7 @@ export const ProjectGrid = ({
   onCardClick,
   onCreateProject,
   onClearSearch,
+  onTagsUpdate,
   userId,
 }: ProjectGridProps) => {
   if (projects.length === 0 && !searchTerm) {
@@ -69,6 +71,7 @@ export const ProjectGrid = ({
           }}
           onToggleFavorite={onToggleFavorite}
           onCardClick={() => onCardClick(project)}
+          onTagsUpdate={onTagsUpdate}
         />
       ))}
     </div>
