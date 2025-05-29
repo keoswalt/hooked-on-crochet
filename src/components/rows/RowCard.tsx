@@ -7,6 +7,7 @@ import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image } f
 import { ImageUploader, ImageUploaderRef } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { LinkifiedText } from '@/components/ui/linkified-text';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -302,13 +303,19 @@ export const RowCard = ({
             </div>
           )}
 
-          <textarea
-            value={localInstructions}
-            onChange={handleInstructionsChange}
-            className="w-full p-2 border rounded-md min-h-[80px] resize-none"
-            placeholder={`Enter ${row.type} instructions...`}
-            disabled={mode === 'make'}
-          />
+          {mode === 'edit' ? (
+            <textarea
+              value={localInstructions}
+              onChange={handleInstructionsChange}
+              className="w-full p-2 border rounded-md min-h-[80px] resize-none"
+              placeholder={`Enter ${row.type} instructions...`}
+            />
+          ) : (
+            <LinkifiedText 
+              text={localInstructions}
+              className="w-full p-2 border rounded-md min-h-[80px] bg-gray-50"
+            />
+          )}
           
           {row.type === 'row' && (
             <div className="space-y-3">

@@ -6,6 +6,7 @@ import { ProjectInfo } from './ProjectInfo';
 import { ProjectActions } from './ProjectActions';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { TagDisplay } from '@/components/tags/TagDisplay';
+import { LinkifiedText } from '@/components/ui/linkified-text';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
@@ -111,7 +112,10 @@ export const ProjectHeader = ({
                   Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
                 </div>
                 {project.details && (
-                  <p className="text-gray-700 mt-2">{project.details}</p>
+                  <LinkifiedText 
+                    text={project.details} 
+                    className="text-gray-700 mt-2"
+                  />
                 )}
               </div>
             </div>

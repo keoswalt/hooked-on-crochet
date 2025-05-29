@@ -1,4 +1,5 @@
 
+import { LinkifiedText } from '@/components/ui/linkified-text';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -15,7 +16,10 @@ export const ProjectInfo = ({ project }: ProjectInfoProps) => {
         Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
       </div>
       {project.details && (
-        <p className="text-gray-700 mt-2">{project.details}</p>
+        <LinkifiedText 
+          text={project.details} 
+          className="text-gray-700 mt-2"
+        />
       )}
     </div>
   );
