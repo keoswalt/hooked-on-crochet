@@ -3,18 +3,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
 
-interface ProjectRow {
-  id: string;
-  position: number;
-  instructions: string;
-  counter: number;
-  type: string;
-  make_mode_counter: number;
-  make_mode_status: string;
-  is_locked: boolean;
-  total_stitches: number;
-}
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 interface RowCardProps {
   row: ProjectRow;

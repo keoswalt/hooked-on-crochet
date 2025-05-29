@@ -1,18 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
 
-interface ProjectRow {
-  id: string;
-  position: number;
-  instructions: string;
-  counter: number;
-  type: string;
-  make_mode_counter: number;
-  make_mode_status: string;
-  is_locked: boolean;
-  total_stitches: number;
-}
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 export const useProjectRows = (projectId: string) => {
   const [rows, setRows] = useState<ProjectRow[]>([]);

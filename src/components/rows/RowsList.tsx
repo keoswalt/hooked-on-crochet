@@ -2,18 +2,9 @@
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent } from '@/components/ui/card';
 import { RowCard } from './RowCard';
+import type { Database } from '@/integrations/supabase/types';
 
-interface ProjectRow {
-  id: string;
-  position: number;
-  instructions: string;
-  counter: number;
-  type: string;
-  make_mode_counter: number;
-  make_mode_status: string;
-  is_locked: boolean;
-  total_stitches: number;
-}
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 interface RowsListProps {
   rows: ProjectRow[];
