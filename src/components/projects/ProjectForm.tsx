@@ -80,6 +80,10 @@ export const ProjectForm = ({
 
   const handleTagsChange = () => {
     refreshTags();
+    // Trigger parent component to refresh tags as well
+    if (window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('tagsUpdated'));
+    }
   };
 
   return (

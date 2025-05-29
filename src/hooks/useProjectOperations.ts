@@ -422,6 +422,51 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
       const text = await file.text();
       const importData = JSON.parse(text);
 
+      // Helper function to upload base64 image to Supabase storage
+      const uploadBase64Image = async (base64Data: string, fileName: string): Promise<string | null> => {
+        try {
+          // Extract the data part from base64 string (remove data:image/...;base64, prefix)
+          const base64Content = base64Data.split(',')[1];
+          const mimeType = base64Data.split(',')[0].split(':')[1].split(';')[0];
+          
+          // Convert base64 to blob
+          const byteCharacters = atob(base64Content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType });
+
+          // Upload to Supabase storage
+          const { data, error } = await supabase.storage
+            .from('project-images')
+            .upload(`${user.id}/imported/${fileName}`, blob);
+
+          if (error) throw error;
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('project-images')
+            .getPublicUrl(data.path);
+
+          return urlData.publicUrl;
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          return null;
+        }
+      };
+
+      // Process featured image if it exists
+      let featuredImageUrl = null;
+      if (importData.project.featured_image_base64) {
+        const timestamp = Date.now();
+        featuredImageUrl = await uploadBase64Image(
+          importData.project.featured_image_base64,
+          `featured_${timestamp}.jpg`
+        );
+      }
+
       // Create the project
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
@@ -430,6 +475,7 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
           hook_size: importData.project.hook_size,
           yarn_weight: importData.project.yarn_weight,
           details: importData.project.details,
+          featured_image_url: featuredImageUrl,
           user_id: user.id,
         })
         .select()
@@ -439,17 +485,33 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
 
       // Import rows if they exist
       if (importData.rows && importData.rows.length > 0) {
-        const rowsToInsert = importData.rows.map((row: any, index: number) => ({
-          project_id: newProject.id,
-          type: row.type || 'row',
-          instructions: row.instructions || '',
-          label: row.label || '',
-          counter: row.counter || 1,
-          total_stitches: row.total_stitches || 0,
-          make_mode_counter: 0,
-          make_mode_status: 'not_started',
-          position: index,
-        }));
+        const rowsToInsert = await Promise.all(
+          importData.rows.map(async (row: any, index: number) => {
+            let imageUrl = null;
+            
+            // Process row image if it exists
+            if (row.image_base64) {
+              const timestamp = Date.now();
+              imageUrl = await uploadBase64Image(
+                row.image_base64,
+                `row_${index}_${timestamp}.jpg`
+              );
+            }
+
+            return {
+              project_id: newProject.id,
+              type: row.type || 'row',
+              instructions: row.instructions || '',
+              label: row.label || '',
+              counter: row.counter || 1,
+              total_stitches: row.total_stitches || 0,
+              make_mode_counter: 0,
+              make_mode_status: 'not_started',
+              image_url: imageUrl,
+              position: index,
+            };
+          })
+        );
 
         const { error: rowsError } = await supabase
           .from('project_rows')
@@ -460,7 +522,7 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
 
       toast({
         title: "Project imported",
-        description: "Your project has been imported successfully.",
+        description: "Your project has been imported successfully with all images.",
       });
 
       await refreshProjects();

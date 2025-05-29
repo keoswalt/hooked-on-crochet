@@ -19,6 +19,7 @@ interface ProjectCardProps {
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onCardClick: () => void;
   userId: string;
+  onTagsUpdate?: () => void;
 }
 
 export const ProjectCard = ({ 
@@ -28,7 +29,8 @@ export const ProjectCard = ({
   onDuplicate, 
   onToggleFavorite, 
   onCardClick,
-  userId 
+  userId,
+  onTagsUpdate
 }: ProjectCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { projectTags } = useProjectTags(project.id, userId);
@@ -90,12 +92,12 @@ export const ProjectCard = ({
         </CardHeader>
         
         {project.featured_image_url && (
-          <CardContent className="flex-1 overflow-hidden p-4 pt-0 flex items-center justify-center">
+          <CardContent className="flex-1 overflow-hidden p-4 pt-0 pb-6 flex items-center justify-center">
             <div className="w-full h-32 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center">
               <img
                 src={project.featured_image_url}
                 alt={`${project.name} featured image`}
-                className="max-w-full max-h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
           </CardContent>

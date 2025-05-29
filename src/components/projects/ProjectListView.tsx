@@ -42,6 +42,7 @@ export const ProjectListView = ({
   userId,
 }: ProjectListViewProps) => {
   const [projectTags, setProjectTags] = useState<Record<string, Tag[]>>({});
+  const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
   const { fetchProjectTags } = useTagOperations(userId);
 
   // Load tags for all projects
@@ -60,7 +61,7 @@ export const ProjectListView = ({
     if (projects.length > 0) {
       loadAllProjectTags();
     }
-  }, [projects, fetchProjectTags]);
+  }, [projects, fetchProjectTags, tagsRefreshTrigger]);
 
   // Enhanced filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
@@ -92,6 +93,10 @@ export const ProjectListView = ({
 
   const handleClearSearch = () => {
     onSearchChange('');
+  };
+
+  const handleTagsUpdate = () => {
+    setTagsRefreshTrigger(prev => prev + 1);
   };
 
   return (
@@ -126,6 +131,7 @@ export const ProjectListView = ({
         onCardClick={onCardClick}
         onCreateProject={onCreateProject}
         onClearSearch={handleClearSearch}
+        onTagsUpdate={handleTagsUpdate}
         userId={userId}
       />
     </div>
