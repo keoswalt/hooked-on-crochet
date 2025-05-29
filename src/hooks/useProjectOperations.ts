@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -258,13 +259,13 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
         throw new Error('Invalid project file structure.');
       }
 
-      // Create new project
+      // Create new project with correct property structure
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert({
           name: `${importData.project.name} (Imported)`,
-          hook_size: importData.project.hook_size,
-          yarn_weight: importData.project.yarn_weight,
+          hook_size: importData.project.hook_size as Database['public']['Enums']['hook_size'],
+          yarn_weight: importData.project.yarn_weight as Database['public']['Enums']['yarn_weight'],
           details: importData.project.details,
           user_id: user!.id,
           is_favorite: false, // Reset favorite status for imported projects
