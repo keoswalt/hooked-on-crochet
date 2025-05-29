@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,10 +32,11 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       
-      // Initialize make mode - ensure first row/note is in_progress
+      // Initialize make mode - ensure first row/note by POSITION is in_progress
       if (data && data.length > 0) {
         const hasInProgress = data.some(row => row.make_mode_status === 'in_progress');
         if (!hasInProgress) {
+          // Find first row or note by position (data is already ordered by position)
           const firstRowOrNote = data.find(row => row.type === 'row' || row.type === 'note');
           if (firstRowOrNote) {
             await supabase
@@ -381,6 +381,7 @@ export const useProjectRows = (projectId: string) => {
     setRows(updatedRows);
 
     try {
+      // Update positions in database
       for (const row of updatedRows) {
         await supabase
           .from('project_rows')
@@ -388,10 +389,32 @@ export const useProjectRows = (projectId: string) => {
           .eq('id', row.id);
       }
       
+      // Reset make mode progress when rows are reordered
+      // First, reset all rows to not_started and counter to 0
+      await supabase
+        .from('project_rows')
+        .update({ 
+          make_mode_status: 'not_started',
+          make_mode_counter: 0 
+        })
+        .eq('project_id', projectId);
+
+      // Then set the first row/note (by position) to in_progress
+      const firstRowOrNote = updatedRows.find(row => row.type === 'row' || row.type === 'note');
+      if (firstRowOrNote) {
+        await supabase
+          .from('project_rows')
+          .update({ make_mode_status: 'in_progress' })
+          .eq('id', firstRowOrNote.id);
+      }
+      
       toast({
         title: "Success",
-        description: "Row order updated successfully.",
+        description: "Row order updated successfully. Make mode progress has been reset.",
       });
+      
+      // Refresh data to get updated make mode status
+      fetchRows();
     } catch (error: any) {
       fetchRows();
       toast({
