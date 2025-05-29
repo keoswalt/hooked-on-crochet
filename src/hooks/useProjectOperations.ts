@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -240,6 +240,125 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
     }
   };
 
+  const handleExportPDF = async (project: Project) => {
+    try {
+      setLoading(true);
+      
+      // Fetch all rows for the project
+      const { data: rows, error: rowsError } = await supabase
+        .from('project_rows')
+        .select('type, position, instructions, counter, label, total_stitches')
+        .eq('project_id', project.id)
+        .order('position');
+
+      if (rowsError) throw rowsError;
+
+      // Create PDF
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      let yPosition = margin;
+
+      // Header
+      pdf.setFontSize(20);
+      pdf.setFont(undefined, 'bold');
+      pdf.text(project.name, margin, yPosition);
+      yPosition += 15;
+
+      // Project details
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(`Hook Size: ${project.hook_size}`, margin, yPosition);
+      yPosition += 8;
+      pdf.text(`Yarn Weight: ${project.yarn_weight}`, margin, yPosition);
+      yPosition += 8;
+
+      if (project.details) {
+        const detailsLines = pdf.splitTextToSize(`Details: ${project.details}`, pageWidth - 2 * margin);
+        pdf.text(detailsLines, margin, yPosition);
+        yPosition += detailsLines.length * 6 + 5;
+      }
+
+      yPosition += 10;
+
+      // Pattern rows
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, 'bold');
+      pdf.text('Pattern:', margin, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(11);
+      pdf.setFont(undefined, 'normal');
+
+      let rowNumber = 1;
+      rows?.forEach(row => {
+        // Check if we need a new page
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        let lineText = '';
+        
+        if (row.type === 'row') {
+          lineText = `Row ${rowNumber}: ${row.instructions}`;
+          if (row.counter > 1) {
+            lineText += ` (repeat ${row.counter} times)`;
+          }
+          if (row.total_stitches > 0) {
+            lineText += ` [${row.total_stitches} sts]`;
+          }
+          rowNumber++;
+        } else if (row.type === 'note') {
+          pdf.setFont(undefined, 'italic');
+          lineText = `Note: ${row.instructions}`;
+        } else if (row.type === 'divider') {
+          pdf.setFont(undefined, 'bold');
+          lineText = `--- ${row.instructions || 'Section Break'} ---`;
+        }
+
+        if (row.label) {
+          lineText = `${row.label}: ${lineText}`;
+        }
+
+        const textLines = pdf.splitTextToSize(lineText, pageWidth - 2 * margin);
+        pdf.text(textLines, margin, yPosition);
+        yPosition += textLines.length * 6 + 3;
+        
+        // Reset font style
+        pdf.setFont(undefined, 'normal');
+      });
+
+      // Footer
+      yPosition += 20;
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      
+      pdf.setFontSize(8);
+      pdf.setTextColor(128);
+      pdf.text(`Exported on ${new Date().toLocaleDateString()}`, margin, yPosition);
+
+      // Save PDF
+      const filename = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_pattern.pdf`;
+      pdf.save(filename);
+
+      toast({
+        title: "PDF exported",
+        description: "Your pattern has been exported as PDF successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "PDF export failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImportProject = async (file: File) => {
     try {
       setLoading(true);
@@ -321,6 +440,7 @@ export const useProjectOperations = (user: any, fetchProjects: () => Promise<voi
     handleDuplicateProject,
     handleToggleFavorite,
     handleExportProject,
+    handleExportPDF,
     handleImportProject,
   };
 };

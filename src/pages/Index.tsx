@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
@@ -91,6 +90,7 @@ const Index = () => {
     handleDuplicateProject,
     handleToggleFavorite,
     handleExportProject,
+    handleExportPDF,
     handleImportProject,
   } = useProjectOperations(user, fetchProjects);
 
@@ -156,6 +156,7 @@ const Index = () => {
             onBack={() => setSelectedProject(null)}
             onProjectDelete={handleDeleteProjectFromDetail}
             onProjectExport={() => handleExportProject(selectedProject)}
+            onProjectExportPDF={() => handleExportPDF(selectedProject)}
           />
         </main>
       </div>
