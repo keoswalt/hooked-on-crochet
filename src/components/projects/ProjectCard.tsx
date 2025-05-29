@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
@@ -90,17 +91,19 @@ export const ProjectCard = ({
           </CardDescription>
         </CardHeader>
         
-        {project.featured_image_url && (
-          <CardContent className="flex-1 p-4 pt-0 pb-8 flex items-center justify-center">
-            <div className="w-full h-32 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+        <CardContent className="flex-1 p-4 pt-0 pb-4 flex items-center justify-center">
+          <div className="w-full h-32 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+            {project.featured_image_url ? (
               <img
                 src={project.featured_image_url}
                 alt={`${project.name} featured image`}
                 className="w-full h-full object-cover"
               />
-            </div>
-          </CardContent>
-        )}
+            ) : (
+              <div className="text-gray-400 text-sm">No image</div>
+            )}
+          </div>
+        </CardContent>
 
         <div className="bg-gray-800 p-3 rounded-b-lg mt-auto">
           <div className="flex justify-end space-x-1">
