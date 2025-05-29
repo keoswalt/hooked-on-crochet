@@ -151,12 +151,12 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
             <DialogTitle>{editingProject ? 'Edit Project' : 'New Project'}</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-6">
             <ProjectForm
               project={editingProject}
               formData={formData}
@@ -166,7 +166,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
             />
           </div>
 
-          <DialogFooter className="px-6 py-4 border-t bg-white sticky bottom-0 z-10">
+          <DialogFooter className="px-6 py-4">
             <Button type="button" variant="outline" onClick={handleFormCancel}>
               Cancel
             </Button>

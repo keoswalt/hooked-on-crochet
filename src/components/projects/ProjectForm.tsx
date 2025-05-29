@@ -1,10 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { ImageUploader } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
@@ -12,6 +10,7 @@ import { TagDisplay } from '@/components/tags/TagDisplay';
 import { TagManager } from '@/components/tags/TagManager';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
+import { Button } from '@/components/ui/button';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -81,131 +80,128 @@ export const ProjectForm = ({
   };
 
   const handleTagsChange = () => {
-    // Just refresh the tags without any other actions
     refreshTags();
   };
 
   return (
-    <div className="p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Project Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="hook_size">Hook Size</Label>
-          <Select value={formData.hook_size} onValueChange={(value: HookSize) => onFormDataChange({ ...formData, hook_size: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select hook size" />
-            </SelectTrigger>
-            <SelectContent>
-              {hookSizes.map((size) => (
-                <SelectItem key={size} value={size}>{size}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Project Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
+          required
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="hook_size">Hook Size</Label>
+        <Select value={formData.hook_size} onValueChange={(value: HookSize) => onFormDataChange({ ...formData, hook_size: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select hook size" />
+          </SelectTrigger>
+          <SelectContent>
+            {hookSizes.map((size) => (
+              <SelectItem key={size} value={size}>{size}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="yarn_weight">Yarn Weight</Label>
-          <Select value={formData.yarn_weight} onValueChange={(value: YarnWeight) => onFormDataChange({ ...formData, yarn_weight: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select yarn weight" />
-            </SelectTrigger>
-            <SelectContent>
-              {yarnWeights.map((weight) => (
-                <SelectItem key={weight} value={weight}>{weight}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="yarn_weight">Yarn Weight</Label>
+        <Select value={formData.yarn_weight} onValueChange={(value: YarnWeight) => onFormDataChange({ ...formData, yarn_weight: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select yarn weight" />
+          </SelectTrigger>
+          <SelectContent>
+            {yarnWeights.map((weight) => (
+              <SelectItem key={weight} value={weight}>{weight}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="details">Details</Label>
-          <textarea
-            id="details"
-            value={formData.details}
-            onChange={(e) => onFormDataChange({ ...formData, details: e.target.value })}
-            className="w-full p-2 border rounded-md min-h-[100px] resize-none"
-            placeholder="Add project details, notes, or pattern information..."
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="details">Details</Label>
+        <textarea
+          id="details"
+          value={formData.details}
+          onChange={(e) => onFormDataChange({ ...formData, details: e.target.value })}
+          className="w-full p-2 border rounded-md min-h-[100px] resize-none"
+          placeholder="Add project details, notes, or pattern information..."
+        />
+      </div>
 
-        {project && (
-          <div className="space-y-2">
-            <Label>Tags</Label>
-            <div className="flex items-center gap-2 flex-wrap">
-              <TagDisplay 
-                tags={projectTags} 
-                onRemoveTag={handleRemoveTag}
-              />
-              <div className="relative">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowTagManager(true)}
-                  className="flex items-center gap-1"
-                >
-                  <Plus className="h-3 w-3" />
-                  Add Tag
-                </Button>
-                
-                {showTagManager && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-                    <div className="relative">
-                      <TagManager
-                        userId={userId}
-                        projectId={project.id}
-                        projectTags={projectTags}
-                        onTagsChange={handleTagsChange}
-                        isOpen={showTagManager}
-                        onOpenChange={setShowTagManager}
-                      />
-                    </div>
+      {project && (
+        <div className="space-y-2">
+          <Label>Tags</Label>
+          <div className="flex items-center gap-2 flex-wrap">
+            <TagDisplay 
+              tags={projectTags} 
+              onRemoveTag={handleRemoveTag}
+            />
+            <div className="relative">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTagManager(true)}
+                className="flex items-center gap-1"
+              >
+                <Plus className="h-3 w-3" />
+                Add Tag
+              </Button>
+              
+              {showTagManager && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
+                  <div className="relative">
+                    <TagManager
+                      userId={userId}
+                      projectId={project.id}
+                      projectTags={projectTags}
+                      onTagsChange={handleTagsChange}
+                      isOpen={showTagManager}
+                      onOpenChange={setShowTagManager}
+                    />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        <div className="space-y-2">
-          <Label>Featured Image</Label>
-          {formData.featured_image_url ? (
-            <ImageViewer
-              imageUrl={formData.featured_image_url}
-              alt="Project featured image"
-              className="w-full h-32"
-              onDelete={handleImageDelete}
-            />
-          ) : (
-            <ImageUploader
-              onImageUploaded={handleImageUpload}
-              userId={userId}
-              folder="featured"
-              className="w-full"
-            />
-          )}
         </div>
+      )}
 
-        {showButtons && (
-          <div className="flex space-x-2">
-            <Button type="submit" className="flex-1" disabled={!formData.hook_size || !formData.yarn_weight}>
-              {project ? 'Update Project' : 'Create Project'}
-            </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-          </div>
+      <div className="space-y-2">
+        <Label>Featured Image</Label>
+        {formData.featured_image_url ? (
+          <ImageViewer
+            imageUrl={formData.featured_image_url}
+            alt="Project featured image"
+            className="w-full h-32"
+            onDelete={handleImageDelete}
+          />
+        ) : (
+          <ImageUploader
+            onImageUploaded={handleImageUpload}
+            userId={userId}
+            folder="featured"
+            className="w-full"
+          />
         )}
-      </form>
-    </div>
+      </div>
+
+      {showButtons && (
+        <div className="flex space-x-2">
+          <Button type="submit" className="flex-1" disabled={!formData.hook_size || !formData.yarn_weight}>
+            {project ? 'Update Project' : 'Create Project'}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      )}
+    </form>
   );
 };
