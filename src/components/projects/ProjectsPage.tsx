@@ -163,6 +163,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
               onFormDataChange={setFormData}
               userId={user.id}
               showButtons={false}
+              onRefreshProjects={fetchProjects}
             />
           </div>
 

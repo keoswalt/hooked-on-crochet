@@ -32,6 +32,7 @@ interface ProjectFormProps {
   showButtons?: boolean;
   onSave?: (project: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   onCancel?: () => void;
+  onRefreshProjects?: () => void;
 }
 
 const hookSizes: HookSize[] = ['2mm', '2.2mm', '3mm', '3.5mm', '4mm', '4.5mm', '5mm', '5.5mm', '6mm', '6.5mm', '9mm', '10mm'];
@@ -44,7 +45,8 @@ export const ProjectForm = ({
   userId,
   showButtons = true,
   onSave,
-  onCancel
+  onCancel,
+  onRefreshProjects
 }: ProjectFormProps) => {
   const [showTagManager, setShowTagManager] = useState(false);
   const { deleteImage } = useImageOperations();
@@ -80,6 +82,10 @@ export const ProjectForm = ({
 
   const handleTagsChange = () => {
     refreshTags();
+    // Refresh the project list to show updated tags
+    if (onRefreshProjects) {
+      onRefreshProjects();
+    }
     // Trigger parent component to refresh tags as well
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('tagsUpdated'));

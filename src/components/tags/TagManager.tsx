@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,6 +88,8 @@ export const TagManager = ({
         setSearchTerm('');
         onTagsChange();
         loadUserTags();
+        // Close the menu after creating and adding the tag
+        onOpenChange(false);
       }
     }
   };
@@ -97,6 +98,8 @@ export const TagManager = ({
     const success = await addTagToProject(projectId, tagId);
     if (success) {
       onTagsChange();
+      // Close the menu after successfully adding the tag
+      onOpenChange(false);
     }
   };
 
