@@ -78,7 +78,7 @@ export const ProjectDetail = ({
   }
 
   return (
-    <div className="space-y-6 px-2 sm:px-4">
+    <div className="space-y-6">
       <ProjectHeader 
         project={project} 
         onBack={onBack}

@@ -101,7 +101,7 @@ export const ProjectListView = ({
   };
 
   return (
-    <div className="space-y-8 px-2 sm:px-4">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-4">My Crochet Projects</h1>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

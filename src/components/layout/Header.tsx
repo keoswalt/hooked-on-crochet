@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -33,7 +32,7 @@ export const Header = ({
     window.location.href = '/';
   };
   return <header className="bg-gray-900 text-white shadow-md">
-      <div className="container mx-auto px-2 sm:px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={handleTitleClick}>
           <Scissors className="h-6 w-6" />
           <h1 className="text-xl font-bold">Hooked on Crochet</h1>
