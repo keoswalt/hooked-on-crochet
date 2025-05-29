@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRowOperations } from './useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
@@ -13,6 +14,7 @@ export const useProjectRows = (projectId: string) => {
     onConfirm: () => void;
   }>({ open: false, onConfirm: () => {} });
   const { toast } = useToast();
+  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation } = useRowOperations();
 
   const fetchRows = async () => {
     try {
@@ -67,97 +69,37 @@ export const useProjectRows = (projectId: string) => {
 
   const addRow = async () => {
     try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: projectId,
-          position: newPosition,
-          instructions: '',
-          counter: 1,
-          type: 'row',
-          total_stitches: 0,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await addRowOperation(projectId, rows.length);
       setRows([...rows, data]);
-      
-      toast({
-        title: "Success",
-        description: "New row added successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Error already handled in useRowOperations
     }
   };
 
   const addNote = async () => {
     try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: projectId,
-          position: newPosition,
-          instructions: '',
-          counter: 1,
-          type: 'note',
-          total_stitches: 0,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await addNoteOperation(projectId, rows.length);
       setRows([...rows, data]);
-      
-      toast({
-        title: "Success",
-        description: "New note added successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Error already handled in useRowOperations
     }
   };
 
   const addDivider = async () => {
     try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: projectId,
-          position: newPosition,
-          instructions: '',
-          counter: 1,
-          type: 'divider',
-          total_stitches: 0,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await addDividerOperation(projectId, rows.length);
       setRows([...rows, data]);
-      
-      toast({
-        title: "Success",
-        description: "New divider added successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
+  const duplicateRow = async (rowToDuplicate: ProjectRow) => {
+    try {
+      const data = await duplicateRowOperation(rowToDuplicate, rows.length);
+      setRows([...rows, data]);
+    } catch (error) {
+      // Error already handled in useRowOperations
     }
   };
 
@@ -312,33 +254,6 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       setRows(rows.map(row => row.id === id ? { ...row, is_locked: isLocked } : row));
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const duplicateRow = async (rowToDuplicate: ProjectRow) => {
-    try {
-      const newPosition = rows.length + 1;
-      const { data, error } = await supabase
-        .from('project_rows')
-        .insert({
-          project_id: projectId,
-          position: newPosition,
-          instructions: rowToDuplicate.instructions,
-          counter: rowToDuplicate.type === 'divider' ? 1 : rowToDuplicate.counter,
-          type: rowToDuplicate.type,
-          total_stitches: rowToDuplicate.total_stitches,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      setRows([...rows, data]);
     } catch (error: any) {
       toast({
         title: "Error",

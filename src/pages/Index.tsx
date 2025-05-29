@@ -1,14 +1,16 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
-import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ProjectDetail } from '@/components/projects/ProjectDetail';
 import { ProjectSearch } from '@/components/projects/ProjectSearch';
+import { ProjectGrid } from '@/components/projects/ProjectGrid';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -81,6 +83,13 @@ const Index = () => {
     }
   };
 
+  const {
+    handleSaveProject,
+    handleDeleteProject,
+    handleDuplicateProject,
+    handleToggleFavorite,
+  } = useProjectOperations(user, fetchProjects);
+
   // Filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
     let filtered = projects;
@@ -99,155 +108,6 @@ const Index = () => {
     });
   }, [projects, searchTerm]);
 
-  const handleSaveProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    try {
-      if (editingProject) {
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', editingProject.id);
-
-        if (error) throw error;
-        toast({
-          title: "Project updated",
-          description: "Your project has been updated successfully.",
-        });
-      } else {
-        const { error } = await supabase
-          .from('projects')
-          .insert({
-            ...projectData,
-            user_id: user!.id,
-          });
-
-        if (error) throw error;
-        toast({
-          title: "Project created",
-          description: "Your new project has been created successfully.",
-        });
-      }
-
-      setShowForm(false);
-      setEditingProject(null);
-      fetchProjects();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteProject = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      toast({
-        title: "Project deleted",
-        description: "Your project has been deleted successfully.",
-      });
-      fetchProjects();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDuplicateProject = async (project: Project) => {
-    try {
-      // Create new project with same basic info but reset progress
-      const { data: newProject, error: projectError } = await supabase
-        .from('projects')
-        .insert({
-          name: `${project.name} (Copy)`,
-          hook_size: project.hook_size,
-          yarn_weight: project.yarn_weight,
-          details: project.details,
-          user_id: user!.id,
-          is_favorite: false,
-        })
-        .select()
-        .single();
-
-      if (projectError) throw projectError;
-
-      // Get original project rows (only edit mode data)
-      const { data: originalRows, error: rowsError } = await supabase
-        .from('project_rows')
-        .select('type, position, instructions, counter')
-        .eq('project_id', project.id)
-        .order('position');
-
-      if (rowsError) throw rowsError;
-
-      // Insert rows with only edit mode data, reset make mode data
-      if (originalRows && originalRows.length > 0) {
-        const rowsToInsert = originalRows.map(row => ({
-          project_id: newProject.id,
-          type: row.type,
-          position: row.position,
-          instructions: row.instructions,
-          counter: row.counter,
-          make_mode_counter: 0,
-          make_mode_status: 'not_started',
-          is_locked: false,
-        }));
-
-        const { error: insertError } = await supabase
-          .from('project_rows')
-          .insert(rowsToInsert);
-
-        if (insertError) throw insertError;
-      }
-
-      toast({
-        title: "Project duplicated",
-        description: "Your project has been duplicated successfully.",
-      });
-      fetchProjects();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ is_favorite: isFavorite })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      setProjects(projects.map(project => 
-        project.id === id ? { ...project, is_favorite: isFavorite } : project
-      ));
-      
-      toast({
-        title: isFavorite ? "Added to favorites" : "Removed from favorites",
-        description: `Project has been ${isFavorite ? 'added to' : 'removed from'} your favorites.`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleEditProject = (project: Project) => {
     setEditingProject(project);
     setShowForm(true);
@@ -258,6 +118,12 @@ const Index = () => {
       handleDeleteProject(selectedProject.id);
       setSelectedProject(null);
     }
+  };
+
+  const handleSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    await handleSaveProject(projectData, editingProject);
+    setShowForm(false);
+    setEditingProject(null);
   };
 
   if (loading) {
@@ -298,7 +164,7 @@ const Index = () => {
         <main className="container mx-auto px-4 py-8">
           <ProjectForm
             project={editingProject || undefined}
-            onSave={handleSaveProject}
+            onSave={handleSave}
             onCancel={() => {
               setShowForm(false);
               setEditingProject(null);
@@ -329,46 +195,17 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onEdit={(e) => {
-                e.stopPropagation();
-                handleEditProject(project);
-              }}
-              onDelete={(id) => {
-                handleDeleteProject(id);
-              }}
-              onDuplicate={(e) => {
-                e.stopPropagation();
-                handleDuplicateProject(project);
-              }}
-              onToggleFavorite={handleToggleFavorite}
-              onCardClick={() => setSelectedProject(project)}
-            />
-          ))}
-        </div>
-
-        {filteredProjects.length === 0 && !searchTerm && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No projects yet!</p>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Project
-            </Button>
-          </div>
-        )}
-
-        {filteredProjects.length === 0 && searchTerm && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No projects found matching "{searchTerm}"</p>
-            <Button onClick={() => setSearchTerm('')} variant="outline">
-              Clear Search
-            </Button>
-          </div>
-        )}
+        <ProjectGrid
+          projects={filteredProjects}
+          searchTerm={searchTerm}
+          onEditProject={handleEditProject}
+          onDeleteProject={handleDeleteProject}
+          onDuplicateProject={handleDuplicateProject}
+          onToggleFavorite={handleToggleFavorite}
+          onCardClick={setSelectedProject}
+          onCreateProject={() => setShowForm(true)}
+          onClearSearch={() => setSearchTerm('')}
+        />
       </main>
     </div>
   );
