@@ -5,9 +5,12 @@ import { ProjectGrid } from './ProjectGrid';
 import { ProjectImporter } from './ProjectImporter';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useTagOperations } from '@/hooks/useTagOperations';
+import { useEffect, useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
+type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface ProjectListViewProps {
   projects: Project[];
@@ -38,14 +41,45 @@ export const ProjectListView = ({
   operationsLoading,
   userId,
 }: ProjectListViewProps) => {
-  // Filter and sort projects based on search term and favorites
+  const [projectTags, setProjectTags] = useState<Record<string, Tag[]>>({});
+  const { fetchProjectTags } = useTagOperations(userId);
+
+  // Load tags for all projects
+  useEffect(() => {
+    const loadAllProjectTags = async () => {
+      const tagsMap: Record<string, Tag[]> = {};
+      
+      for (const project of projects) {
+        const tags = await fetchProjectTags(project.id);
+        tagsMap[project.id] = tags;
+      }
+      
+      setProjectTags(tagsMap);
+    };
+
+    if (projects.length > 0) {
+      loadAllProjectTags();
+    }
+  }, [projects, fetchProjectTags]);
+
+  // Enhanced filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
     let filtered = projects;
     
     if (searchTerm.trim()) {
-      filtered = projects.filter(project =>
-        project.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const lowercaseSearch = searchTerm.toLowerCase();
+      filtered = projects.filter(project => {
+        // Search in project name
+        const nameMatch = project.name.toLowerCase().includes(lowercaseSearch);
+        
+        // Search in project tags
+        const tags = projectTags[project.id] || [];
+        const tagMatch = tags.some(tag => 
+          tag.name.toLowerCase().includes(lowercaseSearch)
+        );
+        
+        return nameMatch || tagMatch;
+      });
     }
     
     // Sort by favorite status first, then by updated_at
@@ -54,7 +88,7 @@ export const ProjectListView = ({
       if (!a.is_favorite && b.is_favorite) return 1;
       return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
     });
-  }, [projects, searchTerm]);
+  }, [projects, searchTerm, projectTags]);
 
   const handleClearSearch = () => {
     onSearchChange('');

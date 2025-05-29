@@ -59,7 +59,7 @@ export const ProjectCard = ({
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
+      <Card className="hover:shadow-lg transition-shadow h-80 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
@@ -89,9 +89,13 @@ export const ProjectCard = ({
           </CardDescription>
         </CardHeader>
         
-        {project.details && (
+        {project.featured_image_url && (
           <CardContent className="flex-1 overflow-hidden p-4 pt-0">
-            <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden text-ellipsis">{project.details}</p>
+            <img
+              src={project.featured_image_url}
+              alt={`${project.name} featured image`}
+              className="w-full h-32 object-cover rounded-md"
+            />
           </CardContent>
         )}
 

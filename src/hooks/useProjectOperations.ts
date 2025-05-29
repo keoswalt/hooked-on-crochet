@@ -260,10 +260,55 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
       const pdf = new jsPDF();
       let yPosition = 20;
 
+      // Helper function to add image to PDF
+      const addImageToPDF = async (imageUrl: string, maxWidth = 170, maxHeight = 100) => {
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          
+          return new Promise<{ width: number; height: number }>((resolve) => {
+            reader.onload = function(event) {
+              const img = new Image();
+              img.onload = function() {
+                // Calculate aspect ratio and fit within max dimensions
+                const aspectRatio = img.width / img.height;
+                let width = maxWidth;
+                let height = maxWidth / aspectRatio;
+                
+                if (height > maxHeight) {
+                  height = maxHeight;
+                  width = maxHeight * aspectRatio;
+                }
+                
+                pdf.addImage(event.target?.result as string, 'JPEG', 20, yPosition, width, height);
+                resolve({ width, height });
+              };
+              img.src = event.target?.result as string;
+            };
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error('Error adding image to PDF:', error);
+          return { width: 0, height: 0 };
+        }
+      };
+
       // Add title
       pdf.setFontSize(20);
       pdf.text(project.name, 20, yPosition);
       yPosition += 20;
+
+      // Add featured image if exists
+      if (project.featured_image_url) {
+        const { height } = await addImageToPDF(project.featured_image_url);
+        yPosition += height + 15;
+        
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      }
 
       // Add project details
       pdf.setFontSize(12);
@@ -285,7 +330,7 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
         pdf.text('Pattern:', 20, yPosition);
         yPosition += 15;
 
-        rows.forEach((row, index) => {
+        for (const row of rows) {
           if (yPosition > 270) {
             pdf.addPage();
             yPosition = 20;
@@ -303,7 +348,18 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
             pdf.text(splitText, 20, yPosition);
             yPosition += splitText.length * 5 + 5;
           }
-        });
+
+          // Add row image if exists
+          if (row.image_url) {
+            if (yPosition > 200) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+            
+            const { height } = await addImageToPDF(row.image_url, 120, 80);
+            yPosition += height + 10;
+          }
+        }
       }
 
       pdf.save(`${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
