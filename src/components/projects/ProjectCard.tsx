@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
@@ -61,7 +60,7 @@ export const ProjectCard = ({
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-80 flex flex-col cursor-pointer" onClick={handleCardClick}>
+      <Card className="hover:shadow-lg transition-shadow h-96 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
