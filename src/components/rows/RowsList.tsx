@@ -9,6 +9,7 @@ type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 interface RowsListProps {
   rows: ProjectRow[];
   mode: 'edit' | 'make';
+  userId: string;
   onDragEnd: (result: DropResult) => void;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
@@ -19,11 +20,13 @@ interface RowsListProps {
   onToggleLock: (id: string, isLocked: boolean) => void;
   onDuplicate: (row: ProjectRow) => void;
   onDelete: (id: string) => void;
+  onUpdateRowImage: (id: string, imageUrl: string | null) => void;
 }
 
 export const RowsList = ({
   rows,
   mode,
+  userId,
   onDragEnd,
   onUpdateCounter,
   onUpdateInstructions,
@@ -33,7 +36,8 @@ export const RowsList = ({
   onUpdateMakeModeStatus,
   onToggleLock,
   onDuplicate,
-  onDelete
+  onDelete,
+  onUpdateRowImage
 }: RowsListProps) => {
   // Calculate row numbers for actual rows (excluding notes and dividers)
   const getRowNumber = (currentIndex: number): number | undefined => {
@@ -67,6 +71,7 @@ export const RowsList = ({
                       row={row}
                       mode={mode}
                       rowNumber={getRowNumber(index)}
+                      userId={userId}
                       onUpdateCounter={onUpdateCounter}
                       onUpdateInstructions={onUpdateInstructions}
                       onUpdateLabel={onUpdateLabel}
@@ -76,6 +81,7 @@ export const RowsList = ({
                       onToggleLock={onToggleLock}
                       onDuplicate={onDuplicate}
                       onDelete={onDelete}
+                      onUpdateRowImage={onUpdateRowImage}
                     />
                   </div>
                 )}

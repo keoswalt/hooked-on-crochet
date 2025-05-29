@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRowOperations } from './useRowOperations';
+import { useImageOperations } from './useImageOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
@@ -14,7 +15,8 @@ export const useProjectRows = (projectId: string) => {
     onConfirm: () => void;
   }>({ open: false, onConfirm: () => {} });
   const { toast } = useToast();
-  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation } = useRowOperations();
+  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation, updateRowImage: updateRowImageOperation } = useRowOperations();
+  const { deleteImage } = useImageOperations();
 
   const fetchRows = async () => {
     try {
@@ -285,6 +287,14 @@ export const useProjectRows = (projectId: string) => {
 
   const deleteRow = async (id: string) => {
     try {
+      // Get the row to check for image
+      const rowToDelete = rows.find(row => row.id === id);
+      
+      // Delete the image from storage if it exists
+      if (rowToDelete?.image_url) {
+        await deleteImage(rowToDelete.image_url);
+      }
+
       const { error } = await supabase
         .from('project_rows')
         .delete()
@@ -374,6 +384,15 @@ export const useProjectRows = (projectId: string) => {
     }
   };
 
+  const updateRowImage = async (id: string, imageUrl: string | null) => {
+    try {
+      await updateRowImageOperation(id, imageUrl);
+      setRows(rows.map(row => row.id === id ? { ...row, image_url: imageUrl } : row));
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
   return {
     rows,
     loading,
@@ -392,5 +411,6 @@ export const useProjectRows = (projectId: string) => {
     duplicateRow,
     deleteRow,
     reorderRows,
+    updateRowImage,
   };
 };

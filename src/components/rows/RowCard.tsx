@@ -2,7 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image } from 'lucide-react';
+import { ImageUploader } from '@/components/images/ImageUploader';
+import { ImageViewer } from '@/components/images/ImageViewer';
+import { useImageOperations } from '@/hooks/useImageOperations';
+import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
@@ -11,6 +16,7 @@ interface RowCardProps {
   row: ProjectRow;
   mode: 'edit' | 'make';
   rowNumber?: number;
+  userId: string;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
   onUpdateLabel: (id: string, label: string) => void;
@@ -20,6 +26,7 @@ interface RowCardProps {
   onToggleLock: (id: string, isLocked: boolean) => void;
   onDuplicate: (row: ProjectRow) => void;
   onDelete: (id: string) => void;
+  onUpdateRowImage: (id: string, imageUrl: string | null) => void;
 }
 
 // Debounce function
@@ -41,6 +48,7 @@ export const RowCard = ({
   row, 
   mode,
   rowNumber,
+  userId,
   onUpdateCounter, 
   onUpdateInstructions,
   onUpdateLabel,
@@ -49,11 +57,15 @@ export const RowCard = ({
   onUpdateMakeModeStatus,
   onToggleLock,
   onDuplicate, 
-  onDelete 
+  onDelete,
+  onUpdateRowImage
 }: RowCardProps) => {
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
   const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
   const [localLabel, setLocalLabel] = useState(row.label || '');
+  const [showImageUploader, setShowImageUploader] = useState(false);
+  const { deleteImage } = useImageOperations();
+  const { toast } = useToast();
 
   // Update local state when row prop changes
   useEffect(() => {
@@ -135,6 +147,20 @@ export const RowCard = ({
     }
   };
 
+  const handleImageUploaded = (imageUrl: string) => {
+    onUpdateRowImage(row.id, imageUrl);
+    setShowImageUploader(false);
+  };
+
+  const handleImageDelete = async () => {
+    if (row.image_url) {
+      const success = await deleteImage(row.image_url);
+      if (success) {
+        onUpdateRowImage(row.id, null);
+      }
+    }
+  };
+
   // Render divider
   if (row.type === 'divider') {
     return (
@@ -210,6 +236,14 @@ export const RowCard = ({
           </div>
           {mode === 'edit' && (
             <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowImageUploader(!showImageUploader)}
+                className={row.image_url ? 'bg-blue-50 border-blue-200' : ''}
+              >
+                <Image className="h-4 w-4" />
+              </Button>
               <Button variant="outline" size="sm" onClick={() => onDuplicate(row)}>
                 <Copy className="h-4 w-4" />
               </Button>
@@ -222,6 +256,38 @@ export const RowCard = ({
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
+          {showImageUploader && mode === 'edit' && (
+            <div className="p-3 border rounded-md bg-gray-50">
+              <ImageUploader
+                onImageUploaded={handleImageUploaded}
+                userId={userId}
+                folder="rows"
+                className="w-full"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowImageUploader(false)}
+                className="mt-2 w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+
+          {row.image_url && (
+            <div className="w-full">
+              <AspectRatio ratio={16 / 9} className="bg-muted">
+                <ImageViewer
+                  imageUrl={row.image_url}
+                  alt={`Image for ${row.type === 'note' ? 'note' : `row ${rowNumber || row.position}`}`}
+                  className="w-full h-full"
+                  onDelete={mode === 'edit' ? handleImageDelete : undefined}
+                />
+              </AspectRatio>
+            </div>
+          )}
+
           <textarea
             value={localInstructions}
             onChange={handleInstructionsChange}

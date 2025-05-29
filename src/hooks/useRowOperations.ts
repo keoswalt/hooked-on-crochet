@@ -122,6 +122,7 @@ export const useRowOperations = () => {
           counter: rowToDuplicate.type === 'divider' ? 1 : rowToDuplicate.counter,
           type: rowToDuplicate.type,
           total_stitches: rowToDuplicate.total_stitches,
+          image_url: rowToDuplicate.image_url, // Include image when duplicating
         })
         .select()
         .single();
@@ -138,10 +139,34 @@ export const useRowOperations = () => {
     }
   };
 
+  const updateRowImage = async (rowId: string, imageUrl: string | null) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ image_url: imageUrl })
+        .eq('id', rowId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: imageUrl ? "Image added successfully." : "Image removed successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return {
     addRow,
     addNote,
     addDivider,
     duplicateRow,
+    updateRowImage,
   };
 };
