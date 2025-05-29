@@ -4,13 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
 type Project = Database['public']['Tables']['projects']['Row'];
+type HookSize = Database['public']['Enums']['hook_size'];
+type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
 interface ProjectsPageProps {
   user: User;
@@ -20,6 +23,20 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [formData, setFormData] = useState<{
+    name: string;
+    hook_size: HookSize | '';
+    yarn_weight: YarnWeight | '';
+    details: string;
+    featured_image_url: string | null;
+  }>({
+    name: '',
+    hook_size: '',
+    yarn_weight: '',
+    details: '',
+    featured_image_url: null,
+  });
+
   const { projects, selectedProject, setSelectedProject, loading, fetchProjects, updateProject } = useProjectState(user);
   const {
     loading: operationsLoading,
@@ -31,6 +48,27 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     handleExportPDF,
     handleImportProject,
   } = useProjectOperations(user, fetchProjects);
+
+  // Reset form data when editing project changes
+  useEffect(() => {
+    if (editingProject) {
+      setFormData({
+        name: editingProject.name,
+        hook_size: editingProject.hook_size,
+        yarn_weight: editingProject.yarn_weight,
+        details: editingProject.details || '',
+        featured_image_url: editingProject.featured_image_url || null,
+      });
+    } else {
+      setFormData({
+        name: '',
+        hook_size: '',
+        yarn_weight: '',
+        details: '',
+        featured_image_url: null,
+      });
+    }
+  }, [editingProject]);
 
   const handleDeleteSelectedProject = async () => {
     if (selectedProject) {
@@ -50,13 +88,30 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     await handleDuplicateProject(project);
   };
 
-  const onSave = async (projectData: any) => {
-    const savedProject = await handleSaveProject(projectData, editingProject);
-    if (savedProject) {
-      updateProject(savedProject);
-      setShowForm(false);
-      setEditingProject(null);
+  const handleFormSubmit = async () => {
+    if (formData.hook_size && formData.yarn_weight) {
+      const projectData = {
+        name: formData.name,
+        hook_size: formData.hook_size,
+        yarn_weight: formData.yarn_weight,
+        details: formData.details || null,
+        featured_image_url: formData.featured_image_url,
+        is_favorite: editingProject?.is_favorite || false,
+        last_mode: editingProject?.last_mode || 'edit',
+      };
+
+      const savedProject = await handleSaveProject(projectData, editingProject);
+      if (savedProject) {
+        updateProject(savedProject);
+        setShowForm(false);
+        setEditingProject(null);
+      }
     }
+  };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingProject(null);
   };
 
   return (
@@ -96,21 +151,33 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden p-0">
-          <DialogHeader className="sticky top-0 bg-white z-10 px-6 py-4 border-b">
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
             <DialogTitle>{editingProject ? 'Edit Project' : 'New Project'}</DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto flex-1">
+          
+          <div className="flex-1 overflow-y-auto">
             <ProjectForm
               project={editingProject}
-              onSave={onSave}
-              onCancel={() => {
-                setShowForm(false);
-                setEditingProject(null);
-              }}
+              formData={formData}
+              onFormDataChange={setFormData}
               userId={user.id}
+              showButtons={false}
             />
           </div>
+
+          <DialogFooter className="px-6 py-4 border-t bg-white sticky bottom-0 z-10">
+            <Button type="button" variant="outline" onClick={handleFormCancel}>
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              onClick={handleFormSubmit}
+              disabled={!formData.hook_size || !formData.yarn_weight}
+            >
+              {editingProject ? 'Update Project' : 'Create Project'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
