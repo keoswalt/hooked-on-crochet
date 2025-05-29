@@ -24,7 +24,7 @@ interface ProjectDetailProps {
 }
 
 export const ProjectDetail = ({ 
-  project, 
+  project: initialProject, 
   onBack, 
   onProjectDelete, 
   onProjectExport,
@@ -32,6 +32,7 @@ export const ProjectDetail = ({
   onEditProject,
   userId
 }: ProjectDetailProps) => {
+  const [project, setProject] = useState<Project>(initialProject);
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
@@ -54,6 +55,11 @@ export const ProjectDetail = ({
     deleteRow, 
     reorderRows 
   } = useProjectRows(project.id);
+
+  // Update project state when initialProject changes
+  useEffect(() => {
+    setProject(initialProject);
+  }, [initialProject]);
 
   // Load saved mode from project preferences
   useEffect(() => {
@@ -89,6 +95,10 @@ export const ProjectDetail = ({
     } catch (error) {
       console.error('Error saving project mode:', error);
     }
+  };
+
+  const handleProjectUpdate = (updatedProject: Project) => {
+    setProject(updatedProject);
   };
 
   const handleAddRow = async () => {
@@ -190,6 +200,7 @@ export const ProjectDetail = ({
         onDelete={handleDeleteProject}
         onExport={onProjectExport}
         onExportPDF={onProjectExportPDF}
+        onProjectUpdate={handleProjectUpdate}
         userId={userId}
       />
 

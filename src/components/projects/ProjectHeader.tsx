@@ -17,18 +17,29 @@ interface ProjectHeaderProps {
   onDelete: () => void;
   onExport: () => void;
   onExportPDF: () => void;
+  onProjectUpdate?: (updatedProject: Project) => void;
   userId: string;
 }
 
-export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onExportPDF, userId }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ 
+  project, 
+  onBack, 
+  onEdit, 
+  onDelete, 
+  onExport, 
+  onExportPDF, 
+  onProjectUpdate,
+  userId 
+}: ProjectHeaderProps) => {
   const { deleteImage } = useImageOperations();
 
   const handleDeleteFeaturedImage = async () => {
     if (project.featured_image_url) {
       const success = await deleteImage(project.featured_image_url);
-      if (success) {
-        // Trigger a refresh or update the project data
-        window.location.reload();
+      if (success && onProjectUpdate) {
+        // Update the project object with the removed image
+        const updatedProject = { ...project, featured_image_url: null };
+        onProjectUpdate(updatedProject);
       }
     }
   };

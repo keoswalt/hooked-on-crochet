@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCw, X } from 'lucide-react';
 import { useState, useRef, useCallback } from 'react';
 
 interface ImageModalProps {
@@ -60,10 +60,20 @@ export const ImageModal = ({ imageUrl, alt, open, onOpenChange }: ImageModalProp
     onOpenChange(newOpen);
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0" hideClose>
         <div className="relative w-full h-full">
+          <div className="absolute top-4 left-4 z-10">
+            <Button variant="secondary" size="sm" onClick={handleClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <div className="absolute top-4 right-4 z-10 flex gap-2">
             <Button variant="secondary" size="sm" onClick={handleZoomOut}>
               <ZoomOut className="h-4 w-4" />
@@ -84,7 +94,7 @@ export const ImageModal = ({ imageUrl, alt, open, onOpenChange }: ImageModalProp
               ref={imageRef}
               src={imageUrl}
               alt={alt}
-              className="max-w-full max-h-full object-contain transition-transform duration-200 select-none"
+              className={`max-w-full max-h-full object-contain select-none ${!isDragging ? 'transition-transform duration-200' : ''}`}
               style={{
                 transform: `scale(${scale}) rotate(${rotation}deg) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
