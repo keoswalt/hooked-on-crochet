@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,7 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
         yarn_weight: formData.yarn_weight,
         details: formData.details || null,
         is_favorite: project?.is_favorite || false,
+        last_mode: project?.last_mode || 'edit',
       });
     }
   };
