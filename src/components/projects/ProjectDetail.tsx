@@ -6,6 +6,8 @@ import { RowsList } from '@/components/rows/RowsList';
 import { RowTypeSelector } from '@/components/rows/RowTypeSelector';
 import { ModeToggle } from './ModeToggle';
 import { StickyModeHeader } from './StickyModeHeader';
+import { CustomConfirmationDialog } from '@/components/ui/custom-confirmation-dialog';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -18,6 +20,7 @@ interface ProjectDetailProps {
   onProjectDelete: () => void;
   onProjectExport: () => void;
   onProjectExportPDF: () => void;
+  onEditProject: (project: Project) => void;
 }
 
 export const ProjectDetail = ({ 
@@ -25,13 +28,18 @@ export const ProjectDetail = ({
   onBack, 
   onProjectDelete, 
   onProjectExport,
-  onProjectExportPDF 
+  onProjectExportPDF,
+  onEditProject
 }: ProjectDetailProps) => {
-  const [isEditing, setIsEditing] = useState(false);
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
+  const [isSticky, setIsSticky] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
   const { 
     rows, 
     loading, 
+    confirmDialog,
+    setConfirmDialog,
     addRow, 
     addNote, 
     addDivider, 
@@ -46,7 +54,53 @@ export const ProjectDetail = ({
     deleteRow, 
     reorderRows 
   } = useProjectRows(project.id);
-  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation } = useRowOperations();
+
+  // Load saved mode from project preferences
+  useEffect(() => {
+    const loadProjectMode = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('last_mode')
+          .eq('id', project.id)
+          .single();
+
+        if (error) throw error;
+        if (data?.last_mode) {
+          setMode(data.last_mode as 'edit' | 'make');
+        }
+      } catch (error) {
+        console.error('Error loading project mode:', error);
+      }
+    };
+
+    loadProjectMode();
+  }, [project.id]);
+
+  // Save mode when it changes
+  const handleModeChange = async (newMode: 'edit' | 'make') => {
+    setMode(newMode);
+    
+    try {
+      await supabase
+        .from('projects')
+        .update({ last_mode: newMode })
+        .eq('id', project.id);
+    } catch (error) {
+      console.error('Error saving project mode:', error);
+    }
+  };
+
+  // Handle sticky header on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsSticky(scrollY > 200);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleAddRow = async () => {
     try {
@@ -121,6 +175,15 @@ export const ProjectDetail = ({
     reorderRows(result.source.index, result.destination.index);
   };
 
+  const handleDeleteProject = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProject = () => {
+    onProjectDelete();
+    setShowDeleteConfirm(false);
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -130,16 +193,16 @@ export const ProjectDetail = ({
       <ProjectHeader 
         project={project} 
         onBack={onBack}
-        onEdit={() => setIsEditing(true)}
-        onDelete={onProjectDelete}
+        onEdit={() => onEditProject(project)}
+        onDelete={handleDeleteProject}
         onExport={onProjectExport}
         onExportPDF={onProjectExportPDF}
       />
 
       <StickyModeHeader
         mode={mode}
-        isSticky={false}
-        onModeChange={setMode}
+        isSticky={isSticky}
+        onModeChange={handleModeChange}
         onAddRow={handleAddRow}
         onAddNote={handleAddNote}
         onAddDivider={handleAddDivider}
@@ -158,6 +221,18 @@ export const ProjectDetail = ({
         onToggleLock={handleToggleLock}
         onDuplicate={handleDuplicateRow}
         onDelete={handleDeleteRow}
+      />
+
+      <DeleteConfirmationDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={confirmDeleteProject}
+      />
+
+      <CustomConfirmationDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        onConfirm={confirmDialog.onConfirm}
       />
     </div>
   );

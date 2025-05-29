@@ -157,6 +157,7 @@ const Index = () => {
             onProjectDelete={handleDeleteProjectFromDetail}
             onProjectExport={() => handleExportProject(selectedProject)}
             onProjectExportPDF={() => handleExportPDF(selectedProject)}
+            onEditProject={handleEditProject}
           />
         </main>
       </div>
