@@ -115,7 +115,7 @@ const Index = () => {
   const handleEditProject = (project: Project) => {
     setEditingProject(project);
     setShowForm(true);
-    setSelectedProject(null); // Clear selected project when editing
+    // Don't clear selectedProject when editing - keep the user in detail view
   };
 
   const handleDeleteProjectFromDetail = () => {
@@ -129,11 +129,13 @@ const Index = () => {
     await handleSaveProject(projectData, editingProject);
     setShowForm(false);
     setEditingProject(null);
+    // Don't clear selectedProject - this will keep us in the detail view if we were editing from there
   };
 
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingProject(null);
+    // Don't clear selectedProject - this will keep us in the detail view if we were editing from there
   };
 
   if (loading) {
