@@ -28,7 +28,7 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHead
         <CardHeader>
           <div className="flex flex-col space-y-4">
             <div className="w-full">
-              <CardTitle className="text-2xl">{project.name}</CardTitle>
+              <CardTitle className="text-2xl mb-3">{project.name}</CardTitle>
               <div className="text-sm text-gray-600">
                 Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
               </div>
