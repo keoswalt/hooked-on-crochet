@@ -210,23 +210,21 @@ const Index = () => {
       <Header userEmail={user.email} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <ProjectSearch 
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">My Crochet Projects</h1>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <ProjectSearch 
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+            <div className="flex gap-2">
+              <ProjectImporter 
+                onImport={handleImportProject}
+                loading={operationsLoading}
               />
-              <div className="flex gap-2">
-                <ProjectImporter 
-                  onImport={handleImportProject}
-                  loading={operationsLoading}
-                />
-                <Button onClick={() => setShowForm(true)} className="whitespace-nowrap">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Project
-                </Button>
-              </div>
+              <Button onClick={() => setShowForm(true)} className="whitespace-nowrap">
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
             </div>
           </div>
         </div>
