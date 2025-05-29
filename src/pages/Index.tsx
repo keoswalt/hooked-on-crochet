@@ -129,7 +129,24 @@ const Index = () => {
     await handleSaveProject(projectData, editingProject);
     setShowForm(false);
     setEditingProject(null);
-    // Don't clear selectedProject - this will keep us in the detail view if we were editing from there
+    
+    // If we were editing a selected project, update it with the latest data
+    if (editingProject && selectedProject && editingProject.id === selectedProject.id) {
+      try {
+        const { data: updatedProject, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('id', editingProject.id)
+          .single();
+        
+        if (error) throw error;
+        if (updatedProject) {
+          setSelectedProject(updatedProject);
+        }
+      } catch (error) {
+        console.error('Error fetching updated project:', error);
+      }
+    }
   };
 
   const handleFormCancel = () => {
