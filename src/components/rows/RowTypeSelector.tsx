@@ -21,6 +21,7 @@ export const RowTypeSelector = ({ onAddRow, onAddNote, onAddDivider }: RowTypeSe
         <Plus className="h-4 w-4 mr-2" />
         Add
       </Button>
+      <div className="w-px bg-white"></div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="default" className="rounded-l-none px-2">

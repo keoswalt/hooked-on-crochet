@@ -1,7 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check } from 'lucide-react';
 
 interface ProjectRow {
@@ -13,6 +13,7 @@ interface ProjectRow {
   make_mode_counter: number;
   make_mode_status: string;
   is_locked: boolean;
+  total_stitches: number;
 }
 
 interface RowCardProps {
@@ -21,6 +22,7 @@ interface RowCardProps {
   rowNumber?: number;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
+  onUpdateTotalStitches: (id: string, totalStitches: number) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
@@ -49,6 +51,7 @@ export const RowCard = ({
   rowNumber,
   onUpdateCounter, 
   onUpdateInstructions,
+  onUpdateTotalStitches,
   onUpdateMakeModeCounter,
   onUpdateMakeModeStatus,
   onToggleLock,
@@ -56,21 +59,38 @@ export const RowCard = ({
   onDelete 
 }: RowCardProps) => {
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
+  const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches.toString());
 
   // Update local state when row prop changes
   useEffect(() => {
     setLocalInstructions(row.instructions);
-  }, [row.instructions]);
+    setLocalTotalStitches(row.total_stitches.toString());
+  }, [row.instructions, row.total_stitches]);
 
   // Debounced function to update instructions in database
   const debouncedUpdateInstructions = useDebounce((id: string, instructions: string) => {
     onUpdateInstructions(id, instructions);
   }, 500);
 
+  // Debounced function to update total stitches in database
+  const debouncedUpdateTotalStitches = useDebounce((id: string, totalStitches: number) => {
+    onUpdateTotalStitches(id, totalStitches);
+  }, 500);
+
   const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setLocalInstructions(newValue);
     debouncedUpdateInstructions(row.id, newValue);
+  };
+
+  const handleTotalStitchesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setLocalTotalStitches(value);
+      const numValue = value === '' ? 0 : parseInt(value, 10);
+      debouncedUpdateTotalStitches(row.id, numValue);
+    }
   };
 
   const handleMakeModeCheck = () => {
@@ -185,67 +205,81 @@ export const RowCard = ({
           />
           
           {row.type === 'row' && (
-            <div className="relative flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-3">
-              {mode === 'edit' ? (
-                <>
-                  <div className="flex items-center justify-center space-x-3 flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onUpdateCounter(row.id, Math.max(1, row.counter - 1))}
-                      disabled={row.counter <= 1 || row.is_locked}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    
-                    <div className="bg-white border rounded-md px-4 py-2 min-w-[60px] text-center font-semibold">
-                      {row.counter}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700 min-w-[100px]">Total Stitches:</label>
+                <Input
+                  type="text"
+                  value={localTotalStitches}
+                  onChange={handleTotalStitchesChange}
+                  className="flex-1"
+                  placeholder="0"
+                  disabled={mode === 'make'}
+                />
+              </div>
+              
+              <div className="relative flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-3">
+                {mode === 'edit' ? (
+                  <>
+                    <div className="flex items-center justify-center space-x-3 flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUpdateCounter(row.id, Math.max(1, row.counter - 1))}
+                        disabled={row.counter <= 1 || row.is_locked}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      
+                      <div className="bg-white border rounded-md px-4 py-2 min-w-[60px] text-center font-semibold">
+                        {row.counter}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUpdateCounter(row.id, row.counter + 1)}
+                        disabled={row.is_locked}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
                     </div>
                     
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onUpdateCounter(row.id, row.counter + 1)}
-                      disabled={row.is_locked}
+                      onClick={() => onToggleLock(row.id, !row.is_locked)}
+                      className="absolute right-3"
+                    >
+                      {row.is_locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                    </Button>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center space-x-3 flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMakeModeCounterChange(Math.max(0, row.make_mode_counter - 1))}
+                      disabled={row.make_mode_counter <= 0 || isCompleted}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="bg-white border rounded-md px-4 py-2 min-w-[80px] text-center font-semibold">
+                      {row.make_mode_counter} / {row.counter}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMakeModeCounterChange(row.make_mode_counter + 1)}
+                      disabled={row.make_mode_counter >= row.counter || isCompleted}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onToggleLock(row.id, !row.is_locked)}
-                    className="absolute right-3"
-                  >
-                    {row.is_locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                  </Button>
-                </>
-              ) : (
-                <div className="flex items-center justify-center space-x-3 flex-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMakeModeCounterChange(Math.max(0, row.make_mode_counter - 1))}
-                    disabled={row.make_mode_counter <= 0 || isCompleted}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="bg-white border rounded-md px-4 py-2 min-w-[80px] text-center font-semibold">
-                    {row.make_mode_counter} / {row.counter}
-                  </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMakeModeCounterChange(row.make_mode_counter + 1)}
-                    disabled={row.make_mode_counter >= row.counter || isCompleted}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>

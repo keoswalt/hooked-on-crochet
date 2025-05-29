@@ -11,6 +11,7 @@ interface ProjectRow {
   make_mode_counter: number;
   make_mode_status: string;
   is_locked: boolean;
+  total_stitches: number;
 }
 
 export const useProjectRows = (projectId: string) => {
@@ -84,6 +85,7 @@ export const useProjectRows = (projectId: string) => {
           instructions: '',
           counter: 1,
           type: 'row',
+          total_stitches: 0,
         })
         .select()
         .single();
@@ -115,6 +117,7 @@ export const useProjectRows = (projectId: string) => {
           instructions: '',
           counter: 1,
           type: 'note',
+          total_stitches: 0,
         })
         .select()
         .single();
@@ -146,6 +149,7 @@ export const useProjectRows = (projectId: string) => {
           instructions: '',
           counter: 1,
           type: 'divider',
+          total_stitches: 0,
         })
         .select()
         .single();
@@ -193,6 +197,24 @@ export const useProjectRows = (projectId: string) => {
 
       if (error) throw error;
       setRows(rows.map(row => row.id === id ? { ...row, instructions } : row));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateTotalStitches = async (id: string, totalStitches: number) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ total_stitches: totalStitches })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, total_stitches: totalStitches } : row));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -319,6 +341,7 @@ export const useProjectRows = (projectId: string) => {
           instructions: rowToDuplicate.instructions,
           counter: rowToDuplicate.type === 'divider' ? 1 : rowToDuplicate.counter,
           type: rowToDuplicate.type,
+          total_stitches: rowToDuplicate.total_stitches,
         })
         .select()
         .single();
@@ -435,6 +458,7 @@ export const useProjectRows = (projectId: string) => {
     addDivider,
     updateCounter,
     updateInstructions,
+    updateTotalStitches,
     updateMakeModeCounter,
     updateMakeModeStatus,
     toggleLock,

@@ -12,6 +12,7 @@ interface ProjectRow {
   make_mode_counter: number;
   make_mode_status: string;
   is_locked: boolean;
+  total_stitches: number;
 }
 
 interface RowsListProps {
@@ -20,6 +21,7 @@ interface RowsListProps {
   onDragEnd: (result: DropResult) => void;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
+  onUpdateTotalStitches: (id: string, totalStitches: number) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
@@ -33,6 +35,7 @@ export const RowsList = ({
   onDragEnd,
   onUpdateCounter,
   onUpdateInstructions,
+  onUpdateTotalStitches,
   onUpdateMakeModeCounter,
   onUpdateMakeModeStatus,
   onToggleLock,
@@ -73,6 +76,7 @@ export const RowsList = ({
                       rowNumber={getRowNumber(index)}
                       onUpdateCounter={onUpdateCounter}
                       onUpdateInstructions={onUpdateInstructions}
+                      onUpdateTotalStitches={onUpdateTotalStitches}
                       onUpdateMakeModeCounter={onUpdateMakeModeCounter}
                       onUpdateMakeModeStatus={onUpdateMakeModeStatus}
                       onToggleLock={onToggleLock}
