@@ -12,12 +12,20 @@ export const useProjectTags = (projectId: string, userId: string) => {
   const { fetchProjectTags, removeTagFromProject } = useTagOperations(userId);
 
   const loadProjectTags = async () => {
+    // Don't make API calls with invalid UUIDs
+    if (!projectId || projectId === '') {
+      setProjectTags([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const tags = await fetchProjectTags(projectId);
       setProjectTags(tags);
     } catch (error) {
       console.error('Error loading project tags:', error);
+      setProjectTags([]);
     } finally {
       setLoading(false);
     }
@@ -25,9 +33,11 @@ export const useProjectTags = (projectId: string, userId: string) => {
 
   useEffect(() => {
     loadProjectTags();
-  }, [projectId]);
+  }, [projectId, userId]);
 
   const handleRemoveTag = async (tagId: string) => {
+    if (!projectId || projectId === '') return;
+    
     const success = await removeTagFromProject(projectId, tagId);
     if (success) {
       setProjectTags(prev => prev.filter(tag => tag.id !== tagId));

@@ -63,6 +63,27 @@ export const ProjectListView = ({
     }
   }, [projects, fetchProjectTags, tagsRefreshTrigger]);
 
+  // Listen for tag update events
+  useEffect(() => {
+    const handleTagsUpdated = (event: CustomEvent) => {
+      console.log('ProjectListView received tagsUpdated event', event.detail);
+      setTagsRefreshTrigger(prev => prev + 1);
+    };
+
+    const handleProjectTagsUpdated = (event: CustomEvent) => {
+      console.log('ProjectListView received projectTagsUpdated event', event.detail);
+      setTagsRefreshTrigger(prev => prev + 1);
+    };
+
+    window.addEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+    window.addEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+      window.removeEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+    };
+  }, []);
+
   // Enhanced filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
     let filtered = projects;
@@ -96,6 +117,7 @@ export const ProjectListView = ({
   };
 
   const handleTagsUpdate = () => {
+    console.log('handleTagsUpdate called in ProjectListView');
     setTagsRefreshTrigger(prev => prev + 1);
   };
 

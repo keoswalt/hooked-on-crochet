@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ProjectBasicFields } from './ProjectBasicFields';
 import { ProjectDetailsField } from './ProjectDetailsField';
@@ -43,7 +43,11 @@ export const ProjectForm = ({
   onRefreshProjects
 }: ProjectFormProps) => {
   const { deleteImage } = useImageOperations();
-  const { projectTags, handleRemoveTag, refreshTags } = useProjectTags(project?.id || '', userId);
+  // Only call useProjectTags if we have a valid project ID
+  const { projectTags, handleRemoveTag, refreshTags } = useProjectTags(
+    project?.id || '', 
+    userId
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,15 +78,21 @@ export const ProjectForm = ({
   };
 
   const handleTagsChange = () => {
+    console.log('Tags changed in ProjectForm');
     refreshTags();
+    
     // Refresh the project list to show updated tags
     if (onRefreshProjects) {
       onRefreshProjects();
     }
-    // Trigger parent component to refresh tags as well
-    if (window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent('tagsUpdated'));
-    }
+    
+    // Dispatch events to notify other components
+    window.dispatchEvent(new CustomEvent('tagsUpdated', { 
+      detail: { projectId: project?.id } 
+    }));
+    window.dispatchEvent(new CustomEvent('projectTagsUpdated', { 
+      detail: { projectId: project?.id } 
+    }));
   };
 
   return (
@@ -97,13 +107,15 @@ export const ProjectForm = ({
         onFormDataChange={onFormDataChange}
       />
 
-      <ProjectTagsSection 
-        project={project}
-        userId={userId}
-        projectTags={projectTags}
-        onRemoveTag={handleRemoveTag}
-        onTagsChange={handleTagsChange}
-      />
+      {project && (
+        <ProjectTagsSection 
+          project={project}
+          userId={userId}
+          projectTags={projectTags}
+          onRemoveTag={handleRemoveTag}
+          onTagsChange={handleTagsChange}
+        />
+      )}
 
       <ProjectImageSection 
         formData={formData}
