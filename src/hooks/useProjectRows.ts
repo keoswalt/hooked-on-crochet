@@ -141,6 +141,24 @@ export const useProjectRows = (projectId: string) => {
     }
   };
 
+  const updateLabel = async (id: string, label: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ label })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, label } : row));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const updateTotalStitches = async (id: string, totalStitches: number) => {
     try {
       const { error } = await supabase
@@ -366,6 +384,7 @@ export const useProjectRows = (projectId: string) => {
     addDivider,
     updateCounter,
     updateInstructions,
+    updateLabel,
     updateTotalStitches,
     updateMakeModeCounter,
     updateMakeModeStatus,

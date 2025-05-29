@@ -16,6 +16,7 @@ export type Database = {
           id: string
           instructions: string
           is_locked: boolean
+          label: string | null
           make_mode_counter: number
           make_mode_status: string
           position: number
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           instructions: string
           is_locked?: boolean
+          label?: string | null
           make_mode_counter?: number
           make_mode_status?: string
           position: number
@@ -44,6 +46,7 @@ export type Database = {
           id?: string
           instructions?: string
           is_locked?: boolean
+          label?: string | null
           make_mode_counter?: number
           make_mode_status?: string
           position?: number

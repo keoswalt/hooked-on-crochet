@@ -12,6 +12,7 @@ interface RowsListProps {
   onDragEnd: (result: DropResult) => void;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
+  onUpdateLabel: (id: string, label: string) => void;
   onUpdateTotalStitches: (id: string, totalStitches: number) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
@@ -26,6 +27,7 @@ export const RowsList = ({
   onDragEnd,
   onUpdateCounter,
   onUpdateInstructions,
+  onUpdateLabel,
   onUpdateTotalStitches,
   onUpdateMakeModeCounter,
   onUpdateMakeModeStatus,
@@ -67,6 +69,7 @@ export const RowsList = ({
                       rowNumber={getRowNumber(index)}
                       onUpdateCounter={onUpdateCounter}
                       onUpdateInstructions={onUpdateInstructions}
+                      onUpdateLabel={onUpdateLabel}
                       onUpdateTotalStitches={onUpdateTotalStitches}
                       onUpdateMakeModeCounter={onUpdateMakeModeCounter}
                       onUpdateMakeModeStatus={onUpdateMakeModeStatus}

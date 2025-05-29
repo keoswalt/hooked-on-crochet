@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -37,6 +36,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
     addDivider,
     updateCounter,
     updateInstructions,
+    updateLabel,
     updateTotalStitches,
     updateMakeModeCounter,
     updateMakeModeStatus,
@@ -142,6 +142,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
           onDragEnd={onDragEnd}
           onUpdateCounter={updateCounter}
           onUpdateInstructions={updateInstructions}
+          onUpdateLabel={updateLabel}
           onUpdateTotalStitches={updateTotalStitches}
           onUpdateMakeModeCounter={updateMakeModeCounter}
           onUpdateMakeModeStatus={updateMakeModeStatus}

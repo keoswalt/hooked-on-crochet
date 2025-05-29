@@ -13,6 +13,7 @@ interface RowCardProps {
   rowNumber?: number;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
+  onUpdateLabel: (id: string, label: string) => void;
   onUpdateTotalStitches: (id: string, totalStitches: number) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
@@ -42,6 +43,7 @@ export const RowCard = ({
   rowNumber,
   onUpdateCounter, 
   onUpdateInstructions,
+  onUpdateLabel,
   onUpdateTotalStitches,
   onUpdateMakeModeCounter,
   onUpdateMakeModeStatus,
@@ -51,16 +53,23 @@ export const RowCard = ({
 }: RowCardProps) => {
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
   const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches.toString());
+  const [localLabel, setLocalLabel] = useState(row.label || '');
 
   // Update local state when row prop changes
   useEffect(() => {
     setLocalInstructions(row.instructions);
     setLocalTotalStitches(row.total_stitches.toString());
-  }, [row.instructions, row.total_stitches]);
+    setLocalLabel(row.label || '');
+  }, [row.instructions, row.total_stitches, row.label]);
 
   // Debounced function to update instructions in database
   const debouncedUpdateInstructions = useDebounce((id: string, instructions: string) => {
     onUpdateInstructions(id, instructions);
+  }, 500);
+
+  // Debounced function to update label in database
+  const debouncedUpdateLabel = useDebounce((id: string, label: string) => {
+    onUpdateLabel(id, label);
   }, 500);
 
   // Debounced function to update total stitches in database
@@ -72,6 +81,12 @@ export const RowCard = ({
     const newValue = e.target.value;
     setLocalInstructions(newValue);
     debouncedUpdateInstructions(row.id, newValue);
+  };
+
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalLabel(newValue);
+    debouncedUpdateLabel(row.id, newValue);
   };
 
   const handleTotalStitchesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,6 +156,21 @@ export const RowCard = ({
             )}
           </div>
         </CardHeader>
+        {mode === 'edit' && (
+          <CardContent className="pt-0">
+            <Input
+              value={localLabel}
+              onChange={handleLabelChange}
+              placeholder="Enter divider label (optional)"
+              className="w-full"
+            />
+          </CardContent>
+        )}
+        {mode === 'make' && localLabel && (
+          <CardContent className="pt-0">
+            <p className="text-sm text-gray-600 text-center">{localLabel}</p>
+          </CardContent>
+        )}
       </Card>
     );
   }
