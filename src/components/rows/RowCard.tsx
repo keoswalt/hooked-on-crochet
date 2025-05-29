@@ -162,10 +162,9 @@ export const RowCard = ({
       const success = await deleteImage(row.image_url);
       if (success) {
         onUpdateRowImage(row.id, null);
-        // Trigger upload after deletion
-        setTimeout(() => {
-          imageUploaderRef.current?.triggerUpload();
-        }, 100);
+        // Reset the input and trigger upload immediately
+        imageUploaderRef.current?.resetInput();
+        imageUploaderRef.current?.triggerUpload();
       }
     }
     setShowReplaceConfirm(false);
@@ -180,6 +179,8 @@ export const RowCard = ({
       const success = await deleteImage(row.image_url);
       if (success) {
         onUpdateRowImage(row.id, null);
+        // Reset the input after deletion
+        imageUploaderRef.current?.resetInput();
       }
     }
   };

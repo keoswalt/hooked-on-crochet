@@ -17,6 +17,7 @@ interface ImageUploaderProps {
 
 export interface ImageUploaderRef {
   triggerUpload: () => void;
+  resetInput: () => void;
 }
 
 const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(({ 
@@ -30,10 +31,19 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
+  const resetFileInput = () => {
+    const input = document.getElementById(`image-upload-${folder}`) as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     triggerUpload: () => {
+      resetFileInput(); // Clear input before triggering
       document.getElementById(`image-upload-${folder}`)?.click();
-    }
+    },
+    resetInput: resetFileInput
   }));
 
   const uploadImage = async (file: File) => {
@@ -70,6 +80,7 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       });
     } finally {
       setUploading(false);
+      resetFileInput(); // Always clear input after upload attempt
     }
   };
 
@@ -81,6 +92,7 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   };
 
   const handleButtonClick = () => {
+    resetFileInput(); // Clear input before triggering
     document.getElementById(`image-upload-${folder}`)?.click();
   };
 
