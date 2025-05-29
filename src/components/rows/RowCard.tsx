@@ -119,7 +119,7 @@ export const RowCard = ({
   const getCardStyling = () => {
     // Add darker background for dividers in edit mode
     if (row.type === 'divider' && mode === 'edit') {
-      return 'bg-muted/80 border-muted-foreground/40';
+      return 'bg-gray-800 border-gray-600 text-white';
     }
     
     if (mode !== 'make') return '';
@@ -149,21 +149,21 @@ export const RowCard = ({
                   value={localLabel}
                   onChange={handleLabelChange}
                   placeholder="Enter divider label (optional)"
-                  className="flex-1"
+                  className="flex-1 text-lg font-medium bg-gray-700 border-gray-600 text-white placeholder:text-gray-300"
                 />
               )}
               {mode === 'make' && localLabel && (
                 <div className="flex-1 text-center">
-                  <p className="text-sm text-gray-600">{localLabel}</p>
+                  <p className="text-lg font-medium text-gray-600">{localLabel}</p>
                 </div>
               )}
             </div>
             {mode === 'edit' && (
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" onClick={() => onDuplicate(row)}>
+                <Button variant="outline" size="sm" onClick={() => onDuplicate(row)} className="border-gray-600 text-white hover:bg-gray-700">
                   <Copy className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onDelete(row.id)}>
+                <Button variant="outline" size="sm" onClick={() => onDelete(row.id)} className="border-gray-600 text-white hover:bg-gray-700">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -172,7 +172,7 @@ export const RowCard = ({
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center justify-center px-4">
-            <svg width="100%" height="2" className="text-gray-400">
+            <svg width="100%" height="2" className="text-gray-500">
               <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
             </svg>
           </div>
