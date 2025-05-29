@@ -6,7 +6,7 @@ type Project = Database['public']['Tables']['projects']['Row'];
 interface ProjectDetailActionsProps {
   project: Project;
   onProjectDelete: () => void;
-  onEditProject: () => void;
+  onEditProject: (project: Project) => void;
   setShowDeleteConfirm: (show: boolean) => void;
 }
 
@@ -26,7 +26,7 @@ export const useProjectDetailActions = ({
   };
 
   const handleEditProject = () => {
-    onEditProject();
+    onEditProject(project);
   };
 
   return {
