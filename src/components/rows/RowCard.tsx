@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -174,11 +175,11 @@ export const RowCard: React.FC<RowCardProps> = ({
 
       {/* Replace image confirmation dialog */}
       <ConfirmationDialog
-        isOpen={showReplaceDialog}
-        onConfirm={handleReplaceConfirm}
-        onCancel={() => setShowReplaceDialog(false)}
+        open={showReplaceDialog}
+        onOpenChange={setShowReplaceDialog}
         title="Replace Image"
         description="This will delete the current image and replace it with a new one. This action cannot be undone."
+        onConfirm={handleReplaceConfirm}
         confirmText="Replace"
         cancelText="Cancel"
       />

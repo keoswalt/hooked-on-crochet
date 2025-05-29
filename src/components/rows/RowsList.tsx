@@ -53,6 +53,23 @@ export const RowsList = ({
     return rowCount;
   };
 
+  const handleEdit = (row: ProjectRow) => {
+    // This functionality needs to be implemented based on the parent component's needs
+    console.log('Edit row:', row);
+  };
+
+  const handleDelete = (row: ProjectRow) => {
+    onDelete(row.id);
+  };
+
+  const handleImageUpload = (row: ProjectRow, imageUrl: string) => {
+    onUpdateRowImage(row.id, imageUrl);
+  };
+
+  const handleImageDelete = (row: ProjectRow) => {
+    onUpdateRowImage(row.id, null);
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="rows" isDropDisabled={mode === 'make'}>
@@ -69,19 +86,12 @@ export const RowsList = ({
                   >
                     <RowCard
                       row={row}
-                      mode={mode}
-                      rowNumber={getRowNumber(index)}
-                      userId={userId}
-                      onUpdateCounter={onUpdateCounter}
-                      onUpdateInstructions={onUpdateInstructions}
-                      onUpdateLabel={onUpdateLabel}
-                      onUpdateTotalStitches={onUpdateTotalStitches}
-                      onUpdateMakeModeCounter={onUpdateMakeModeCounter}
-                      onUpdateMakeModeStatus={onUpdateMakeModeStatus}
-                      onToggleLock={onToggleLock}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
                       onDuplicate={onDuplicate}
-                      onDelete={onDelete}
-                      onUpdateRowImage={onUpdateRowImage}
+                      onImageUpload={handleImageUpload}
+                      onImageDelete={handleImageDelete}
+                      userId={userId}
                     />
                   </div>
                 )}
