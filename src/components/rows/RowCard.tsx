@@ -53,13 +53,13 @@ export const RowCard = ({
   onDelete 
 }: RowCardProps) => {
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
-  const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches === 0 ? '' : row.total_stitches.toString());
+  const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
   const [localLabel, setLocalLabel] = useState(row.label || '');
 
   // Update local state when row prop changes
   useEffect(() => {
     setLocalInstructions(row.instructions);
-    setLocalTotalStitches(row.total_stitches === 0 ? '' : row.total_stitches.toString());
+    setLocalTotalStitches(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
     setLocalLabel(row.label || '');
   }, [row.instructions, row.total_stitches, row.label]);
 
@@ -117,6 +117,11 @@ export const RowCard = ({
 
   // Determine card styling based on make mode status
   const getCardStyling = () => {
+    // Add darker background for dividers in edit mode
+    if (row.type === 'divider' && mode === 'edit') {
+      return 'bg-muted/80 border-muted-foreground/40';
+    }
+    
     if (mode !== 'make') return '';
     
     switch (row.make_mode_status) {
@@ -137,7 +142,7 @@ export const RowCard = ({
       <Card className={`mb-3 ${getCardStyling()}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 flex-1 mr-2">
+            <div className="flex items-center space-x-2 flex-1 mr-3">
               {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
               {mode === 'edit' && (
                 <Input
