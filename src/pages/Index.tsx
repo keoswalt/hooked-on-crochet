@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { ProjectsPage } from '@/components/projects/ProjectsPage';
+import { Header } from '@/components/layout/Header';
 import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
@@ -41,7 +42,14 @@ const Index = () => {
     );
   }
 
-  return <ProjectsPage user={user} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header userEmail={user.email} />
+      <main className="container mx-auto px-4 py-8">
+        <ProjectsPage user={user} />
+      </main>
+    </div>
+  );
 };
 
 export default Index;

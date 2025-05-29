@@ -20,6 +20,7 @@ interface ProjectDetailProps {
   onProjectExport: () => void;
   onProjectExportPDF: () => void;
   onEditProject: (project: Project) => void;
+  userId: string;
 }
 
 export const ProjectDetail = ({ 
@@ -28,7 +29,8 @@ export const ProjectDetail = ({
   onProjectDelete, 
   onProjectExport,
   onProjectExportPDF,
-  onEditProject
+  onEditProject,
+  userId
 }: ProjectDetailProps) => {
   const [mode, setMode] = useState<'edit' | 'make'>('edit');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -188,6 +190,7 @@ export const ProjectDetail = ({
         onDelete={handleDeleteProject}
         onExport={onProjectExport}
         onExportPDF={onProjectExportPDF}
+        userId={userId}
       />
 
       <ModeHeader

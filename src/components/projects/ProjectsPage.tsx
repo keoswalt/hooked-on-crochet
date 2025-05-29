@@ -131,6 +131,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         onProjectExport={handleProjectExport}
         onProjectExportPDF={handleProjectExportPDF}
         onEditProject={handleEditProject}
+        userId={user.id}
       />
     );
   }

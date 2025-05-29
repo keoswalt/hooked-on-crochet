@@ -5,6 +5,7 @@ import { ArrowLeft, Edit, Trash2, Download, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { QRCodeGenerator } from './QRCodeGenerator';
 import { ImageViewer } from '@/components/images/ImageViewer';
+import { useImageOperations } from '@/hooks/useImageOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -16,9 +17,22 @@ interface ProjectHeaderProps {
   onDelete: () => void;
   onExport: () => void;
   onExportPDF: () => void;
+  userId: string;
 }
 
-export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onExportPDF }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onExportPDF, userId }: ProjectHeaderProps) => {
+  const { deleteImage } = useImageOperations();
+
+  const handleDeleteFeaturedImage = async () => {
+    if (project.featured_image_url) {
+      const success = await deleteImage(project.featured_image_url);
+      if (success) {
+        // Trigger a refresh or update the project data
+        window.location.reload();
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex items-center space-x-4">
@@ -47,6 +61,7 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport, onE
                   imageUrl={project.featured_image_url}
                   alt={`${project.name} featured image`}
                   className="w-full h-64 rounded-lg"
+                  onDelete={handleDeleteFeaturedImage}
                 />
               </div>
             )}
