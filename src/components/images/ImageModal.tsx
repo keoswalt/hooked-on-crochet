@@ -67,13 +67,7 @@ export const ImageModal = ({ imageUrl, alt, open, onOpenChange }: ImageModalProp
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0" hideClose>
-        <div className="relative w-full h-full">
-          <div className="absolute top-4 left-4 z-10">
-            <Button variant="secondary" size="sm" onClick={handleClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          
+        <div className="relative w-full h-full">          
           <div className="absolute top-4 right-4 z-10 flex gap-2">
             <Button variant="secondary" size="sm" onClick={handleZoomOut}>
               <ZoomOut className="h-4 w-4" />
@@ -86,6 +80,9 @@ export const ImageModal = ({ imageUrl, alt, open, onOpenChange }: ImageModalProp
             </Button>
             <Button variant="secondary" size="sm" onClick={handleReset}>
               Reset
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleClose}>
+              <X className="h-4 w-4" />
             </Button>
           </div>
           

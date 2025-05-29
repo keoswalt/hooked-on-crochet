@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2, Download, ChevronDown } from 'lucide-react';
@@ -38,37 +37,47 @@ export const ProjectHeader = ({
 
   const handleDeleteFeaturedImage = async () => {
     if (project.featured_image_url) {
+      console.log('Starting image deletion for project:', project.id);
+      
       // First delete the image from storage
       const success = await deleteImage(project.featured_image_url);
       
       if (success) {
+        console.log('Storage deletion successful, updating database...');
+        
         // Then update the project in the database
         try {
           const { data, error } = await supabase
             .from('projects')
             .update({ featured_image_url: null })
             .eq('id', project.id)
+            .eq('user_id', userId) // Add user_id check for RLS
             .select()
             .single();
 
-          if (error) throw error;
+          if (error) {
+            console.error('Database update error:', error);
+            throw error;
+          }
+
+          console.log('Database update successful:', data);
 
           // Update the local state
           if (onProjectUpdate && data) {
             onProjectUpdate(data);
           }
 
-          toast({
-            title: "Image deleted",
-            description: "The featured image has been removed from the project.",
-          });
+          // Don't show toast here since useImageOperations already shows one
         } catch (error: any) {
+          console.error('Failed to update project in database:', error);
           toast({
-            title: "Error",
-            description: "Failed to update project after deleting image.",
+            title: "Database Error",
+            description: "Image was deleted from storage but failed to update project record.",
             variant: "destructive",
           });
         }
+      } else {
+        console.log('Storage deletion failed');
       }
     }
   };
