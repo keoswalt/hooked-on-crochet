@@ -72,6 +72,7 @@ export type Database = {
           hook_size: Database["public"]["Enums"]["hook_size"]
           id: string
           is_favorite: boolean
+          last_mode: string | null
           name: string
           updated_at: string
           user_id: string
@@ -83,6 +84,7 @@ export type Database = {
           hook_size: Database["public"]["Enums"]["hook_size"]
           id?: string
           is_favorite?: boolean
+          last_mode?: string | null
           name: string
           updated_at?: string
           user_id: string
@@ -94,6 +96,7 @@ export type Database = {
           hook_size?: Database["public"]["Enums"]["hook_size"]
           id?: string
           is_favorite?: boolean
+          last_mode?: string | null
           name?: string
           updated_at?: string
           user_id?: string
