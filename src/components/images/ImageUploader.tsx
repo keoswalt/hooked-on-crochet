@@ -18,7 +18,7 @@ export interface ImageUploaderRef {
   triggerUpload: () => void;
 }
 
-export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(({ 
+const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(({ 
   onImageUploaded, 
   userId, 
   folder, 
@@ -95,4 +95,6 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(({
   );
 });
 
-ImageUploader.displayName = 'ImageUploader';
+ImageUploaderComponent.displayName = 'ImageUploader';
+
+export const ImageUploader = ImageUploaderComponent;
