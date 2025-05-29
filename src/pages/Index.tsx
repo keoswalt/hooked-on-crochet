@@ -115,6 +115,7 @@ const Index = () => {
   const handleEditProject = (project: Project) => {
     setEditingProject(project);
     setShowForm(true);
+    setSelectedProject(null); // Clear selected project when editing
   };
 
   const handleDeleteProjectFromDetail = () => {
@@ -126,6 +127,11 @@ const Index = () => {
 
   const handleSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     await handleSaveProject(projectData, editingProject);
+    setShowForm(false);
+    setEditingProject(null);
+  };
+
+  const handleFormCancel = () => {
     setShowForm(false);
     setEditingProject(null);
   };
@@ -146,6 +152,22 @@ const Index = () => {
     );
   }
 
+  // Prioritize form over project detail
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header userEmail={user.email} />
+        <main className="container mx-auto px-4 py-8">
+          <ProjectForm
+            project={editingProject || undefined}
+            onSave={handleSave}
+            onCancel={handleFormCancel}
+          />
+        </main>
+      </div>
+    );
+  }
+
   if (selectedProject) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -158,24 +180,6 @@ const Index = () => {
             onProjectExport={() => handleExportProject(selectedProject)}
             onProjectExportPDF={() => handleExportPDF(selectedProject)}
             onEditProject={handleEditProject}
-          />
-        </main>
-      </div>
-    );
-  }
-
-  if (showForm) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header userEmail={user.email} />
-        <main className="container mx-auto px-4 py-8">
-          <ProjectForm
-            project={editingProject || undefined}
-            onSave={handleSave}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingProject(null);
-            }}
           />
         </main>
       </div>
