@@ -1,20 +1,25 @@
+
 import { useState, useEffect } from 'react';
-import { useUser } from '@supabase/auth-helpers-react';
-import { useRouter } from 'next/router';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
+import type { Database } from '@/integrations/supabase/types';
+import type { User } from '@supabase/supabase-js';
 
-export const ProjectsPage = () => {
-  const user = useUser();
-  const router = useRouter();
+type Project = Database['public']['Tables']['projects']['Row'];
+
+interface ProjectsPageProps {
+  user: User;
+}
+
+export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
-  const { projects, selectedProject, setSelectedProject, loading, fetchProjects, updateProject } = useProjectState(user!);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const { projects, selectedProject, setSelectedProject, loading, fetchProjects, updateProject } = useProjectState(user);
   const {
     loading: operationsLoading,
     handleSaveProject,
@@ -24,13 +29,7 @@ export const ProjectsPage = () => {
     handleExportProject,
     handleExportPDF,
     handleImportProject,
-  } = useProjectOperations(user!, fetchProjects);
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user, router]);
+  } = useProjectOperations(user, fetchProjects);
 
   const handleDeleteSelectedProject = async () => {
     if (selectedProject) {
@@ -39,14 +38,14 @@ export const ProjectsPage = () => {
     }
   };
 
-  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+  const handleToggleFavoriteWrapper = async (id: string, isFavorite: boolean) => {
     const project = projects.find(p => p.id === id);
     if (project) {
       await handleToggleFavorite(project);
     }
   };
 
-  const handleDuplicateProject = async (project: any) => {
+  const handleDuplicateWrapper = async (project: Project) => {
     await handleDuplicateProject(project);
   };
 
@@ -59,10 +58,6 @@ export const ProjectsPage = () => {
     }
   };
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       {!selectedProject ? (
@@ -72,8 +67,8 @@ export const ProjectsPage = () => {
           onSearchChange={setSearchTerm}
           onEditProject={setEditingProject}
           onDeleteProject={handleDeleteProject}
-          onDuplicateProject={handleDuplicateProject}
-          onToggleFavorite={handleToggleFavorite}
+          onDuplicateProject={handleDuplicateWrapper}
+          onToggleFavorite={handleToggleFavoriteWrapper}
           onCardClick={setSelectedProject}
           onCreateProject={() => setShowForm(true)}
           onImportProject={handleImportProject}
