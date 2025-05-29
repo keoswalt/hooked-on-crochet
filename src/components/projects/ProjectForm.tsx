@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -147,7 +146,7 @@ export const ProjectForm = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setShowTagManager(true)}
+                onClick={() => setShowTagManager(!showTagManager)}
                 className="flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
@@ -155,17 +154,15 @@ export const ProjectForm = ({
               </Button>
               
               {showTagManager && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-                  <div className="relative">
-                    <TagManager
-                      userId={userId}
-                      projectId={project.id}
-                      projectTags={projectTags}
-                      onTagsChange={handleTagsChange}
-                      isOpen={showTagManager}
-                      onOpenChange={setShowTagManager}
-                    />
-                  </div>
+                <div className="absolute top-full left-0 mt-1 z-50">
+                  <TagManager
+                    userId={userId}
+                    projectId={project.id}
+                    projectTags={projectTags}
+                    onTagsChange={handleTagsChange}
+                    isOpen={showTagManager}
+                    onOpenChange={setShowTagManager}
+                  />
                 </div>
               )}
             </div>

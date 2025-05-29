@@ -209,14 +209,52 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
 
       if (error) throw error;
 
+      // Convert images to base64 for inclusion in the export
+      const convertImageToBase64 = async (imageUrl: string): Promise<string | null> => {
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error('Error converting image to base64:', error);
+          return null;
+        }
+      };
+
+      // Process featured image
+      let featuredImageBase64 = null;
+      if (project.featured_image_url) {
+        featuredImageBase64 = await convertImageToBase64(project.featured_image_url);
+      }
+
+      // Process row images
+      const processedRows = await Promise.all(
+        (rows || []).map(async (row) => {
+          let imageBase64 = null;
+          if (row.image_url) {
+            imageBase64 = await convertImageToBase64(row.image_url);
+          }
+          return {
+            ...row,
+            image_base64: imageBase64,
+          };
+        })
+      );
+
       const exportData = {
         project: {
           name: project.name,
           hook_size: project.hook_size,
           yarn_weight: project.yarn_weight,
           details: project.details,
+          featured_image_base64: featuredImageBase64,
         },
-        rows: rows || [],
+        rows: processedRows,
         exportedAt: new Date().toISOString(),
       };
 
@@ -235,7 +273,7 @@ export const useProjectOperations = (user: User, refreshProjects: () => Promise<
 
       toast({
         title: "Project exported",
-        description: "Your project has been exported successfully.",
+        description: "Your project has been exported successfully with all images included.",
       });
     } catch (error: any) {
       toast({

@@ -90,12 +90,14 @@ export const ProjectCard = ({
         </CardHeader>
         
         {project.featured_image_url && (
-          <CardContent className="flex-1 overflow-hidden p-4 pt-0">
-            <img
-              src={project.featured_image_url}
-              alt={`${project.name} featured image`}
-              className="w-full h-32 object-cover rounded-md"
-            />
+          <CardContent className="flex-1 overflow-hidden p-4 pt-0 flex items-center justify-center">
+            <div className="w-full h-32 overflow-hidden rounded-md bg-gray-100 flex items-center justify-center">
+              <img
+                src={project.featured_image_url}
+                alt={`${project.name} featured image`}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
           </CardContent>
         )}
 
