@@ -26,7 +26,7 @@ export const useProjectDetailActions = ({
   };
 
   const handleEditProject = () => {
-    onEditProject(project);
+    onEditProject();
   };
 
   return {
