@@ -12,6 +12,7 @@ interface ImageUploaderProps {
   folder: string;
   accept?: string;
   className?: string;
+  showButton?: boolean;
 }
 
 export interface ImageUploaderRef {
@@ -23,7 +24,8 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   userId, 
   folder, 
   accept = "image/*",
-  className = ""
+  className = "",
+  showButton = true
 }, ref) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -78,6 +80,10 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     }
   };
 
+  const handleButtonClick = () => {
+    document.getElementById(`image-upload-${folder}`)?.click();
+  };
+
   return (
     <div className={className}>
       <Input
@@ -88,7 +94,19 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         className="hidden"
         id={`image-upload-${folder}`}
       />
-      {uploading && (
+      {showButton && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleButtonClick}
+          disabled={uploading}
+          className="w-full"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          {uploading ? 'Uploading...' : 'Upload Image'}
+        </Button>
+      )}
+      {uploading && !showButton && (
         <div className="text-sm text-gray-500">Uploading...</div>
       )}
     </div>
