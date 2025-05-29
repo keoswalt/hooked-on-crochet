@@ -72,6 +72,14 @@ export const useProjectTags = (projectId: string, userId: string) => {
     const success = await removeTagFromProject(projectId, tagId);
     if (success) {
       setProjectTags(prev => prev.filter(tag => tag.id !== tagId));
+      
+      // Dispatch events to notify other components about tag removal
+      window.dispatchEvent(new CustomEvent('tagsUpdated', { 
+        detail: { projectId } 
+      }));
+      window.dispatchEvent(new CustomEvent('projectTagsUpdated', { 
+        detail: { projectId } 
+      }));
     }
   };
 
