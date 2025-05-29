@@ -1,13 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { ImageUploader } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
+import { TagDisplay } from '@/components/tags/TagDisplay';
+import { TagManager } from '@/components/tags/TagManager';
 import { useImageOperations } from '@/hooks/useImageOperations';
+import { useProjectTags } from '@/hooks/useProjectTags';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -39,7 +43,9 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
     featured_image_url: null,
   });
 
+  const [showTagManager, setShowTagManager] = useState(false);
   const { deleteImage } = useImageOperations();
+  const { projectTags, handleRemoveTag, refreshTags } = useProjectTags(project?.id || '', userId);
 
   useEffect(() => {
     if (project) {
@@ -82,14 +88,9 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full border-none shadow-none">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>{project ? 'Edit Project' : 'New Project'}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        <CardTitle>{project ? 'Edit Project' : 'New Project'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,6 +142,43 @@ export const ProjectForm = ({ project, onSave, onCancel, userId }: ProjectFormPr
               placeholder="Add project details, notes, or pattern information..."
             />
           </div>
+
+          {project && (
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <TagDisplay 
+                  tags={projectTags} 
+                  onRemoveTag={handleRemoveTag}
+                />
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTagManager(true)}
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add Tag
+                  </Button>
+                  
+                  {showTagManager && (
+                    <div className="absolute top-full left-0 mt-2 z-50">
+                      <TagManager
+                        userId={userId}
+                        projectId={project.id}
+                        projectTags={projectTags}
+                        onTagsChange={refreshTags}
+                        isOpen={showTagManager}
+                        onOpenChange={setShowTagManager}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Featured Image</Label>

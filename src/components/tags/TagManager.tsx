@@ -48,6 +48,24 @@ export const TagManager = ({
     }
   }, [isOpen]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isOpen && !target.closest('[data-tag-manager]')) {
+        onOpenChange(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onOpenChange]);
+
   const loadUserTags = async () => {
     const tags = await fetchUserTags();
     // Sort tags alphabetically by name
@@ -123,7 +141,10 @@ export const TagManager = ({
   if (!isOpen) return null;
 
   return (
-    <div className="border rounded-lg p-3 bg-white shadow-lg w-64">
+    <div 
+      data-tag-manager
+      className="border rounded-lg p-3 bg-white shadow-lg w-56 z-50"
+    >
       <div className="space-y-3">
         <Input
           placeholder="Search tags or create new..."

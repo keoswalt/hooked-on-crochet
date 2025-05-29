@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -94,21 +95,19 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         />
       )}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-            <ProjectForm
-              project={editingProject}
-              onSave={onSave}
-              onCancel={() => {
-                setShowForm(false);
-                setEditingProject(null);
-              }}
-              userId={user.id}
-            />
-          </div>
-        </div>
-      )}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="max-w-2xl">
+          <ProjectForm
+            project={editingProject}
+            onSave={onSave}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingProject(null);
+            }}
+            userId={user.id}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
