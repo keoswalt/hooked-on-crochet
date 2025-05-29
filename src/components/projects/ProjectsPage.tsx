@@ -96,7 +96,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden p-0">
           <ProjectForm
             project={editingProject}
             onSave={onSave}

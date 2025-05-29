@@ -48,11 +48,6 @@ export const ProjectCard = ({
     setShowDeleteDialog(true);
   };
 
-  const handleConfirmDelete = () => {
-    onDelete(project.id);
-    setShowDeleteDialog(false);
-  };
-
   const handleCardClick = () => {
     onCardClick();
   };
@@ -65,7 +60,7 @@ export const ProjectCard = ({
     <>
       <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
               <Star 
                 className={`h-4 w-4 ${project.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`} 
@@ -75,7 +70,7 @@ export const ProjectCard = ({
           </div>
 
           {projectTags.length > 0 && (
-            <div className="mb-3">
+            <div className="mb-4">
               <TagDisplay 
                 tags={projectTags} 
                 onRemoveTag={handleRemoveTagFromCard}
