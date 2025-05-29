@@ -13,7 +13,7 @@ type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectCardProps {
   project: Project;
-  onEdit: (e: React.MouseEvent) => void;
+  onEdit: (project: Project) => void;
   onDelete: (id: string) => void;
   onDuplicate: (e: React.MouseEvent) => void;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
@@ -38,6 +38,11 @@ export const ProjectCard = ({
     onToggleFavorite(project.id, !project.is_favorite);
   };
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(project);
+  };
+
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteDialog(true);
@@ -60,7 +65,7 @@ export const ProjectCard = ({
     <>
       <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
               <Star 
                 className={`h-4 w-4 ${project.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`} 
@@ -70,7 +75,7 @@ export const ProjectCard = ({
           </div>
 
           {projectTags.length > 0 && (
-            <div className="mb-2">
+            <div className="mb-3">
               <TagDisplay 
                 tags={projectTags} 
                 onRemoveTag={handleRemoveTagFromCard}
@@ -79,7 +84,7 @@ export const ProjectCard = ({
             </div>
           )}
 
-          <CardDescription className="text-xs w-full">
+          <CardDescription className="text-xs w-full mb-1">
             Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
           </CardDescription>
           
@@ -96,7 +101,7 @@ export const ProjectCard = ({
 
         <div className="bg-gray-800 p-3 rounded-b-lg mt-auto">
           <div className="flex justify-end space-x-1">
-            <Button variant="outline" size="sm" onClick={onEdit} className="bg-white hover:bg-gray-100">
+            <Button variant="outline" size="sm" onClick={handleEditClick} className="bg-white hover:bg-gray-100">
               <Edit className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={onDuplicate} className="bg-white hover:bg-gray-100">

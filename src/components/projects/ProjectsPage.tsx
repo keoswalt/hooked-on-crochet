@@ -65,7 +65,10 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
           projects={projects}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          onEditProject={setEditingProject}
+          onEditProject={(project) => {
+            setEditingProject(project);
+            setShowForm(true);
+          }}
           onDeleteProject={handleDeleteProject}
           onDuplicateProject={handleDuplicateWrapper}
           onToggleFavorite={handleToggleFavoriteWrapper}
@@ -93,7 +96,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
 
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <ProjectForm
               project={editingProject}
               onSave={onSave}

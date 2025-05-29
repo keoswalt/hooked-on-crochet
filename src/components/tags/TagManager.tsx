@@ -50,7 +50,9 @@ export const TagManager = ({
 
   const loadUserTags = async () => {
     const tags = await fetchUserTags();
-    setUserTags(tags);
+    // Sort tags alphabetically by name
+    const sortedTags = tags.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    setUserTags(sortedTags);
   };
 
   const filteredTags = userTags.filter(tag =>
@@ -121,45 +123,46 @@ export const TagManager = ({
   if (!isOpen) return null;
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-lg">
+    <div className="border rounded-lg p-3 bg-white shadow-lg w-64">
       <div className="space-y-3">
         <Input
           placeholder="Search tags or create new..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
+          className="w-full text-sm"
         />
 
         {searchTerm && availableTags.length === 0 && !userTags.some(t => t.name.toLowerCase() === searchTerm.toLowerCase()) && (
           <Button
             onClick={handleCreateTag}
-            className="w-full justify-start"
+            className="w-full justify-start text-sm"
             variant="outline"
+            size="sm"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-3 w-3 mr-2" />
             Create "{searchTerm}"
           </Button>
         )}
 
         <div className="space-y-1 max-h-48 overflow-y-auto">
           {availableTags.map((tag) => (
-            <div key={tag.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+            <div key={tag.id} className="flex items-center gap-1 p-1 hover:bg-gray-50 rounded">
               {editingTag === tag.id ? (
                 <>
                   <Input
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 text-sm h-8"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveEdit();
                       if (e.key === 'Escape') handleCancelEdit();
                     }}
                   />
-                  <Button size="sm" onClick={handleSaveEdit}>
-                    <Check className="h-4 w-4" />
+                  <Button size="sm" onClick={handleSaveEdit} className="h-8 w-8 p-0">
+                    <Check className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                    <X className="h-4 w-4" />
+                  <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0">
+                    <X className="h-3 w-3" />
                   </Button>
                 </>
               ) : (
@@ -167,7 +170,7 @@ export const TagManager = ({
                   <Button
                     onClick={() => handleAddTag(tag.id)}
                     variant="ghost"
-                    className="flex-1 justify-start"
+                    className="flex-1 justify-start text-sm h-8 px-2"
                   >
                     {tag.name}
                   </Button>
@@ -175,15 +178,17 @@ export const TagManager = ({
                     size="sm"
                     variant="ghost"
                     onClick={() => handleStartEdit(tag)}
+                    className="h-8 w-8 p-0"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-3 w-3" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDeleteTag(tag)}
+                    className="h-8 w-8 p-0"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
               )}
@@ -194,7 +199,8 @@ export const TagManager = ({
         <Button
           onClick={() => onOpenChange(false)}
           variant="outline"
-          className="w-full"
+          className="w-full text-sm"
+          size="sm"
         >
           Done
         </Button>
