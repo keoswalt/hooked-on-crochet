@@ -7,6 +7,7 @@ import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ProjectDetail } from '@/components/projects/ProjectDetail';
 import { ProjectSearch } from '@/components/projects/ProjectSearch';
 import { ProjectGrid } from '@/components/projects/ProjectGrid';
+import { ProjectImporter } from '@/components/projects/ProjectImporter';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -84,10 +85,13 @@ const Index = () => {
   };
 
   const {
+    loading: operationsLoading,
     handleSaveProject,
     handleDeleteProject,
     handleDuplicateProject,
     handleToggleFavorite,
+    handleExportProject,
+    handleImportProject,
   } = useProjectOperations(user, fetchProjects);
 
   // Filter and sort projects based on search term and favorites
@@ -151,6 +155,7 @@ const Index = () => {
             project={selectedProject} 
             onBack={() => setSelectedProject(null)}
             onProjectDelete={handleDeleteProjectFromDetail}
+            onProjectExport={() => handleExportProject(selectedProject)}
           />
         </main>
       </div>
@@ -187,10 +192,16 @@ const Index = () => {
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
               />
-              <Button onClick={() => setShowForm(true)} className="whitespace-nowrap">
-                <Plus className="h-4 w-4 mr-2" />
-                New Project
-              </Button>
+              <div className="flex gap-2">
+                <ProjectImporter 
+                  onImport={handleImportProject}
+                  loading={operationsLoading}
+                />
+                <Button onClick={() => setShowForm(true)} className="whitespace-nowrap">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Project
+                </Button>
+              </div>
             </div>
           </div>
         </div>

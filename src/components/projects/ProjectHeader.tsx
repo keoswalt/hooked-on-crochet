@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { QRCodeGenerator } from './QRCodeGenerator';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -12,9 +13,10 @@ interface ProjectHeaderProps {
   onBack: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onExport: () => void;
 }
 
-export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ project, onBack, onEdit, onDelete, onExport }: ProjectHeaderProps) => {
   return (
     <>
       <div className="flex items-center space-x-4">
@@ -40,6 +42,10 @@ export const ProjectHeader = ({ project, onBack, onEdit, onDelete }: ProjectHead
               <Button variant="outline" onClick={onEdit} className="flex-1 sm:flex-none">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Project
+              </Button>
+              <Button variant="outline" onClick={onExport} className="flex-1 sm:flex-none">
+                <Download className="h-4 w-4 mr-2" />
+                Export
               </Button>
               <QRCodeGenerator project={project} />
               <Button variant="outline" onClick={onDelete}>

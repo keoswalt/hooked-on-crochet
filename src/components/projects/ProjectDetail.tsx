@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -18,9 +17,10 @@ interface ProjectDetailProps {
   onBack: () => void;
   onProjectUpdate?: (updatedProject: Project) => void;
   onProjectDelete?: () => void;
+  onProjectExport?: () => void;
 }
 
-export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelete }: ProjectDetailProps) => {
+export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelete, onProjectExport }: ProjectDetailProps) => {
   // Get the last saved mode for this project, defaulting to 'edit'
   const getInitialMode = (): 'edit' | 'make' => {
     const savedMode = localStorage.getItem(`project-mode-${project.id}`);
@@ -37,6 +37,12 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
   const handleModeChange = (newMode: 'edit' | 'make') => {
     setMode(newMode);
     localStorage.setItem(`project-mode-${project.id}`, newMode);
+  };
+
+  const handleExportProject = () => {
+    if (onProjectExport) {
+      onProjectExport();
+    }
   };
 
   const {
@@ -133,6 +139,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
           onBack={onBack} 
           onEdit={handleEditProject}
           onDelete={handleDeleteProject}
+          onExport={handleExportProject}
         />
 
         {/* Sentinel element to detect when header should become sticky */}
