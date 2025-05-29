@@ -1,13 +1,17 @@
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { ProjectInfo } from './ProjectInfo';
 import { ProjectActions } from './ProjectActions';
 import { ImageViewer } from '@/components/images/ImageViewer';
+import { TagDisplay } from '@/components/tags/TagDisplay';
+import { TagManager } from '@/components/tags/TagManager';
 import { useImageOperations } from '@/hooks/useImageOperations';
+import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -33,8 +37,10 @@ export const ProjectHeader = ({
   onProjectUpdate,
   userId 
 }: ProjectHeaderProps) => {
+  const [showTagManager, setShowTagManager] = useState(false);
   const { deleteImage } = useImageOperations();
   const { toast } = useToast();
+  const { projectTags, handleRemoveTag, refreshTags } = useProjectTags(project.id, userId);
 
   const handleDeleteFeaturedImage = async () => {
     if (project.featured_image_url) {
@@ -93,7 +99,41 @@ export const ProjectHeader = ({
       <Card>
         <CardHeader>
           <div className="flex flex-col space-y-4">
-            <ProjectInfo project={project} />
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <ProjectInfo project={project} />
+                
+                {/* Tags Section */}
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <TagDisplay 
+                      tags={projectTags} 
+                      onRemoveTag={handleRemoveTag}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTagManager(true)}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add Tag
+                    </Button>
+                  </div>
+                  
+                  {showTagManager && (
+                    <TagManager
+                      userId={userId}
+                      projectId={project.id}
+                      projectTags={projectTags}
+                      onTagsChange={refreshTags}
+                      isOpen={showTagManager}
+                      onOpenChange={setShowTagManager}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
             
             {project.featured_image_url && (
               <div className="w-full">

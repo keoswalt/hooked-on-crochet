@@ -16,6 +16,7 @@ interface ProjectGridProps {
   onCardClick: (project: Project) => void;
   onCreateProject: () => void;
   onClearSearch: () => void;
+  userId: string;
 }
 
 export const ProjectGrid = ({
@@ -28,6 +29,7 @@ export const ProjectGrid = ({
   onCardClick,
   onCreateProject,
   onClearSearch,
+  userId,
 }: ProjectGridProps) => {
   if (projects.length === 0 && !searchTerm) {
     return (
@@ -58,6 +60,7 @@ export const ProjectGrid = ({
         <ProjectCard
           key={project.id}
           project={project}
+          userId={userId}
           onEdit={(e) => {
             e.stopPropagation();
             onEditProject(project);

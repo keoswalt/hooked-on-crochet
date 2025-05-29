@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
 import { formatLastModified } from '@/utils/dateUtils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { TagDisplay } from '@/components/tags/TagDisplay';
+import { useProjectTags } from '@/hooks/useProjectTags';
 import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -16,10 +18,20 @@ interface ProjectCardProps {
   onDuplicate: (e: React.MouseEvent) => void;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onCardClick: () => void;
+  userId: string;
 }
 
-export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite, onCardClick }: ProjectCardProps) => {
+export const ProjectCard = ({ 
+  project, 
+  onEdit, 
+  onDelete, 
+  onDuplicate, 
+  onToggleFavorite, 
+  onCardClick,
+  userId 
+}: ProjectCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { projectTags, handleRemoveTag } = useProjectTags(project.id, userId);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,6 +52,10 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
     onCardClick();
   };
 
+  const handleRemoveTagFromCard = (tagId: string) => {
+    handleRemoveTag(tagId);
+  };
+
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
@@ -52,6 +68,16 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
             </button>
             <CardTitle className="text-lg truncate flex-1">{project.name}</CardTitle>
           </div>
+
+          {projectTags.length > 0 && (
+            <div className="mb-2">
+              <TagDisplay 
+                tags={projectTags} 
+                onRemoveTag={handleRemoveTagFromCard}
+                size="sm"
+              />
+            </div>
+          )}
 
           <CardDescription className="text-xs w-full">
             Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}

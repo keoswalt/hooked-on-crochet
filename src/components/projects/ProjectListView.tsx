@@ -21,6 +21,7 @@ interface ProjectListViewProps {
   onCreateProject: () => void;
   onImportProject: (file: File) => void;
   operationsLoading: boolean;
+  userId: string;
 }
 
 export const ProjectListView = ({
@@ -35,6 +36,7 @@ export const ProjectListView = ({
   onCreateProject,
   onImportProject,
   operationsLoading,
+  userId,
 }: ProjectListViewProps) => {
   // Filter and sort projects based on search term and favorites
   const filteredProjects = useMemo(() => {
@@ -90,6 +92,7 @@ export const ProjectListView = ({
         onCardClick={onCardClick}
         onCreateProject={onCreateProject}
         onClearSearch={handleClearSearch}
+        userId={userId}
       />
     </div>
   );

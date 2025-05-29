@@ -1,154 +1,116 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { useRouter } from 'next/router';
+import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
 import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
-import { useProjectOperations } from '@/hooks/useProjectOperations';
 import { useProjectState } from '@/hooks/useProjectState';
-import { useProjectNavigation } from '@/hooks/useProjectNavigation';
-import type { Database } from '@/integrations/supabase/types';
-import type { User } from '@supabase/supabase-js';
+import { useProjectOperations } from '@/hooks/useProjectOperations';
 
-type Project = Database['public']['Tables']['projects']['Row'];
-
-interface ProjectsPageProps {
-  user: User;
-}
-
-export const ProjectsPage = ({ user }: ProjectsPageProps) => {
+export const ProjectsPage = () => {
+  const user = useUser();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-
-  const {
-    projects,
-    selectedProject,
-    setSelectedProject,
-    loading,
-    fetchProjects,
-    updateProject,
-  } = useProjectState(user);
-
-  const {
-    currentView,
-    editingProject,
-    navigateToList,
-    navigateToDetail,
-    navigateToForm,
-    handleFormCancel,
-    handleFormSave,
-  } = useProjectNavigation();
-
+  const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const { projects, selectedProject, setSelectedProject, loading, fetchProjects, updateProject } = useProjectState(user!);
   const {
     loading: operationsLoading,
     handleSaveProject,
     handleDeleteProject,
     handleDuplicateProject,
-    handleToggleFavorite: toggleFavorite,
+    handleToggleFavorite,
     handleExportProject,
     handleExportPDF,
     handleImportProject,
-  } = useProjectOperations(user, fetchProjects);
+  } = useProjectOperations(user!, fetchProjects);
 
-  const handleCreateProject = () => {
-    navigateToForm();
-  };
-
-  const handleEditProject = (project: Project) => {
-    navigateToForm(project);
-  };
-
-  const handleCardClick = (project: Project) => {
-    setSelectedProject(project);
-    navigateToDetail(project);
-  };
-
-  const handleBackToList = () => {
-    navigateToList();
-    setSelectedProject(null);
-  };
-
-  const onFormCancel = () => {
-    handleFormCancel(selectedProject);
-  };
-
-  const onFormSave = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    const savedProject = await handleSaveProject(projectData, editingProject);
-    const updatedProject = handleFormSave(selectedProject, savedProject);
-    
-    if (updatedProject && savedProject) {
-      setSelectedProject(savedProject);
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
     }
-  };
+  }, [user, router]);
 
-  const handleProjectDelete = async () => {
+  const handleDeleteSelectedProject = async () => {
     if (selectedProject) {
       await handleDeleteProject(selectedProject.id);
-      navigateToList();
       setSelectedProject(null);
     }
   };
 
-  const handleProjectExport = async () => {
-    if (selectedProject) {
-      await handleExportProject(selectedProject);
-    }
-  };
-
-  const handleProjectExportPDF = async () => {
-    if (selectedProject) {
-      await handleExportPDF(selectedProject);
-    }
-  };
-
-  const handleToggleFavorite = async (projectId: string, isFavorite: boolean) => {
-    const project = projects.find(p => p.id === projectId);
+  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+    const project = projects.find(p => p.id === id);
     if (project) {
-      await toggleFavorite(project);
+      await handleToggleFavorite(project);
     }
   };
 
-  if (loading) {
-    return <div className="text-center">Loading...</div>;
-  }
+  const handleDuplicateProject = async (project: any) => {
+    await handleDuplicateProject(project);
+  };
 
-  if (currentView === 'form') {
-    return (
-      <ProjectForm
-        project={editingProject}
-        onSave={onFormSave}
-        onCancel={onFormCancel}
-        userId={user.id}
-      />
-    );
-  }
+  const onSave = async (projectData: any) => {
+    const savedProject = await handleSaveProject(projectData, editingProject);
+    if (savedProject) {
+      updateProject(savedProject);
+      setShowForm(false);
+      setEditingProject(null);
+    }
+  };
 
-  if (currentView === 'detail' && selectedProject) {
-    return (
-      <ProjectDetail
-        project={selectedProject}
-        onBack={handleBackToList}
-        onProjectDelete={handleProjectDelete}
-        onProjectExport={handleProjectExport}
-        onProjectExportPDF={handleProjectExportPDF}
-        onEditProject={handleEditProject}
-        onProjectUpdate={updateProject}
-        userId={user.id}
-      />
-    );
+  if (!user) {
+    return null;
   }
 
   return (
-    <ProjectListView
-      projects={projects}
-      searchTerm={searchTerm}
-      onSearchChange={setSearchTerm}
-      onEditProject={handleEditProject}
-      onDeleteProject={handleDeleteProject}
-      onDuplicateProject={handleDuplicateProject}
-      onToggleFavorite={handleToggleFavorite}
-      onCardClick={handleCardClick}
-      onCreateProject={handleCreateProject}
-      onImportProject={handleImportProject}
-      operationsLoading={operationsLoading}
-    />
+    <div className="container mx-auto px-4 py-8">
+      {!selectedProject ? (
+        <ProjectListView
+          projects={projects}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onEditProject={setEditingProject}
+          onDeleteProject={handleDeleteProject}
+          onDuplicateProject={handleDuplicateProject}
+          onToggleFavorite={handleToggleFavorite}
+          onCardClick={setSelectedProject}
+          onCreateProject={() => setShowForm(true)}
+          onImportProject={handleImportProject}
+          operationsLoading={operationsLoading}
+          userId={user.id}
+        />
+      ) : (
+        <ProjectDetail
+          project={selectedProject}
+          onBack={() => setSelectedProject(null)}
+          onProjectDelete={handleDeleteSelectedProject}
+          onProjectExport={() => handleExportProject(selectedProject)}
+          onProjectExportPDF={() => handleExportPDF(selectedProject)}
+          onEditProject={(project) => {
+            setEditingProject(project);
+            setShowForm(true);
+          }}
+          onProjectUpdate={updateProject}
+          userId={user.id}
+        />
+      )}
+
+      {showForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <ProjectForm
+              project={editingProject}
+              onSave={onSave}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingProject(null);
+              }}
+              userId={user.id}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
