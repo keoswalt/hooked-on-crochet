@@ -184,6 +184,10 @@ export const ProjectDetail = ({
     setShowDeleteConfirm(false);
   };
 
+  const handleEditProject = () => {
+    onEditProject(project);
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -193,7 +197,7 @@ export const ProjectDetail = ({
       <ProjectHeader 
         project={project} 
         onBack={onBack}
-        onEdit={() => onEditProject(project)}
+        onEdit={handleEditProject}
         onDelete={handleDeleteProject}
         onExport={onProjectExport}
         onExportPDF={onProjectExportPDF}
