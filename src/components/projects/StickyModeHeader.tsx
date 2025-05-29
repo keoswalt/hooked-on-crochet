@@ -42,28 +42,29 @@ export const StickyModeHeader = ({
     </div>
   );
 
-  return (
-    <>
-      {!isSticky && (
-        <Card className="border border-gray-200 rounded-lg shadow-sm">
-          <CardContent className="py-4">
-            {headerContent}
-          </CardContent>
-        </Card>
-      )}
-
-      {isSticky && (
-        <>
-          {/* Spacer to maintain document flow when header becomes sticky */}
-          <div className="h-[88px]" />
-          
-          <div className="fixed top-0 left-0 right-0 w-full bg-white border-b border-gray-200 z-50 shadow-sm">
-            <div className="max-w-6xl mx-auto px-4 py-4">
+  if (isSticky) {
+    return (
+      <>
+        {/* Placeholder to maintain layout when header becomes sticky */}
+        <div className="h-[88px]" />
+        
+        {/* Sticky header with same styling as the original Card */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Card className="border border-gray-200 rounded-none shadow-sm">
+            <CardContent className="py-4">
               {headerContent}
-            </div>
-          </div>
-        </>
-      )}
-    </>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <Card className="border border-gray-200 rounded-lg shadow-sm">
+      <CardContent className="py-4">
+        {headerContent}
+      </CardContent>
+    </Card>
   );
 };
