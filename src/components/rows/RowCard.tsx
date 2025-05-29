@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,7 @@ type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 interface RowCardProps {
   row: ProjectRow;
   mode: 'edit' | 'make';
+  rowNumber?: number;
   userId: string;
   onUpdateCounter: (id: string, counter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
@@ -41,6 +41,7 @@ interface RowCardProps {
 export const RowCard = ({
   row,
   mode,
+  rowNumber,
   userId,
   onUpdateCounter,
   onUpdateInstructions,
@@ -58,11 +59,11 @@ export const RowCard = ({
   const [editLabel, setEditLabel] = useState(row.label || '');
   const [editTotalStitches, setEditTotalStitches] = useState(row.total_stitches);
   const [showImageUploader, setShowImageUploader] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
     }
   }, [isEditing]);
 
@@ -315,7 +316,7 @@ export const RowCard = ({
             <div>
               <label className="text-sm font-medium">Instructions</label>
               <textarea
-                ref={inputRef}
+                ref={textareaRef}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 onKeyDown={handleKeyPress}

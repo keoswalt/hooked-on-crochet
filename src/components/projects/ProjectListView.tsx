@@ -61,7 +61,7 @@ export const ProjectListView = ({
         </div>
       </div>
 
-      <ProjectSearch value={searchTerm} onChange={onSearchChange} />
+      <ProjectSearch searchTerm={searchTerm} onSearchChange={onSearchChange} />
 
       <ProjectGrid
         projects={filteredProjects}
@@ -76,8 +76,10 @@ export const ProjectListView = ({
 
       {showImporter && (
         <ProjectImporter
-          onImport={onImportProject}
-          onClose={() => setShowImporter(false)}
+          onImport={(file) => {
+            onImportProject(file);
+            setShowImporter(false);
+          }}
         />
       )}
     </div>
