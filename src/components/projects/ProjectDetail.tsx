@@ -38,6 +38,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
     addDivider,
     updateCounter,
     updateInstructions,
+    updateTotalStitches,
     updateMakeModeCounter,
     updateMakeModeStatus,
     toggleLock,
@@ -160,6 +161,7 @@ export const ProjectDetail = ({ project, onBack, onProjectUpdate, onProjectDelet
           onDragEnd={onDragEnd}
           onUpdateCounter={updateCounter}
           onUpdateInstructions={updateInstructions}
+          onUpdateTotalStitches={updateTotalStitches}
           onUpdateMakeModeCounter={updateMakeModeCounter}
           onUpdateMakeModeStatus={updateMakeModeStatus}
           onToggleLock={toggleLock}
