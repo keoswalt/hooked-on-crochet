@@ -10,7 +10,6 @@ import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -38,34 +37,7 @@ export const ProjectHeader = ({
 }: ProjectHeaderProps) => {
   const { deleteImage } = useImageOperations();
   const { toast } = useToast();
-  const { projectTags, handleRemoveTag, refreshTags } = useProjectTags(project.id, userId);
-
-  // Listen for tag update events
-  useEffect(() => {
-    const handleTagsUpdated = (event: CustomEvent) => {
-      console.log('ProjectHeader received tagsUpdated event', event.detail);
-      // Only refresh if this project's tags were updated
-      if (!event.detail?.projectId || event.detail.projectId === project.id) {
-        refreshTags();
-      }
-    };
-
-    const handleProjectTagsUpdated = (event: CustomEvent) => {
-      console.log('ProjectHeader received projectTagsUpdated event', event.detail);
-      // Only refresh if this project's tags were updated
-      if (!event.detail?.projectId || event.detail.projectId === project.id) {
-        refreshTags();
-      }
-    };
-
-    window.addEventListener('tagsUpdated', handleTagsUpdated as EventListener);
-    window.addEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
-
-    return () => {
-      window.removeEventListener('tagsUpdated', handleTagsUpdated as EventListener);
-      window.removeEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
-    };
-  }, [project.id, refreshTags]);
+  const { projectTags, handleRemoveTag } = useProjectTags(project.id, userId);
 
   const handleDeleteFeaturedImage = async () => {
     if (project.featured_image_url) {

@@ -35,6 +35,37 @@ export const useProjectTags = (projectId: string, userId: string) => {
     loadProjectTags();
   }, [projectId, userId]);
 
+  // Listen for tag update events automatically
+  useEffect(() => {
+    const handleTagsUpdated = (event: CustomEvent) => {
+      console.log('useProjectTags received tagsUpdated event', event.detail);
+      // Refresh if no projectId specified or if it matches our project
+      if (!event.detail?.projectId || event.detail.projectId === projectId) {
+        if (projectId && projectId !== '') {
+          loadProjectTags();
+        }
+      }
+    };
+
+    const handleProjectTagsUpdated = (event: CustomEvent) => {
+      console.log('useProjectTags received projectTagsUpdated event', event.detail);
+      // Refresh if no projectId specified or if it matches our project
+      if (!event.detail?.projectId || event.detail.projectId === projectId) {
+        if (projectId && projectId !== '') {
+          loadProjectTags();
+        }
+      }
+    };
+
+    window.addEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+    window.addEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+      window.removeEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+    };
+  }, [projectId]);
+
   const handleRemoveTag = async (tagId: string) => {
     if (!projectId || projectId === '') return;
     
