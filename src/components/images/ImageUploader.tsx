@@ -68,6 +68,12 @@ export const ImageUploader = ({
     }
   };
 
+  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    document.getElementById(`image-upload-${folder}`)?.click();
+  };
+
   return (
     <div className={className}>
       <Input
@@ -79,10 +85,11 @@ export const ImageUploader = ({
         id={`image-upload-${folder}`}
       />
       <Button
+        type="button"
         variant="outline"
         size="sm"
         disabled={uploading}
-        onClick={() => document.getElementById(`image-upload-${folder}`)?.click()}
+        onClick={handleButtonClick}
       >
         {uploading ? (
           "Uploading..."
