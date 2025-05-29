@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { QRCodeGenerator } from './QRCodeGenerator';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { useImageOperations } from '@/hooks/useImageOperations';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -32,14 +34,41 @@ export const ProjectHeader = ({
   userId 
 }: ProjectHeaderProps) => {
   const { deleteImage } = useImageOperations();
+  const { toast } = useToast();
 
   const handleDeleteFeaturedImage = async () => {
     if (project.featured_image_url) {
+      // First delete the image from storage
       const success = await deleteImage(project.featured_image_url);
-      if (success && onProjectUpdate) {
-        // Update the project object with the removed image
-        const updatedProject = { ...project, featured_image_url: null };
-        onProjectUpdate(updatedProject);
+      
+      if (success) {
+        // Then update the project in the database
+        try {
+          const { data, error } = await supabase
+            .from('projects')
+            .update({ featured_image_url: null })
+            .eq('id', project.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          // Update the local state
+          if (onProjectUpdate && data) {
+            onProjectUpdate(data);
+          }
+
+          toast({
+            title: "Image deleted",
+            description: "The featured image has been removed from the project.",
+          });
+        } catch (error: any) {
+          toast({
+            title: "Error",
+            description: "Failed to update project after deleting image.",
+            variant: "destructive",
+          });
+        }
       }
     }
   };
