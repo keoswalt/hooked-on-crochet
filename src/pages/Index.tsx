@@ -331,23 +331,23 @@ const Index = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <div key={project.id} onClick={() => setSelectedProject(project)} className="cursor-pointer">
-              <ProjectCard
-                project={project}
-                onEdit={(e) => {
-                  e.stopPropagation();
-                  handleEditProject(project);
-                }}
-                onDelete={(id) => {
-                  handleDeleteProject(id);
-                }}
-                onDuplicate={(e) => {
-                  e.stopPropagation();
-                  handleDuplicateProject(project);
-                }}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            </div>
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onEdit={(e) => {
+                e.stopPropagation();
+                handleEditProject(project);
+              }}
+              onDelete={(id) => {
+                handleDeleteProject(id);
+              }}
+              onDuplicate={(e) => {
+                e.stopPropagation();
+                handleDuplicateProject(project);
+              }}
+              onToggleFavorite={handleToggleFavorite}
+              onCardClick={() => setSelectedProject(project)}
+            />
           ))}
         </div>
 

@@ -15,9 +15,10 @@ interface ProjectCardProps {
   onDelete: (id: string) => void;
   onDuplicate: (e: React.MouseEvent) => void;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
+  onCardClick: () => void;
 }
 
-export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFavorite, onCardClick }: ProjectCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -35,9 +36,13 @@ export const ProjectCard = ({ project, onEdit, onDelete, onDuplicate, onToggleFa
     setShowDeleteDialog(false);
   };
 
+  const handleCardClick = () => {
+    onCardClick();
+  };
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col">
+      <Card className="hover:shadow-lg transition-shadow h-64 flex flex-col cursor-pointer" onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
           <div className="flex items-center gap-2 mb-3">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
