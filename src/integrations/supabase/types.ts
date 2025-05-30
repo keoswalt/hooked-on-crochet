@@ -22,7 +22,7 @@ export type Database = {
           make_mode_status: string
           position: number
           project_id: string
-          total_stitches: number
+          total_stitches: string
           type: string
           updated_at: string
         }
@@ -38,7 +38,7 @@ export type Database = {
           make_mode_status?: string
           position: number
           project_id: string
-          total_stitches?: number
+          total_stitches?: string
           type?: string
           updated_at?: string
         }
@@ -54,7 +54,7 @@ export type Database = {
           make_mode_status?: string
           position?: number
           project_id?: string
-          total_stitches?: number
+          total_stitches?: string
           type?: string
           updated_at?: string
         }

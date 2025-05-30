@@ -161,7 +161,7 @@ export const useProjectRows = (projectId: string) => {
     }
   };
 
-  const updateTotalStitches = async (id: string, totalStitches: number) => {
+  const updateTotalStitches = async (id: string, totalStitches: string) => {
     try {
       const { error } = await supabase
         .from('project_rows')

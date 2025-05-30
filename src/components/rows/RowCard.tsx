@@ -22,7 +22,7 @@ interface RowCardProps {
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
   onUpdateLabel: (id: string, label: string) => void;
-  onUpdateTotalStitches: (id: string, totalStitches: number) => void;
+  onUpdateTotalStitches: (id: string, totalStitches: string) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
@@ -63,55 +63,66 @@ export const RowCard = ({
   onUpdateRowImage
 }: RowCardProps) => {
   const [localInstructions, setLocalInstructions] = useState(row.instructions);
-  const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
+  const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches || '');
   const [localLabel, setLocalLabel] = useState(row.label || '');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [isUserEditing, setIsUserEditing] = useState(false);
   const { deleteImage } = useImageOperations();
   const { toast } = useToast();
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
 
-  // Update local state when row prop changes
+  // Update local state when row prop changes, but only if user is not actively editing
   useEffect(() => {
-    setLocalInstructions(row.instructions);
-    setLocalTotalStitches(row.total_stitches === null || row.total_stitches === 0 ? '' : row.total_stitches.toString());
-    setLocalLabel(row.label || '');
-  }, [row.instructions, row.total_stitches, row.label]);
+    if (!isUserEditing) {
+      if (localInstructions !== row.instructions) {
+        setLocalInstructions(row.instructions);
+      }
+      if (localTotalStitches !== (row.total_stitches || '')) {
+        setLocalTotalStitches(row.total_stitches || '');
+      }
+      if (localLabel !== (row.label || '')) {
+        setLocalLabel(row.label || '');
+      }
+    }
+  }, [row.instructions, row.total_stitches, row.label, isUserEditing, localInstructions, localTotalStitches, localLabel]);
 
   // Debounced function to update instructions in database
   const debouncedUpdateInstructions = useDebounce((id: string, instructions: string) => {
     onUpdateInstructions(id, instructions);
+    setIsUserEditing(false);
   }, 500);
 
   // Debounced function to update label in database
   const debouncedUpdateLabel = useDebounce((id: string, label: string) => {
     onUpdateLabel(id, label);
+    setIsUserEditing(false);
   }, 500);
 
   // Debounced function to update total stitches in database
-  const debouncedUpdateTotalStitches = useDebounce((id: string, totalStitches: number) => {
+  const debouncedUpdateTotalStitches = useDebounce((id: string, totalStitches: string) => {
     onUpdateTotalStitches(id, totalStitches);
+    setIsUserEditing(false);
   }, 500);
 
   const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
+    setIsUserEditing(true);
     setLocalInstructions(newValue);
     debouncedUpdateInstructions(row.id, newValue);
   };
 
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    setIsUserEditing(true);
     setLocalLabel(newValue);
     debouncedUpdateLabel(row.id, newValue);
   };
 
   const handleTotalStitchesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Only allow numbers
-    if (value === '' || /^\d+$/.test(value)) {
-      setLocalTotalStitches(value);
-      const numValue = value === '' ? 0 : parseInt(value, 10);
-      debouncedUpdateTotalStitches(row.id, numValue);
-    }
+    setIsUserEditing(true);
+    setLocalTotalStitches(value);
+    debouncedUpdateTotalStitches(row.id, value);
   };
 
   const handleMakeModeCheck = () => {
@@ -326,7 +337,7 @@ export const RowCard = ({
                   value={localTotalStitches}
                   onChange={handleTotalStitchesChange}
                   className="flex-1"
-                  placeholder="Enter number of stitches"
+                  placeholder="Enter total stitches (any value)"
                   disabled={mode === 'make'}
                 />
               </div>

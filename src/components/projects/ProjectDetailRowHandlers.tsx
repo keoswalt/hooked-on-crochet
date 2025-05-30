@@ -1,4 +1,3 @@
-
 import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -77,7 +76,7 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
     await updateLabel(id, label);
   };
 
-  const handleUpdateTotalStitches = async (id: string, total_stitches: number) => {
+  const handleUpdateTotalStitches = async (id: string, total_stitches: string) => {
     await updateTotalStitches(id, total_stitches);
   };
 

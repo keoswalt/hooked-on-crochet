@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -19,7 +18,7 @@ export const useRowOperations = () => {
           instructions: '',
           counter: 1,
           type: 'row',
-          total_stitches: 0,
+          total_stitches: '',
         })
         .select()
         .single();
@@ -53,7 +52,7 @@ export const useRowOperations = () => {
           instructions: '',
           counter: 1,
           type: 'note',
-          total_stitches: 0,
+          total_stitches: '',
         })
         .select()
         .single();
@@ -87,7 +86,7 @@ export const useRowOperations = () => {
           instructions: '',
           counter: 1,
           type: 'divider',
-          total_stitches: 0,
+          total_stitches: '',
         })
         .select()
         .single();
