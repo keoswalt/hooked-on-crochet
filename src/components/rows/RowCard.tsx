@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,63 +67,82 @@ export const RowCard = ({
   const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches || '');
   const [localLabel, setLocalLabel] = useState(row.label || '');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
-  const [isUserEditing, setIsUserEditing] = useState(false);
+  
+  // Track which fields are currently focused
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  
   const { deleteImage } = useImageOperations();
   const { toast } = useToast();
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
 
-  // Update local state when row prop changes, but only if user is not actively editing
+  // Update local state when row prop changes, but only if user is not actively editing that field
   useEffect(() => {
-    if (!isUserEditing) {
-      if (localInstructions !== row.instructions) {
-        setLocalInstructions(row.instructions);
-      }
-      if (localTotalStitches !== (row.total_stitches || '')) {
-        setLocalTotalStitches(row.total_stitches || '');
-      }
-      if (localLabel !== (row.label || '')) {
-        setLocalLabel(row.label || '');
-      }
+    if (focusedField !== 'instructions' && localInstructions !== row.instructions) {
+      setLocalInstructions(row.instructions);
     }
-  }, [row.instructions, row.total_stitches, row.label, isUserEditing, localInstructions, localTotalStitches, localLabel]);
+    if (focusedField !== 'totalStitches' && localTotalStitches !== (row.total_stitches || '')) {
+      setLocalTotalStitches(row.total_stitches || '');
+    }
+    if (focusedField !== 'label' && localLabel !== (row.label || '')) {
+      setLocalLabel(row.label || '');
+    }
+  }, [row.instructions, row.total_stitches, row.label, focusedField]);
 
   // Debounced function to update instructions in database
   const debouncedUpdateInstructions = useDebounce((id: string, instructions: string) => {
     onUpdateInstructions(id, instructions);
-    setIsUserEditing(false);
   }, 500);
 
   // Debounced function to update label in database
   const debouncedUpdateLabel = useDebounce((id: string, label: string) => {
     onUpdateLabel(id, label);
-    setIsUserEditing(false);
   }, 500);
 
   // Debounced function to update total stitches in database
   const debouncedUpdateTotalStitches = useDebounce((id: string, totalStitches: string) => {
     onUpdateTotalStitches(id, totalStitches);
-    setIsUserEditing(false);
   }, 500);
 
   const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    setIsUserEditing(true);
     setLocalInstructions(newValue);
     debouncedUpdateInstructions(row.id, newValue);
   };
 
+  const handleInstructionsFocus = () => {
+    setFocusedField('instructions');
+  };
+
+  const handleInstructionsBlur = () => {
+    setFocusedField(null);
+  };
+
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setIsUserEditing(true);
     setLocalLabel(newValue);
     debouncedUpdateLabel(row.id, newValue);
   };
 
+  const handleLabelFocus = () => {
+    setFocusedField('label');
+  };
+
+  const handleLabelBlur = () => {
+    setFocusedField(null);
+  };
+
   const handleTotalStitchesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setIsUserEditing(true);
     setLocalTotalStitches(value);
     debouncedUpdateTotalStitches(row.id, value);
+  };
+
+  const handleTotalStitchesFocus = () => {
+    setFocusedField('totalStitches');
+  };
+
+  const handleTotalStitchesBlur = () => {
+    setFocusedField(null);
   };
 
   const handleMakeModeCheck = () => {
@@ -209,6 +229,8 @@ export const RowCard = ({
                 <Input
                   value={localLabel}
                   onChange={handleLabelChange}
+                  onFocus={handleLabelFocus}
+                  onBlur={handleLabelBlur}
                   placeholder="Enter divider label (optional)"
                   className="flex-1 text-lg font-medium bg-gray-700 border-gray-600 text-white placeholder:text-gray-300"
                 />
@@ -318,6 +340,8 @@ export const RowCard = ({
             <textarea
               value={localInstructions}
               onChange={handleInstructionsChange}
+              onFocus={handleInstructionsFocus}
+              onBlur={handleInstructionsBlur}
               className="w-full p-2 border rounded-md min-h-[80px] resize-none"
               placeholder={`Enter ${row.type} instructions...`}
             />
@@ -336,6 +360,8 @@ export const RowCard = ({
                   type="text"
                   value={localTotalStitches}
                   onChange={handleTotalStitchesChange}
+                  onFocus={handleTotalStitchesFocus}
+                  onBlur={handleTotalStitchesBlur}
                   className="flex-1"
                   placeholder="Enter total stitches (any value)"
                   disabled={mode === 'make'}
