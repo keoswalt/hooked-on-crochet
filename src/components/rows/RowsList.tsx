@@ -14,7 +14,7 @@ interface RowsListProps {
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
   onUpdateLabel: (id: string, label: string) => void;
-  onUpdateTotalStitches: (id: string, totalStitches: number) => void;
+  onUpdateTotalStitches: (id: string, totalStitches: string) => void;
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
