@@ -13,6 +13,7 @@ interface ImageUploaderProps {
   accept?: string;
   className?: string;
   showButton?: boolean;
+  uniqueId?: string;
 }
 
 export interface ImageUploaderRef {
@@ -26,13 +27,16 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   folder, 
   accept = "image/*",
   className = "",
-  showButton = true
+  showButton = true,
+  uniqueId
 }, ref) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
+  const inputId = `image-upload-${folder}${uniqueId ? `-${uniqueId}` : ''}`;
+
   const resetFileInput = () => {
-    const input = document.getElementById(`image-upload-${folder}`) as HTMLInputElement;
+    const input = document.getElementById(inputId) as HTMLInputElement;
     if (input) {
       input.value = '';
     }
@@ -41,7 +45,7 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   useImperativeHandle(ref, () => ({
     triggerUpload: () => {
       resetFileInput(); // Clear input before triggering
-      document.getElementById(`image-upload-${folder}`)?.click();
+      document.getElementById(inputId)?.click();
     },
     resetInput: resetFileInput
   }));
@@ -93,7 +97,7 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
 
   const handleButtonClick = () => {
     resetFileInput(); // Clear input before triggering
-    document.getElementById(`image-upload-${folder}`)?.click();
+    document.getElementById(inputId)?.click();
   };
 
   return (
@@ -104,7 +108,7 @@ const ImageUploaderComponent = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         onChange={handleFileSelect}
         disabled={uploading}
         className="hidden"
-        id={`image-upload-${folder}`}
+        id={inputId}
       />
       {showButton && (
         <Button

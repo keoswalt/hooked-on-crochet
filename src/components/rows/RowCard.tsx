@@ -321,6 +321,7 @@ export const RowCard = ({
             folder="rows"
             className="hidden"
             showButton={false}
+            uniqueId={row.id}
           />
 
           {row.image_url && (
