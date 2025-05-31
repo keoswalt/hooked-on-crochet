@@ -341,7 +341,7 @@ export const RowCard = ({
               onChange={handleInstructionsChange}
               onFocus={handleInstructionsFocus}
               onBlur={handleInstructionsBlur}
-              className="w-full p-2 border rounded-md min-h-[120px] resize-none"
+              className="w-full p-2 border rounded-md min-h-[160px] resize-none"
               placeholder={`Enter ${row.type} instructions...`}
             />
           ) : (
