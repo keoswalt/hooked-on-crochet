@@ -362,7 +362,7 @@ export const RowCard = ({
                   onFocus={handleTotalStitchesFocus}
                   onBlur={handleTotalStitchesBlur}
                   className="flex-1"
-                  placeholder="Enter total stitches (any value)"
+                  placeholder="Enter total stitches"
                   disabled={mode === 'make'}
                 />
               </div>
