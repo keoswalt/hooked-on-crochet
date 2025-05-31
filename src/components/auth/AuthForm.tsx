@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Scissors } from 'lucide-react';
+// import { Scissors } from 'lucide-react'; Currently unused
 
 interface AuthFormProps {
   mode: 'signin' | 'signup';
@@ -94,7 +94,7 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
       <Card className="border-0 shadow-none sm:border sm:shadow-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Scissors className="h-8 w-8 text-green-600" />
+            <img src="/hooked-on-crochet-favicon-inverted.svg" className="h-8 w-8" />
           </div>
           <CardTitle className="text-2xl">
             {mode === 'signin' ? 'Welcome Back' : 'Create Account'}

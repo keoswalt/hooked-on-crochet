@@ -36,7 +36,8 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 sm:bg-gradient-to-br sm:from-green-50 sm:to-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+
         <AuthForm mode={authMode} onModeChange={setAuthMode} />
       </div>
     );
