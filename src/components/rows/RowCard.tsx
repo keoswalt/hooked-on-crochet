@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -194,8 +193,7 @@ export const RowCard = ({
       const success = await deleteImage(row.image_url);
       if (success) {
         onUpdateRowImage(row.id, null);
-        // Reset the input and trigger upload immediately
-        imageUploaderRef.current?.resetInput();
+        // Trigger upload immediately after deletion - triggerUpload already handles input reset
         imageUploaderRef.current?.triggerUpload();
       }
     }
