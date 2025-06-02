@@ -66,6 +66,7 @@ export const RowCard = ({
   const [localTotalStitches, setLocalTotalStitches] = useState(row.total_stitches || '');
   const [localLabel, setLocalLabel] = useState(row.label || '');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Track which fields are currently focused
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -218,6 +219,15 @@ export const RowCard = ({
     }
   };
 
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(row.id);
+    setShowDeleteConfirm(false);
+  };
+
   // Render divider
   if (row.type === 'divider') {
     return (
@@ -247,7 +257,7 @@ export const RowCard = ({
                 <Button variant="outline" size="sm" onClick={() => onDuplicate(row)} className="border-gray-300 text-gray-700 hover:bg-gray-400 bg-white">
                   <Copy className="h-4 w-4 text-gray-700" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onDelete(row.id)} className="border-gray-300 text-gray-700 hover:bg-gray-400 bg-white">
+                <Button variant="outline" size="sm" onClick={handleDeleteClick} className="border-gray-300 text-gray-700 hover:bg-gray-400 bg-white">
                   <Trash2 className="h-4 w-4 text-gray-700" />
                 </Button>
               </div>
@@ -306,7 +316,7 @@ export const RowCard = ({
               <Button variant="outline" size="sm" onClick={() => onDuplicate(row)}>
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => onDelete(row.id)}>
+              <Button variant="outline" size="sm" onClick={handleDeleteClick}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -444,6 +454,16 @@ export const RowCard = ({
         description="This will delete the current image and cannot be undone. Do you want to continue?"
         onConfirm={handleReplaceConfirm}
         confirmText="Replace"
+        cancelText="Cancel"
+      />
+
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete row?"
+        description="This will permanently delete this row and all its content. This action cannot be undone."
+        onConfirm={handleDeleteConfirm}
+        confirmText="Delete"
         cancelText="Cancel"
       />
     </Card>
