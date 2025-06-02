@@ -189,15 +189,18 @@ export const RowCard = ({
   };
 
   const handleReplaceConfirm = async () => {
+    setShowReplaceConfirm(false);
+    
     if (row.image_url) {
       const success = await deleteImage(row.image_url);
       if (success) {
         onUpdateRowImage(row.id, null);
-        // Trigger upload immediately after deletion - triggerUpload already handles input reset
-        imageUploaderRef.current?.triggerUpload();
+        // Add a small delay to ensure the confirmation dialog has fully closed
+        setTimeout(() => {
+          imageUploaderRef.current?.triggerUpload();
+        }, 150);
       }
     }
-    setShowReplaceConfirm(false);
   };
 
   const handleImageUploaded = (imageUrl: string) => {
