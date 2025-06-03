@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -17,21 +16,13 @@ export const useRowOperations = () => {
         newPosition = insertAfterPosition + 1;
         
         // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase.rpc('increment_positions', {
-          project_id: projectId,
-          after_position: insertAfterPosition
-        });
+        const { error: updateError } = await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gte('position', newPosition);
 
-        if (updateError) {
-          // Fallback to manual update if RPC doesn't exist
-          const { error: fallbackError } = await supabase
-            .from('project_rows')
-            .update({ position: newPosition + 1 })
-            .eq('project_id', projectId)
-            .gt('position', insertAfterPosition);
-          
-          if (fallbackError) throw fallbackError;
-        }
+        if (updateError) throw updateError;
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
@@ -77,21 +68,13 @@ export const useRowOperations = () => {
         newPosition = insertAfterPosition + 1;
         
         // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase.rpc('increment_positions', {
-          project_id: projectId,
-          after_position: insertAfterPosition
-        });
+        const { error: updateError } = await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gte('position', newPosition);
 
-        if (updateError) {
-          // Fallback to manual update if RPC doesn't exist
-          const { error: fallbackError } = await supabase
-            .from('project_rows')
-            .update({ position: newPosition + 1 })
-            .eq('project_id', projectId)
-            .gt('position', insertAfterPosition);
-          
-          if (fallbackError) throw fallbackError;
-        }
+        if (updateError) throw updateError;
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
@@ -137,21 +120,13 @@ export const useRowOperations = () => {
         newPosition = insertAfterPosition + 1;
         
         // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase.rpc('increment_positions', {
-          project_id: projectId,
-          after_position: insertAfterPosition
-        });
+        const { error: updateError } = await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gte('position', newPosition);
 
-        if (updateError) {
-          // Fallback to manual update if RPC doesn't exist
-          const { error: fallbackError } = await supabase
-            .from('project_rows')
-            .update({ position: newPosition + 1 })
-            .eq('project_id', projectId)
-            .gt('position', insertAfterPosition);
-          
-          if (fallbackError) throw fallbackError;
-        }
+        if (updateError) throw updateError;
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
