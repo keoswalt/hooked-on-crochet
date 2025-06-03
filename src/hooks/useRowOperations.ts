@@ -15,14 +15,29 @@ export const useRowOperations = () => {
         // Insert after the specified position
         newPosition = insertAfterPosition + 1;
         
-        // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase
+        // First, get all rows that need to be shifted
+        const { data: rowsToUpdate, error: fetchError } = await supabase
           .from('project_rows')
-          .update({ position: supabase.sql`position + 1` })
+          .select('id, position')
           .eq('project_id', projectId)
-          .gte('position', newPosition);
+          .gte('position', newPosition)
+          .order('position', { ascending: true });
 
-        if (updateError) throw updateError;
+        if (fetchError) throw fetchError;
+
+        // Update each row's position
+        if (rowsToUpdate && rowsToUpdate.length > 0) {
+          const updates = rowsToUpdate.map(row => 
+            supabase
+              .from('project_rows')
+              .update({ position: row.position + 1 })
+              .eq('id', row.id)
+          );
+
+          const results = await Promise.all(updates);
+          const updateError = results.find(result => result.error);
+          if (updateError?.error) throw updateError.error;
+        }
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
@@ -67,14 +82,29 @@ export const useRowOperations = () => {
         // Insert after the specified position
         newPosition = insertAfterPosition + 1;
         
-        // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase
+        // First, get all rows that need to be shifted
+        const { data: rowsToUpdate, error: fetchError } = await supabase
           .from('project_rows')
-          .update({ position: supabase.sql`position + 1` })
+          .select('id, position')
           .eq('project_id', projectId)
-          .gte('position', newPosition);
+          .gte('position', newPosition)
+          .order('position', { ascending: true });
 
-        if (updateError) throw updateError;
+        if (fetchError) throw fetchError;
+
+        // Update each row's position
+        if (rowsToUpdate && rowsToUpdate.length > 0) {
+          const updates = rowsToUpdate.map(row => 
+            supabase
+              .from('project_rows')
+              .update({ position: row.position + 1 })
+              .eq('id', row.id)
+          );
+
+          const results = await Promise.all(updates);
+          const updateError = results.find(result => result.error);
+          if (updateError?.error) throw updateError.error;
+        }
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
@@ -119,14 +149,29 @@ export const useRowOperations = () => {
         // Insert after the specified position
         newPosition = insertAfterPosition + 1;
         
-        // First, increment positions of all rows that come after the insert position
-        const { error: updateError } = await supabase
+        // First, get all rows that need to be shifted
+        const { data: rowsToUpdate, error: fetchError } = await supabase
           .from('project_rows')
-          .update({ position: supabase.sql`position + 1` })
+          .select('id, position')
           .eq('project_id', projectId)
-          .gte('position', newPosition);
+          .gte('position', newPosition)
+          .order('position', { ascending: true });
 
-        if (updateError) throw updateError;
+        if (fetchError) throw fetchError;
+
+        // Update each row's position
+        if (rowsToUpdate && rowsToUpdate.length > 0) {
+          const updates = rowsToUpdate.map(row => 
+            supabase
+              .from('project_rows')
+              .update({ position: row.position + 1 })
+              .eq('id', row.id)
+          );
+
+          const results = await Promise.all(updates);
+          const updateError = results.find(result => result.error);
+          if (updateError?.error) throw updateError.error;
+        }
       } else {
         // Add at the end
         newPosition = rowsLength + 1;
