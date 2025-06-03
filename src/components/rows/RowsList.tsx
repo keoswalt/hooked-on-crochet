@@ -2,6 +2,7 @@
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent } from '@/components/ui/card';
 import { RowCard } from './RowCard';
+import { RowInsertButton } from './RowInsertButton';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
@@ -21,6 +22,9 @@ interface RowsListProps {
   onDuplicate: (row: ProjectRow) => void;
   onDelete: (id: string) => void;
   onUpdateRowImage: (id: string, imageUrl: string | null) => void;
+  onAddRow: (insertAfterPosition?: number) => void;
+  onAddNote: (insertAfterPosition?: number) => void;
+  onAddDivider: (insertAfterPosition?: number) => void;
 }
 
 export const RowsList = ({
@@ -37,7 +41,10 @@ export const RowsList = ({
   onToggleLock,
   onDuplicate,
   onDelete,
-  onUpdateRowImage
+  onUpdateRowImage,
+  onAddRow,
+  onAddNote,
+  onAddDivider
 }: RowsListProps) => {
   // Calculate row numbers for actual rows (excluding notes and dividers)
   const getRowNumber = (currentIndex: number): number | undefined => {
@@ -59,33 +66,43 @@ export const RowsList = ({
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
             {rows.map((row, index) => (
-              <Draggable key={row.id} draggableId={row.id} index={index} isDragDisabled={mode === 'make'}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={`${snapshot.isDragging ? 'opacity-75' : ''}`}
-                  >
-                    <RowCard
-                      row={row}
-                      mode={mode}
-                      rowNumber={getRowNumber(index)}
-                      userId={userId}
-                      onUpdateCounter={onUpdateCounter}
-                      onUpdateInstructions={onUpdateInstructions}
-                      onUpdateLabel={onUpdateLabel}
-                      onUpdateTotalStitches={onUpdateTotalStitches}
-                      onUpdateMakeModeCounter={onUpdateMakeModeCounter}
-                      onUpdateMakeModeStatus={onUpdateMakeModeStatus}
-                      onToggleLock={onToggleLock}
-                      onDuplicate={onDuplicate}
-                      onDelete={onDelete}
-                      onUpdateRowImage={onUpdateRowImage}
-                    />
-                  </div>
+              <div key={row.id}>
+                <Draggable draggableId={row.id} index={index} isDragDisabled={mode === 'make'}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`${snapshot.isDragging ? 'opacity-75' : ''}`}
+                    >
+                      <RowCard
+                        row={row}
+                        mode={mode}
+                        rowNumber={getRowNumber(index)}
+                        userId={userId}
+                        onUpdateCounter={onUpdateCounter}
+                        onUpdateInstructions={onUpdateInstructions}
+                        onUpdateLabel={onUpdateLabel}
+                        onUpdateTotalStitches={onUpdateTotalStitches}
+                        onUpdateMakeModeCounter={onUpdateMakeModeCounter}
+                        onUpdateMakeModeStatus={onUpdateMakeModeStatus}
+                        onToggleLock={onToggleLock}
+                        onDuplicate={onDuplicate}
+                        onDelete={onDelete}
+                        onUpdateRowImage={onUpdateRowImage}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+                {mode === 'edit' && (
+                  <RowInsertButton
+                    insertAfterPosition={row.position}
+                    onAddRow={onAddRow}
+                    onAddNote={onAddNote}
+                    onAddDivider={onAddDivider}
+                  />
                 )}
-              </Draggable>
+              </div>
             ))}
             {provided.placeholder}
             {rows.length === 0 && (

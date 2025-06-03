@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -7,9 +8,25 @@ type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 export const useRowOperations = () => {
   const { toast } = useToast();
 
-  const addRow = async (projectId: string, rowsLength: number) => {
+  const addRow = async (projectId: string, rowsLength: number, insertAfterPosition?: number) => {
     try {
-      const newPosition = rowsLength + 1;
+      let newPosition: number;
+      
+      if (insertAfterPosition !== undefined) {
+        // Insert after the specified position
+        newPosition = insertAfterPosition + 1;
+        
+        // First, increment positions of all rows that come after the insert position
+        await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gt('position', insertAfterPosition);
+      } else {
+        // Add at the end
+        newPosition = rowsLength + 1;
+      }
+
       const { data, error } = await supabase
         .from('project_rows')
         .insert({
@@ -41,9 +58,25 @@ export const useRowOperations = () => {
     }
   };
 
-  const addNote = async (projectId: string, rowsLength: number) => {
+  const addNote = async (projectId: string, rowsLength: number, insertAfterPosition?: number) => {
     try {
-      const newPosition = rowsLength + 1;
+      let newPosition: number;
+      
+      if (insertAfterPosition !== undefined) {
+        // Insert after the specified position
+        newPosition = insertAfterPosition + 1;
+        
+        // First, increment positions of all rows that come after the insert position
+        await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gt('position', insertAfterPosition);
+      } else {
+        // Add at the end
+        newPosition = rowsLength + 1;
+      }
+
       const { data, error } = await supabase
         .from('project_rows')
         .insert({
@@ -75,9 +108,25 @@ export const useRowOperations = () => {
     }
   };
 
-  const addDivider = async (projectId: string, rowsLength: number) => {
+  const addDivider = async (projectId: string, rowsLength: number, insertAfterPosition?: number) => {
     try {
-      const newPosition = rowsLength + 1;
+      let newPosition: number;
+      
+      if (insertAfterPosition !== undefined) {
+        // Insert after the specified position
+        newPosition = insertAfterPosition + 1;
+        
+        // First, increment positions of all rows that come after the insert position
+        await supabase
+          .from('project_rows')
+          .update({ position: supabase.sql`position + 1` })
+          .eq('project_id', projectId)
+          .gt('position', insertAfterPosition);
+      } else {
+        // Add at the end
+        newPosition = rowsLength + 1;
+      }
+
       const { data, error } = await supabase
         .from('project_rows')
         .insert({

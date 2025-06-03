@@ -1,3 +1,4 @@
+
 import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -24,25 +25,25 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
     updateRowImage
   } = useProjectRows(projectId);
 
-  const handleAddRow = async () => {
+  const handleAddRow = async (insertAfterPosition?: number) => {
     try {
-      await addRow();
+      await addRow(insertAfterPosition);
     } catch (error) {
       console.error("Failed to add row:", error);
     }
   };
 
-  const handleAddNote = async () => {
+  const handleAddNote = async (insertAfterPosition?: number) => {
     try {
-      await addNote();
+      await addNote(insertAfterPosition);
     } catch (error) {
       console.error("Failed to add note:", error);
     }
   };
 
-  const handleAddDivider = async () => {
+  const handleAddDivider = async (insertAfterPosition?: number) => {
     try {
-      await addDivider();
+      await addDivider(insertAfterPosition);
     } catch (error) {
       console.error("Failed to add divider:", error);
     }

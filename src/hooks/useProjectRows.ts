@@ -71,28 +71,46 @@ export const useProjectRows = (projectId: string) => {
     fetchRows();
   }, [projectId]);
 
-  const addRow = async () => {
+  const addRow = async (insertAfterPosition?: number) => {
     try {
-      const data = await addRowOperation(projectId, rows.length);
-      setRows([...rows, data]);
+      const data = await addRowOperation(projectId, rows.length, insertAfterPosition);
+      
+      if (insertAfterPosition !== undefined) {
+        // Refresh the entire list to get updated positions
+        await fetchRows();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error) {
       // Error already handled in useRowOperations
     }
   };
 
-  const addNote = async () => {
+  const addNote = async (insertAfterPosition?: number) => {
     try {
-      const data = await addNoteOperation(projectId, rows.length);
-      setRows([...rows, data]);
+      const data = await addNoteOperation(projectId, rows.length, insertAfterPosition);
+      
+      if (insertAfterPosition !== undefined) {
+        // Refresh the entire list to get updated positions
+        await fetchRows();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error) {
       // Error already handled in useRowOperations
     }
   };
 
-  const addDivider = async () => {
+  const addDivider = async (insertAfterPosition?: number) => {
     try {
-      const data = await addDividerOperation(projectId, rows.length);
-      setRows([...rows, data]);
+      const data = await addDividerOperation(projectId, rows.length, insertAfterPosition);
+      
+      if (insertAfterPosition !== undefined) {
+        // Refresh the entire list to get updated positions
+        await fetchRows();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error) {
       // Error already handled in useRowOperations
     }

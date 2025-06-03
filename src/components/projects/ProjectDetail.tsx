@@ -1,4 +1,3 @@
-
 import { ProjectHeader } from './ProjectHeader';
 import { RowsList } from '@/components/rows/RowsList';
 import { ModeHeader } from './ModeHeader';
@@ -113,6 +112,9 @@ export const ProjectDetail = ({
         onDuplicate={handleDuplicateRow}
         onDelete={handleDeleteRow}
         onUpdateRowImage={handleUpdateRowImage}
+        onAddRow={handleAddRow}
+        onAddNote={handleAddNote}
+        onAddDivider={handleAddDivider}
       />
 
       <DeleteConfirmationDialog
