@@ -98,6 +98,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         featured_image_url: formData.featured_image_url,
         is_favorite: editingProject?.is_favorite || false,
         last_mode: editingProject?.last_mode || 'edit',
+        status: editingProject?.status || null,
       };
 
       const savedProject = await handleSaveProject(projectData, editingProject);

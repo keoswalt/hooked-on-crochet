@@ -60,6 +60,7 @@ export const ProjectForm = ({
         featured_image_url: formData.featured_image_url,
         is_favorite: project?.is_favorite || false,
         last_mode: project?.last_mode || 'edit',
+        status: project?.status || null,
       });
     }
   };
