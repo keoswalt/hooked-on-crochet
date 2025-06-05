@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image } from 'lucide-react';
+import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image, Replace } from 'lucide-react';
 import { ImageUploader, ImageUploaderRef } from '@/components/images/ImageUploader';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -189,22 +189,18 @@ export const RowCard = ({
     }
   };
 
-  const handleReplaceConfirm = async () => {
+  const handleReplaceConfirm = () => {
     setShowReplaceConfirm(false);
-    
-    if (row.image_url) {
-      const success = await deleteImage(row.image_url);
-      if (success) {
-        onUpdateRowImage(row.id, null);
-        // Add a small delay to ensure the confirmation dialog has fully closed
-        setTimeout(() => {
-          imageUploaderRef.current?.triggerUpload();
-        }, 150);
-      }
-    }
+    // Immediately trigger file upload without deleting existing image
+    imageUploaderRef.current?.triggerUpload();
   };
 
-  const handleImageUploaded = (imageUrl: string) => {
+  const handleImageUploaded = async (imageUrl: string) => {
+    // If there's an existing image, delete it first
+    if (row.image_url) {
+      await deleteImage(row.image_url);
+    }
+    // Update with the new image
     onUpdateRowImage(row.id, imageUrl);
   };
 
@@ -311,7 +307,7 @@ export const RowCard = ({
                 onClick={handleImageButtonClick}
                 className={row.image_url ? 'bg-blue-50 border-blue-200' : ''}
               >
-                <Image className="h-4 w-4" />
+                {row.image_url ? <Replace className="h-4 w-4" /> : <Image className="h-4 w-4" />}
               </Button>
               <Button variant="outline" size="sm" onClick={() => onDuplicate(row)}>
                 <Copy className="h-4 w-4" />
@@ -451,9 +447,9 @@ export const RowCard = ({
         open={showReplaceConfirm}
         onOpenChange={setShowReplaceConfirm}
         title="Replace existing image?"
-        description="This will delete the current image and cannot be undone. Do you want to continue?"
+        description="Select a new image to replace the current one. The existing image will be deleted once you select a new one."
         onConfirm={handleReplaceConfirm}
-        confirmText="Replace"
+        confirmText="Choose New Image"
         cancelText="Cancel"
       />
 

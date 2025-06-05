@@ -114,6 +114,7 @@ export type Database = {
           is_favorite: boolean
           last_mode: string | null
           name: string
+          status: Database["public"]["Enums"]["project_status"] | null
           updated_at: string
           user_id: string
           yarn_weight: Database["public"]["Enums"]["yarn_weight"]
@@ -127,6 +128,7 @@ export type Database = {
           is_favorite?: boolean
           last_mode?: string | null
           name: string
+          status?: Database["public"]["Enums"]["project_status"] | null
           updated_at?: string
           user_id: string
           yarn_weight: Database["public"]["Enums"]["yarn_weight"]
@@ -140,6 +142,7 @@ export type Database = {
           is_favorite?: boolean
           last_mode?: string | null
           name?: string
+          status?: Database["public"]["Enums"]["project_status"] | null
           updated_at?: string
           user_id?: string
           yarn_weight?: Database["public"]["Enums"]["yarn_weight"]
@@ -176,6 +179,8 @@ export type Database = {
     }
     Enums: {
       hook_size:
+        | "1.5mm"
+        | "1.75mm"
         | "2mm"
         | "2.2mm"
         | "3mm"
@@ -188,6 +193,7 @@ export type Database = {
         | "6.5mm"
         | "9mm"
         | "10mm"
+      project_status: "Writing" | "Ready" | "Making" | "Made"
       yarn_weight: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7"
     }
     CompositeTypes: {
@@ -305,6 +311,8 @@ export const Constants = {
   public: {
     Enums: {
       hook_size: [
+        "1.5mm",
+        "1.75mm",
         "2mm",
         "2.2mm",
         "3mm",
@@ -318,6 +326,7 @@ export const Constants = {
         "9mm",
         "10mm",
       ],
+      project_status: ["Writing", "Ready", "Making", "Made"],
       yarn_weight: ["0", "1", "2", "3", "4", "5", "6", "7"],
     },
   },
