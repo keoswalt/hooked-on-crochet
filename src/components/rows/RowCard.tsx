@@ -1,15 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Minus, Plus, Copy, Trash2, GripVertical, Lock, Unlock, Check, Image, Replace } from 'lucide-react';
-import { ImageUploader, ImageUploaderRef } from '@/components/images/ImageUploader';
-import { ImageViewer } from '@/components/images/ImageViewer';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { LinkifiedText } from '@/components/ui/linkified-text';
+import { ImageUploaderRef } from '@/components/images/ImageUploader';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useToast } from '@/hooks/use-toast';
+import { DividerCard } from './DividerCard';
+import { RowCardHeader } from './RowCardHeader';
+import { RowCardContent } from './RowCardContent';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
@@ -67,8 +64,6 @@ export const RowCard = ({
   const [localLabel, setLocalLabel] = useState(row.label || '');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
-  // Track which fields are currently focused
   const [focusedField, setFocusedField] = useState<string | null>(null);
   
   const { deleteImage } = useImageOperations();
@@ -227,47 +222,17 @@ export const RowCard = ({
   // Render divider
   if (row.type === 'divider') {
     return (
-      <Card className={`mb-3 ${getCardStyling()}`}>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 flex-1 mr-3">
-              {mode === 'edit' && <GripVertical className="h-4 w-4 text-white cursor-grab" />}
-              {mode === 'edit' && (
-                <Input
-                  value={localLabel}
-                  onChange={handleLabelChange}
-                  onFocus={handleLabelFocus}
-                  onBlur={handleLabelBlur}
-                  placeholder="Enter divider label (optional)"
-                  className="flex-1 text-lg font-medium bg-gray-700 border-gray-600 text-white placeholder:text-gray-300"
-                />
-              )}
-              {mode === 'make' && localLabel && (
-                <div className="flex-1 text-center">
-                  <p className="text-lg font-medium text-gray-600">{localLabel}</p>
-                </div>
-              )}
-            </div>
-            {mode === 'edit' && (
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" onClick={() => onDuplicate(row)} className="border-gray-300 text-gray-700 hover:bg-gray-400 bg-white">
-                  <Copy className="h-4 w-4 text-gray-700" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleDeleteClick} className="border-gray-300 text-gray-700 hover:bg-gray-400 bg-white">
-                  <Trash2 className="h-4 w-4 text-gray-700" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center justify-center px-4">
-            <svg width="100%" height="2" className="text-gray-500">
-              <line x1="0" y1="1" x2="100%" y2="1" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
-            </svg>
-          </div>
-        </CardContent>
-      </Card>
+      <DividerCard
+        row={row}
+        mode={mode}
+        localLabel={localLabel}
+        onLabelChange={handleLabelChange}
+        onLabelFocus={handleLabelFocus}
+        onLabelBlur={handleLabelBlur}
+        onDuplicate={onDuplicate}
+        onDeleteClick={handleDeleteClick}
+        cardStyling={getCardStyling()}
+      />
     );
   }
 
@@ -277,170 +242,39 @@ export const RowCard = ({
   return (
     <Card className={`mb-3 ${getCardStyling()}`}>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {mode === 'edit' && <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />}
-            {mode === 'make' && row.type !== 'divider' && (
-              <button 
-                onClick={handleMakeModeCheck}
-                disabled={isCheckboxDisabled}
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                  row.make_mode_status === 'complete' 
-                    ? 'bg-foreground border-foreground text-background' 
-                    : isCheckboxDisabled
-                    ? 'border-gray-200 bg-gray-100 cursor-not-allowed dark:border-muted-foreground/30 dark:bg-muted/50'
-                    : 'border-gray-300 hover:border-gray-400 dark:border-muted-foreground dark:hover:border-muted-foreground/80'
-                }`}
-              >
-                {row.make_mode_status === 'complete' && <Check className="h-4 w-4" />}
-              </button>
-            )}
-            <h3 className="font-semibold">
-              {row.type === 'note' ? 'Note' : `Row ${rowNumber || row.position}`}
-            </h3>
-          </div>
-          {mode === 'edit' && (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleImageButtonClick}
-                className={row.image_url ? 'bg-blue-50 border-blue-200' : ''}
-              >
-                {row.image_url ? <Replace className="h-4 w-4" /> : <Image className="h-4 w-4" />}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => onDuplicate(row)}>
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDeleteClick}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
+        <RowCardHeader
+          row={row}
+          mode={mode}
+          rowNumber={rowNumber}
+          isCheckboxDisabled={isCheckboxDisabled}
+          onMakeModeCheck={handleMakeModeCheck}
+          onImageButtonClick={handleImageButtonClick}
+          onDuplicate={onDuplicate}
+          onDeleteClick={handleDeleteClick}
+        />
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-3">
-          <ImageUploader
-            ref={imageUploaderRef}
-            onImageUploaded={handleImageUploaded}
-            userId={userId}
-            folder="rows"
-            className="hidden"
-            showButton={false}
-            uniqueId={row.id}
-          />
-
-          {row.image_url && (
-            <div className="w-full">
-              <AspectRatio ratio={16 / 9} className="bg-muted">
-                <ImageViewer
-                  imageUrl={row.image_url}
-                  alt={`Image for ${row.type === 'note' ? 'note' : `row ${rowNumber || row.position}`}`}
-                  className="w-full h-full"
-                  onDelete={mode === 'edit' ? handleImageDelete : undefined}
-                />
-              </AspectRatio>
-            </div>
-          )}
-
-          {mode === 'edit' ? (
-            <textarea
-              value={localInstructions}
-              onChange={handleInstructionsChange}
-              onFocus={handleInstructionsFocus}
-              onBlur={handleInstructionsBlur}
-              className="w-full p-2 border rounded-md min-h-[160px] resize-none"
-              placeholder={`Enter ${row.type} instructions...`}
-            />
-          ) : (
-            <LinkifiedText 
-              text={localInstructions}
-              className="w-full p-2 border rounded-md min-h-[80px] bg-gray-50"
-            />
-          )}
-          
-          {row.type === 'row' && (
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700 min-w-[100px]">Total Stitches:</label>
-                <Input
-                  type="text"
-                  value={localTotalStitches}
-                  onChange={handleTotalStitchesChange}
-                  onFocus={handleTotalStitchesFocus}
-                  onBlur={handleTotalStitchesBlur}
-                  className="flex-1"
-                  placeholder="Enter total stitches"
-                  disabled={mode === 'make'}
-                />
-              </div>
-              
-              <div className="relative flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-3">
-                {mode === 'edit' ? (
-                  <>
-                    <div className="flex items-center justify-center space-x-3 flex-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onUpdateCounter(row.id, Math.max(1, row.counter - 1))}
-                        disabled={row.counter <= 1 || row.is_locked}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      
-                      <div className="bg-white border rounded-md px-4 py-2 min-w-[60px] text-center font-semibold">
-                        {row.counter}
-                      </div>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onUpdateCounter(row.id, row.counter + 1)}
-                        disabled={row.is_locked}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onToggleLock(row.id, !row.is_locked)}
-                      className="absolute right-3"
-                    >
-                      {row.is_locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                    </Button>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-center space-x-3 flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMakeModeCounterChange(Math.max(0, row.make_mode_counter - 1))}
-                      disabled={row.make_mode_counter <= 0 || isCompleted}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    
-                    <div className="bg-white border rounded-md px-4 py-2 min-w-[80px] text-center font-semibold">
-                      {row.make_mode_counter} / {row.counter}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMakeModeCounterChange(row.make_mode_counter + 1)}
-                      disabled={row.make_mode_counter >= row.counter || isCompleted}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <RowCardContent
+          row={row}
+          mode={mode}
+          rowNumber={rowNumber}
+          userId={userId}
+          localInstructions={localInstructions}
+          localTotalStitches={localTotalStitches}
+          isCompleted={isCompleted}
+          imageUploaderRef={imageUploaderRef}
+          onInstructionsChange={handleInstructionsChange}
+          onInstructionsFocus={handleInstructionsFocus}
+          onInstructionsBlur={handleInstructionsBlur}
+          onTotalStitchesChange={handleTotalStitchesChange}
+          onTotalStitchesFocus={handleTotalStitchesFocus}
+          onTotalStitchesBlur={handleTotalStitchesBlur}
+          onUpdateCounter={onUpdateCounter}
+          onToggleLock={onToggleLock}
+          onMakeModeCounterChange={handleMakeModeCounterChange}
+          onImageUploaded={handleImageUploaded}
+          onImageDelete={handleImageDelete}
+        />
       </CardContent>
 
       <ConfirmationDialog
