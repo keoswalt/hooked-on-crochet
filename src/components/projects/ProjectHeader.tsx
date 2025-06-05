@@ -7,6 +7,7 @@ import { ProjectActions } from './ProjectActions';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { TagDisplay } from '@/components/tags/TagDisplay';
 import { LinkifiedText } from '@/components/ui/linkified-text';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectHeaderProps {
   project: Project;
@@ -85,6 +87,42 @@ export const ProjectHeader = ({
     }
   };
 
+  const handleStatusChange = async (newStatus: ProjectStatus) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .update({ status: newStatus })
+        .eq('id', project.id)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Status update error:', error);
+        throw error;
+      }
+
+      console.log('Status update successful:', data);
+
+      // Update the local state
+      if (onProjectUpdate && data) {
+        onProjectUpdate(data);
+      }
+
+      toast({
+        title: "Status Updated",
+        description: `Project status changed to ${newStatus}`,
+      });
+    } catch (error: any) {
+      console.error('Failed to update project status:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update project status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <div className="flex items-center space-x-4">
@@ -108,9 +146,27 @@ export const ProjectHeader = ({
                   />
                 </div>
                 
-                <div className="text-sm text-gray-600">
-                  Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
+                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                  <span>Hook: {project.hook_size}</span>
+                  <span>•</span>
+                  <span>Yarn Weight: {project.yarn_weight}</span>
+                  <span>•</span>
+                  <div className="flex items-center gap-2">
+                    <span>Status:</span>
+                    <Select value={project.status || ''} onValueChange={handleStatusChange}>
+                      <SelectTrigger className="w-32 h-8">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Writing">Writing</SelectItem>
+                        <SelectItem value="Ready">Ready</SelectItem>
+                        <SelectItem value="Making">Making</SelectItem>
+                        <SelectItem value="Made">Made</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+                
                 {project.details && (
                   <LinkifiedText 
                     text={project.details} 
