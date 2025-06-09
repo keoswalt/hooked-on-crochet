@@ -150,21 +150,6 @@ export const ProjectHeader = ({
                   <span>Hook: {project.hook_size}</span>
                   <span>•</span>
                   <span>Yarn Weight: {project.yarn_weight}</span>
-                  <span>•</span>
-                  <div className="flex items-center gap-2">
-                    <span>Status:</span>
-                    <Select value={project.status || ''} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Writing">Writing</SelectItem>
-                        <SelectItem value="Ready">Ready</SelectItem>
-                        <SelectItem value="Making">Making</SelectItem>
-                        <SelectItem value="Made">Made</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
                 
                 {project.details && (
@@ -186,6 +171,21 @@ export const ProjectHeader = ({
                 />
               </div>
             )}
+
+            <div className="flex items-center gap-2">
+                    <span>Status:</span>
+                    <Select value={project.status || ''} onValueChange={handleStatusChange}>
+                      <SelectTrigger className="w-32 h-8">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Writing">Writing</SelectItem>
+                        <SelectItem value="Ready">Ready</SelectItem>
+                        <SelectItem value="Making">Making</SelectItem>
+                        <SelectItem value="Made">Made</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
             
             <ProjectActions
               project={project}
