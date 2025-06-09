@@ -146,7 +146,7 @@ export const ProjectHeader = ({
                   />
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <span>Hook: {project.hook_size}</span>
                   <span>•</span>
                   <span>Yarn Weight: {project.yarn_weight}</span>
@@ -160,17 +160,6 @@ export const ProjectHeader = ({
                 )}
               </div>
             </div>
-            
-            {project.featured_image_url && (
-              <div className="w-full">
-                <ImageViewer
-                  imageUrl={project.featured_image_url}
-                  alt={`${project.name} featured image`}
-                  className="w-full h-64 rounded-lg"
-                  onDelete={handleDeleteFeaturedImage}
-                />
-              </div>
-            )}
 
             <div className="flex items-center gap-2">
                     <span>Status:</span>
@@ -186,6 +175,17 @@ export const ProjectHeader = ({
                       </SelectContent>
                     </Select>
                   </div>
+            
+            {project.featured_image_url && (
+              <div className="w-full">
+                <ImageViewer
+                  imageUrl={project.featured_image_url}
+                  alt={`${project.name} featured image`}
+                  className="w-full h-64 rounded-lg"
+                  onDelete={handleDeleteFeaturedImage}
+                />
+              </div>
+            )}
             
             <ProjectActions
               project={project}
