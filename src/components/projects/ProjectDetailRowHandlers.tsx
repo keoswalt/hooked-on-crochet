@@ -1,4 +1,3 @@
-
 import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -9,6 +8,10 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
     loading, 
     confirmDialog,
     setConfirmDialog,
+    hideCompleted,
+    setHideCompleted,
+    hiddenCount,
+    inProgressIndex,
     addRow, 
     addNote, 
     addDivider, 
@@ -102,11 +105,19 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
     await updateRowImage(id, imageUrl);
   };
 
+  const handleToggleHideCompleted = () => {
+    setHideCompleted(!hideCompleted);
+  };
+
   return {
     rows,
     loading,
     confirmDialog,
     setConfirmDialog,
+    hideCompleted,
+    hiddenCount,
+    inProgressIndex,
+    handleToggleHideCompleted,
     handleAddRow,
     handleAddNote,
     handleAddDivider,

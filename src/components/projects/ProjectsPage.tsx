@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
@@ -147,6 +146,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
             setShowForm(true);
           }}
           onProjectUpdate={updateProject}
+          onDuplicate={() => handleDuplicateWrapper(selectedProject)}
           userId={user.id}
         />
       )}

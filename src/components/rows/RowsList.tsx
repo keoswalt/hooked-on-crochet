@@ -1,6 +1,7 @@
-
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { RowCard } from './RowCard';
 import { RowInsertButton } from './RowInsertButton';
 import type { Database } from '@/integrations/supabase/types';
@@ -11,6 +12,10 @@ interface RowsListProps {
   rows: ProjectRow[];
   mode: 'edit' | 'make';
   userId: string;
+  hideCompleted: boolean;
+  hiddenCount: number;
+  inProgressIndex: number;
+  onToggleHideCompleted: () => void;
   onDragEnd: (result: DropResult) => void;
   onUpdateCounter: (id: string, newCounter: number) => void;
   onUpdateInstructions: (id: string, instructions: string) => void;
@@ -31,6 +36,10 @@ export const RowsList = ({
   rows,
   mode,
   userId,
+  hideCompleted,
+  hiddenCount,
+  inProgressIndex,
+  onToggleHideCompleted,
   onDragEnd,
   onUpdateCounter,
   onUpdateInstructions,
@@ -67,6 +76,27 @@ export const RowsList = ({
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
             {rows.map((row, index) => (
               <div key={row.id}>
+                {mode === 'make' && index === inProgressIndex && (
+                  <div className="mb-3">
+                    <Button
+                      variant="ghost"
+                      onClick={onToggleHideCompleted}
+                      className="w-full flex items-center justify-center gap-2 h-8 text-sm"
+                    >
+                      {hideCompleted ? (
+                        <>
+                          <EyeIcon className="h-4 w-4" />
+                          Show {hiddenCount} completed {hiddenCount === 1 ? 'row' : 'rows'}
+                        </>
+                      ) : (
+                        <>
+                          <EyeOffIcon className="h-4 w-4" />
+                          Hide completed rows
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
                 <Draggable draggableId={row.id} index={index} isDragDisabled={mode === 'make'}>
                   {(provided, snapshot) => (
                     <div

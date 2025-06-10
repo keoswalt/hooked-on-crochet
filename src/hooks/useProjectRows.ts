@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRowOperations } from './useRowOperations';
@@ -7,9 +7,22 @@ import type { Database } from '@/integrations/supabase/types';
 
 type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
+const HIDE_COMPLETED_STORAGE_KEY = 'project-rows:hide-completed';
+
+const getInitialHideCompleted = () => {
+  try {
+    const stored = localStorage.getItem(HIDE_COMPLETED_STORAGE_KEY);
+    return stored === null ? true : stored === 'true';
+  } catch (e) {
+    // In case localStorage is not available
+    return true;
+  }
+};
+
 export const useProjectRows = (projectId: string) => {
   const [rows, setRows] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hideCompleted, setHideCompleted] = useState(getInitialHideCompleted);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     onConfirm: () => void;
@@ -17,6 +30,31 @@ export const useProjectRows = (projectId: string) => {
   const { toast } = useToast();
   const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation, updateRowImage: updateRowImageOperation } = useRowOperations();
   const { deleteImage } = useImageOperations();
+
+  // Save hideCompleted preference to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(HIDE_COMPLETED_STORAGE_KEY, hideCompleted.toString());
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }, [hideCompleted]);
+
+  // Process rows to handle visibility and get in-progress information
+  const processedRows = useMemo(() => {
+    const visibleRows = hideCompleted 
+      ? rows.filter(row => row.make_mode_status !== 'complete')
+      : rows;
+    
+    const inProgressIndex = visibleRows.findIndex(row => row.make_mode_status === 'in_progress');
+    const hiddenCount = rows.length - visibleRows.length;
+    
+    return {
+      rows: visibleRows,
+      inProgressIndex,
+      hiddenCount
+    };
+  }, [rows, hideCompleted]);
 
   const fetchRows = async () => {
     try {
@@ -245,10 +283,13 @@ export const useProjectRows = (projectId: string) => {
             const currentIndex = rows.findIndex(row => row.id === id);
             const subsequentRows = rows.slice(currentIndex + 1);
             
-            // Update current row
+            // Update current row - reset counter when unchecking
             await supabase
               .from('project_rows')
-              .update({ make_mode_status: status })
+              .update({ 
+                make_mode_status: status,
+                make_mode_counter: 0  // Reset counter when marking as incomplete
+              })
               .eq('id', id);
 
             // Update subsequent rows (only rows and notes, not dividers)
@@ -412,8 +453,10 @@ export const useProjectRows = (projectId: string) => {
   };
 
   return {
-    rows,
+    ...processedRows,
     loading,
+    hideCompleted,
+    setHideCompleted,
     confirmDialog,
     setConfirmDialog,
     addRow,

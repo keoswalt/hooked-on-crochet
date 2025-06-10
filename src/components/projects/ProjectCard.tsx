@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -98,7 +97,7 @@ export const ProjectCard = ({
               <img
                 src={project.featured_image_url}
                 alt={`${project.name} featured image`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
               />
             ) : (
               <div className="text-gray-400 text-sm">No image</div>

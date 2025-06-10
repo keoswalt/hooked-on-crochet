@@ -18,6 +18,7 @@ interface ProjectDetailProps {
   onProjectExportPDF: () => void;
   onEditProject: (project: Project) => void;
   onProjectUpdate?: (updatedProject: Project) => void;
+  onDuplicate: () => void;
   userId: string;
 }
 
@@ -29,6 +30,7 @@ export const ProjectDetail = ({
   onProjectExportPDF,
   onEditProject,
   onProjectUpdate,
+  onDuplicate,
   userId
 }: ProjectDetailProps) => {
   const {
@@ -45,6 +47,10 @@ export const ProjectDetail = ({
     loading,
     confirmDialog,
     setConfirmDialog,
+    hideCompleted,
+    hiddenCount,
+    inProgressIndex,
+    handleToggleHideCompleted,
     handleAddRow,
     handleAddNote,
     handleAddDivider,
@@ -78,13 +84,14 @@ export const ProjectDetail = ({
 
   return (
     <div className="space-y-6">
-      <ProjectHeader 
-        project={project} 
+      <ProjectHeader
+        project={project}
         onBack={onBack}
         onEdit={handleEditProject}
         onDelete={handleDeleteProject}
         onExport={onProjectExport}
         onExportPDF={onProjectExportPDF}
+        onDuplicate={onDuplicate}
         onProjectUpdate={handleProjectUpdate}
         userId={userId}
       />
@@ -101,6 +108,10 @@ export const ProjectDetail = ({
         rows={rows}
         mode={mode}
         userId={userId}
+        hideCompleted={hideCompleted}
+        hiddenCount={hiddenCount}
+        inProgressIndex={inProgressIndex}
+        onToggleHideCompleted={handleToggleHideCompleted}
         onDragEnd={handleDragEnd}
         onUpdateCounter={handleUpdateCounter}
         onUpdateInstructions={handleUpdateInstructions}

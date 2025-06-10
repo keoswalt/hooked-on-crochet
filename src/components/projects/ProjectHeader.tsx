@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -24,6 +23,7 @@ interface ProjectHeaderProps {
   onDelete: () => void;
   onExport: () => void;
   onExportPDF: () => void;
+  onDuplicate: () => void;
   onProjectUpdate?: (updatedProject: Project) => void;
   userId: string;
 }
@@ -34,7 +34,8 @@ export const ProjectHeader = ({
   onEdit, 
   onDelete, 
   onExport, 
-  onExportPDF, 
+  onExportPDF,
+  onDuplicate,
   onProjectUpdate,
   userId 
 }: ProjectHeaderProps) => {
@@ -193,6 +194,7 @@ export const ProjectHeader = ({
               onDelete={onDelete}
               onExport={onExport}
               onExportPDF={onExportPDF}
+              onDuplicate={onDuplicate}
             />
           </div>
         </CardHeader>
