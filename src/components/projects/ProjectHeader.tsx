@@ -146,12 +146,22 @@ export const ProjectHeader = ({
                   />
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <span>Hook: {project.hook_size}</span>
                   <span>•</span>
                   <span>Yarn Weight: {project.yarn_weight}</span>
-                  <span>•</span>
-                  <div className="flex items-center gap-2">
+                </div>
+                
+                {project.details && (
+                  <LinkifiedText 
+                    text={project.details} 
+                    className="text-gray-700 mt-2"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
                     <span>Status:</span>
                     <Select value={project.status || ''} onValueChange={handleStatusChange}>
                       <SelectTrigger className="w-32 h-8">
@@ -165,16 +175,6 @@ export const ProjectHeader = ({
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                
-                {project.details && (
-                  <LinkifiedText 
-                    text={project.details} 
-                    className="text-gray-700 mt-2"
-                  />
-                )}
-              </div>
-            </div>
             
             {project.featured_image_url && (
               <div className="w-full">

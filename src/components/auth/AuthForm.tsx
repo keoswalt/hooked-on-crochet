@@ -33,7 +33,7 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
         if (error) throw error;
         toast({
           title: "Account created",
-          description: "Please check your email to verify your account.",
+          description: "Account created successfully!",
         });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
