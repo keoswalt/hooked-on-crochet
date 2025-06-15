@@ -20,12 +20,13 @@ import { NewPlanDialog } from '@/components/planner/NewPlanDialog';
 import { PlansGrid } from '@/components/planner/PlansGrid';
 import { PlannerRelatedOverview } from '@/components/planner/PlannerRelatedOverview';
 
-type Plan = Database['public']['Tables']['plans']['Row'] & {
+// Export these types so they can be used elsewhere
+export type Plan = Database['public']['Tables']['plans']['Row'] & {
   featured_image_url?: string | null;
 };
 
-type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
-type Swatch = Database['public']['Tables']['swatches']['Row'];
+export type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
+export type Swatch = Database['public']['Tables']['swatches']['Row'];
 
 export type PlannerPageProps = {
   user: User;
