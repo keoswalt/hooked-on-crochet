@@ -19,11 +19,8 @@ export default function PlanYarnCard({ yarn, onRemove, onEdit }: PlanYarnCardPro
 
   return (
     <div className="relative">
-      <YarnCard
-        yarn={yarn}
-        onEdit={() => onEdit(yarn)}
-        onDelete={() => setShowRemoveConfirm(true)}
-      />
+      {/* YarnCard now receives no edit/delete props, so no duplicate buttons */}
+      <YarnCard yarn={yarn} />
       <Button
         size="icon"
         variant="destructive"
@@ -54,3 +51,4 @@ export default function PlanYarnCard({ yarn, onRemove, onEdit }: PlanYarnCardPro
     </div>
   );
 }
+
