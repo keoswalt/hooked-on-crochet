@@ -27,9 +27,9 @@ type Plan = Database['public']['Tables']['plans']['Row'] & {
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 type Swatch = Database['public']['Tables']['swatches']['Row'];
 
-interface PlannerPageProps {
+export type PlannerPageProps = {
   user: User;
-}
+};
 
 const PLANS_PER_PAGE = 9;
 
