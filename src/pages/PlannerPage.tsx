@@ -18,7 +18,10 @@ import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import { NewPlanDialog } from '@/components/planner/NewPlanDialog';
 
-type Plan = Database['public']['Tables']['plans']['Row'];
+type Plan = Database['public']['Tables']['plans']['Row'] & {
+  featured_image_url?: string | null;
+};
+
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 type Swatch = Database['public']['Tables']['swatches']['Row'];
 
@@ -123,10 +126,10 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       
       const offset = (page - 1) * PLANS_PER_PAGE;
       
-      // Build the query
+      // Compose the SQL to join plan_images table for featured images
       let plansQuery = supabase
         .from('plans')
-        .select('*')
+        .select('*, plan_images!left(is_featured, image_url)')
         .eq('user_id', user.id);
 
       let countQuery = supabase
@@ -134,25 +137,33 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
-      // Add search filter if query exists
       if (query.trim()) {
         const searchFilter = `name.ilike.%${query}%,description.ilike.%${query}%`;
         plansQuery = plansQuery.or(searchFilter);
         countQuery = countQuery.or(searchFilter);
       }
 
-      // Execute count query
+      // Count
       const { count, error: countError } = await countQuery;
       if (countError) throw countError;
       setTotalPlans(count || 0);
 
-      // Execute plans query with pagination
+      // Get data (with featured image)
       const { data: planData, error: plansError } = await plansQuery
         .order('updated_at', { ascending: false })
         .range(offset, offset + PLANS_PER_PAGE - 1);
 
       if (plansError) throw plansError;
-      setPlans(planData || []);
+
+      // Map image
+      const plansWithImage = (planData || []).map((plan: any) => ({
+        ...plan,
+        featured_image_url: Array.isArray(plan.plan_images)
+          ? plan.plan_images.find((img: any) => img.is_featured === true)?.image_url
+          : null
+      }));
+
+      setPlans(plansWithImage);
 
     } catch (error: any) {
       console.error('Error fetching plans:', error);
@@ -323,17 +334,26 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                     className="cursor-pointer"
                     onClick={() => navigate(`/planner/${plan.id}`)}
                   >
+                    {/* Image at top */}
+                    <div className="w-full h-32 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+                      {plan.featured_image_url ? (
+                        <img
+                          src={plan.featured_image_url}
+                          alt={plan.name || 'Plan image'}
+                          className="w-full h-full object-cover object-center"
+                          draggable={false}
+                        />
+                      ) : (
+                        <div className="text-gray-300 text-xs">No image</div>
+                      )}
+                    </div>
                     <CardHeader>
-                      <CardTitle>{plan.name}</CardTitle>
+                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
                       {plan.description && (
                         <CardDescription>{plan.description}</CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-500">
-                        Last modified: {new Date(plan.updated_at).toLocaleDateString()}
-                      </p>
-                    </CardContent>
+                    {/* REMOVED Last modified section */}
                   </div>
                   <Button
                     variant="ghost"
@@ -342,7 +362,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                       e.stopPropagation();
                       setPlanToDelete(plan);
                     }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-gray-100"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
