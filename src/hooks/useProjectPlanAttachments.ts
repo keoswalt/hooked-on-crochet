@@ -29,7 +29,7 @@ export function useProjectPlanAttachments(projectId: string | null, user: User |
       return;
     }
     setLoading(true);
-    // Get all plans this project is attached to, include plan and featured image
+
     const fetch = async () => {
       const { data, error } = await supabase
         .from("plan_project_attachments" as any)
@@ -38,31 +38,30 @@ export function useProjectPlanAttachments(projectId: string | null, user: User |
         .eq("user_id", user.id)
         .order("attached_at");
       if (!error && Array.isArray(data)) {
-        // For each plan, get its featured image (first image with is_featured, else first image)
         const planRows: PlanAttachmentRow[] = await Promise.all(
           data.map(async (row: any) => {
             let plan_featured_image: string | null = null;
             if (row.plan?.id) {
               // Get featured image from plan_images
-              const { data: imgData } = await supabase
+              const { data: imgData, error: imgError } = await supabase
                 .from("plan_images" as any)
                 .select("image_url")
                 .eq("plan_id", row.plan.id)
                 .eq("is_featured", true)
                 .limit(1)
                 .maybeSingle();
-              if (imgData?.image_url) {
+              if (imgData && imgData.image_url) {
                 plan_featured_image = imgData.image_url;
               } else {
                 // fallback: just get first image
-                const { data: firstImgData } = await supabase
+                const { data: firstImgData, error: firstImgError } = await supabase
                   .from("plan_images" as any)
                   .select("image_url")
                   .eq("plan_id", row.plan.id)
                   .order("uploaded_at")
                   .limit(1)
                   .maybeSingle();
-                if (firstImgData?.image_url) {
+                if (firstImgData && firstImgData.image_url) {
                   plan_featured_image = firstImgData.image_url;
                 }
               }
