@@ -337,7 +337,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                   className="hover:shadow-lg transition-shadow relative group flex flex-col md:flex-row items-stretch h-full"
                 >
                   {/* Image Section (stacked on mobile, left on desktop) */}
-                  <div className="w-full md:w-48 md:h-48 flex items-center justify-center p-4 shrink-0">
+                  <div className="w-full md:w-48 md:h-48 flex items-center justify-center p-4 shrink-0 relative">
                     <div className="w-full h-48 md:w-48 md:h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {plan.featured_image_url ? (
                         <img
@@ -349,6 +349,21 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                       ) : (
                         <div className="text-gray-300 text-xs text-center w-full">No image</div>
                       )}
+                    </div>
+                    {/* Delete button - overlay top-right on image for mobile and desktop */}
+                    <div className="absolute top-2 right-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlanToDelete(plan);
+                        }}
+                        className={`h-8 w-8 p-0 hover:bg-gray-100 
+                          opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity`}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                   {/* Card Content Section (stacked row below image on mobile, right on desktop) */}
@@ -362,21 +377,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                         <CardDescription className="truncate">{plan.description}</CardDescription>
                       )}
                     </CardHeader>
-                  </div>
-                  {/* Delete button - full width row on mobile, top-right overlay on desktop */}
-                  <div className="w-full flex justify-end md:absolute md:top-2 md:right-2 md:w-auto md:justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPlanToDelete(plan);
-                      }}
-                      className={`h-8 w-8 p-0 hover:bg-gray-100 
-                        ${"opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"}`}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
                   </div>
                 </Card>
               ))}
