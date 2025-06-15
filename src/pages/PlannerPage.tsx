@@ -329,31 +329,19 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           </Card>
         ) : (
           <>
-            {/* HORIZONTAL FLEX PLAN CARDS */}
+            {/* Plan cards row: IMAGE LEFT, CONTENT RIGHT, Large Square */}
             <div className="grid grid-cols-1 gap-6 mb-6">
               {plans.map((plan) => (
                 <Card
                   key={plan.id}
                   className="hover:shadow-lg transition-shadow relative group flex flex-row items-stretch"
                 >
-                  {/* Card Content Section (Left Side) */}
+                  {/* Image Section (Left Side, now large, square) */}
                   <div
-                    className="flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
-                    onClick={() => navigate(`/planner/${plan.id}`)}
+                    className="flex items-center justify-center p-4"
+                    style={{ minWidth: '192px' }}
                   >
-                    <CardHeader className="p-0 mb-2">
-                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
-                      {plan.description && (
-                        <CardDescription className="truncate">{plan.description}</CardDescription>
-                      )}
-                    </CardHeader>
-                  </div>
-                  {/* Image Section (Right Side) */}
-                  <div
-                    className="flex items-center justify-center p-2"
-                    style={{ minWidth: '96px' }}
-                  >
-                    <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <div className="w-48 h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {plan.featured_image_url ? (
                         <img
                           src={plan.featured_image_url}
@@ -365,6 +353,18 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                         <div className="text-gray-300 text-xs text-center w-full">No image</div>
                       )}
                     </div>
+                  </div>
+                  {/* Card Content Section (Right Side) */}
+                  <div
+                    className="flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
+                    onClick={() => navigate(`/planner/${plan.id}`)}
+                  >
+                    <CardHeader className="p-0 mb-2">
+                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
+                      {plan.description && (
+                        <CardDescription className="truncate">{plan.description}</CardDescription>
+                      )}
+                    </CardHeader>
                   </div>
                   {/* Delete button - overlay on the top-right of card (absolute) */}
                   <Button
