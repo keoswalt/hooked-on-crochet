@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
@@ -36,7 +37,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     featured_image_url: null,
   });
 
-  const { projects, selectedProject, setSelectedProject, loading, fetchProjects, updateProject } = useProjectState(user);
+  const { projects, selectedProject, setSelectedProject, loading, fetchProjects } = useProjectState(user);
   const {
     loading: operationsLoading,
     handleSaveProject,
@@ -102,7 +103,6 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
 
       const savedProject = await handleSaveProject(projectData, editingProject);
       if (savedProject) {
-        updateProject(savedProject);
         setShowForm(false);
         setEditingProject(null);
       }
@@ -112,6 +112,10 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingProject(null);
+  };
+
+  const handleProjectUpdate = async () => {
+    await fetchProjects();
   };
 
   return (
@@ -145,7 +149,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
             setEditingProject(project);
             setShowForm(true);
           }}
-          onProjectUpdate={updateProject}
+          onProjectUpdate={handleProjectUpdate}
           onDuplicate={() => handleDuplicateWrapper(selectedProject)}
           userId={user.id}
         />

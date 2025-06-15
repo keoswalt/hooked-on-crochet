@@ -18,6 +18,7 @@ export const useProjectState = (user: User) => {
         .from('projects')
         .select('*')
         .eq('user_id', user.id)
+        .order('is_favorite', { ascending: false })
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -33,24 +34,11 @@ export const useProjectState = (user: User) => {
     fetchProjects();
   }, [user.id]);
 
-  const updateProject = (updatedProject: Project) => {
-    console.log('Updating project in state:', updatedProject);
-    
-    // Update the projects array
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    
-    // Update the selected project if it's the same one
-    if (selectedProject && selectedProject.id === updatedProject.id) {
-      setSelectedProject(updatedProject);
-    }
-  };
-
   return {
     projects,
     selectedProject,
     setSelectedProject,
     loading,
     fetchProjects,
-    updateProject,
   };
 };

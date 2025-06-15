@@ -63,31 +63,24 @@ export const ProjectListView = ({
     }
   }, [projects, fetchProjectTags, tagsRefreshTrigger]);
 
-  // Enhanced filter and sort projects based on search term and favorites
+  // Filter projects based on search term (projects are already sorted by database)
   const filteredProjects = useMemo(() => {
-    let filtered = projects;
-    
-    if (searchTerm.trim()) {
-      const lowercaseSearch = searchTerm.toLowerCase();
-      filtered = projects.filter(project => {
-        // Search in project name
-        const nameMatch = project.name.toLowerCase().includes(lowercaseSearch);
-        
-        // Search in project tags
-        const tags = projectTags[project.id] || [];
-        const tagMatch = tags.some(tag => 
-          tag.name.toLowerCase().includes(lowercaseSearch)
-        );
-        
-        return nameMatch || tagMatch;
-      });
+    if (!searchTerm.trim()) {
+      return projects;
     }
     
-    // Sort by favorite status first, then by updated_at
-    return filtered.sort((a, b) => {
-      if (a.is_favorite && !b.is_favorite) return -1;
-      if (!a.is_favorite && b.is_favorite) return 1;
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return projects.filter(project => {
+      // Search in project name
+      const nameMatch = project.name.toLowerCase().includes(lowercaseSearch);
+      
+      // Search in project tags
+      const tags = projectTags[project.id] || [];
+      const tagMatch = tags.some(tag => 
+        tag.name.toLowerCase().includes(lowercaseSearch)
+      );
+      
+      return nameMatch || tagMatch;
     });
   }, [projects, searchTerm, projectTags]);
 
