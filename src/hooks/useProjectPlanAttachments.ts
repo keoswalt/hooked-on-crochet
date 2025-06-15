@@ -18,6 +18,10 @@ type PlanAttachmentRow = {
   plan_featured_image?: string | null;
 };
 
+function isImageObject(obj: any): obj is { image_url: string } {
+  return obj && typeof obj === "object" && "image_url" in obj && typeof obj.image_url === "string";
+}
+
 export function useProjectPlanAttachments(projectId: string | null, user: User | null) {
   const [plans, setPlans] = useState<PlanAttachmentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +54,7 @@ export function useProjectPlanAttachments(projectId: string | null, user: User |
                 .eq("is_featured", true)
                 .limit(1)
                 .maybeSingle();
-              if (imgData && imgData.image_url) {
+              if (!imgError && isImageObject(imgData)) {
                 plan_featured_image = imgData.image_url;
               } else {
                 // fallback: just get first image
@@ -61,7 +65,7 @@ export function useProjectPlanAttachments(projectId: string | null, user: User |
                   .order("uploaded_at")
                   .limit(1)
                   .maybeSingle();
-                if (firstImgData && firstImgData.image_url) {
+                if (!firstImgError && isImageObject(firstImgData)) {
                   plan_featured_image = firstImgData.image_url;
                 }
               }
