@@ -144,10 +144,9 @@ export const ProjectHeader = ({
                   <h1 className="text-2xl font-bold">{project.name}</h1>
                   <TagDisplay 
                     entityId={project.id}
-                    entityType="project"
+                    entityType="pattern"
                     userId={userId}
-                    onRemoveTag={handleRemoveTag}
-                    showRemoveButton={false}
+                    readonly={true}
                   />
                 </div>
                 

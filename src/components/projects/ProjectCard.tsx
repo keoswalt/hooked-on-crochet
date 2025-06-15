@@ -77,10 +77,9 @@ export const ProjectCard = ({
             <div className="mb-1">
               <TagDisplay 
                 entityId={project.id}
-                entityType="project"
+                entityType="pattern"
                 userId={userId}
-                showRemoveButton={false}
-                size="sm"
+                readonly={true}
               />
             </div>
           )}

@@ -10,7 +10,7 @@ type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface TagDisplayProps {
   entityId: string;
-  entityType: 'pattern' | 'project';
+  entityType: 'pattern';
   userId: string;
   onTagsUpdate?: () => Promise<void>;
   readonly?: boolean;
@@ -33,14 +33,13 @@ export const TagDisplay = ({
   const fetchTags = async () => {
     try {
       setLoading(true);
-      const tableName = entityType === 'pattern' ? 'pattern_tags' : 'project_tags';
       const { data, error } = await supabase
-        .from(tableName)
+        .from('pattern_tags')
         .select(`
           tag_id,
           tags (*)
         `)
-        .eq(`${entityType}_id`, entityId);
+        .eq('pattern_id', entityId);
 
       if (error) throw error;
       
@@ -58,11 +57,10 @@ export const TagDisplay = ({
     if (readonly) return;
     
     try {
-      const tableName = entityType === 'pattern' ? 'pattern_tags' : 'project_tags';
       const { error } = await supabase
-        .from(tableName)
+        .from('pattern_tags')
         .delete()
-        .eq(`${entityType}_id`, entityId)
+        .eq('pattern_id', entityId)
         .eq('tag_id', tagId);
 
       if (error) throw error;
