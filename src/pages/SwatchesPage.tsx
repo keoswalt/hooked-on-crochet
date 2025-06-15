@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -74,6 +73,17 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
 
   const handleEditSwatch = (swatch: Swatch) => {
     setEditingSwatch(swatch);
+  };
+
+  const handleCloneSwatch = (swatch: Swatch) => {
+    const clonedSwatch = {
+      ...swatch,
+      id: undefined as any, // Will be auto-generated
+      title: `${swatch.title} (Copy)`,
+      created_at: undefined as any,
+      updated_at: undefined as any,
+    };
+    setEditingSwatch(clonedSwatch);
   };
 
   const handleDeleteSwatch = async (swatchId: string) => {
@@ -180,6 +190,7 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
               swatch={swatch}
               onEdit={handleEditSwatch}
               onDelete={handleDeleteSwatch}
+              onClone={handleCloneSwatch}
             />
           ))}
         </div>
