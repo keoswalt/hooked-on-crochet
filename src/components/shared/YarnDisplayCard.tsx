@@ -72,9 +72,10 @@ export const YarnDisplayCard = ({
             </span>
           )}
           {yarn.weight && (
-            <div className="flex flex-col w-full pt-1">
+            // Updated layout to single centered line, with chip wrapping if necessary
+            <div className="flex flex-wrap items-center justify-center gap-2 w-full pt-1">
               <span className="text-xs font-medium mb-0.5">Weight:</span>
-              <Badge variant="secondary" className="max-w-fit break-words whitespace-normal">
+              <Badge variant="secondary" className="max-w-full break-words whitespace-normal">
                 {getYarnWeightLabel(yarn.weight)}
               </Badge>
             </div>
@@ -87,3 +88,4 @@ export const YarnDisplayCard = ({
 };
 
 export default YarnDisplayCard;
+
