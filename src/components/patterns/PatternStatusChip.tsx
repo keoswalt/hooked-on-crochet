@@ -9,41 +9,47 @@ interface PatternStatusChipProps {
 }
 
 export const PatternStatusChip = ({ status }: PatternStatusChipProps) => {
-  if (!status) return null;
+  if (!status) {
+    return null;
+  }
 
-  const getStatusColor = (status: PatternStatus) => {
+  const getStatusConfig = (status: PatternStatus) => {
     switch (status) {
-      case 'not_started':
-        return 'bg-gray-100 text-gray-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'on_hold':
-        return 'bg-yellow-100 text-yellow-800';
+      case 'Writing':
+        return { label: 'Writing', className: 'bg-blue-100 text-blue-800' };
+      case 'Ready':
+        return { label: 'Ready', className: 'bg-green-100 text-green-800' };
+      case 'Making':
+        return { label: 'Making', className: 'bg-yellow-100 text-yellow-800' };
+      case 'Made':
+        return { label: 'Made', className: 'bg-purple-100 text-purple-800' };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return { label: status, className: 'bg-gray-100 text-gray-800' };
     }
   };
 
-  const getStatusLabel = (status: PatternStatus) => {
+  const getStatusIcon = (status: PatternStatus) => {
     switch (status) {
-      case 'not_started':
-        return 'Not Started';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'on_hold':
-        return 'On Hold';
+      case 'Writing':
+        return '✏️';
+      case 'Ready':
+        return '✅';
+      case 'Making':
+        return '🧶';
+      case 'Made':
+        return '🎉';
       default:
-        return status;
+        return '';
     }
   };
+
+  const config = getStatusConfig(status);
+  const icon = getStatusIcon(status);
 
   return (
-    <Badge variant="secondary" className={`text-xs ${getStatusColor(status)}`}>
-      {getStatusLabel(status)}
+    <Badge variant="outline" className={config.className}>
+      {icon && <span className="mr-1">{icon}</span>}
+      {config.label}
     </Badge>
   );
 };

@@ -16,7 +16,7 @@ export const PatternImageSection = ({
     <div className="space-y-2">
       <label className="text-sm font-medium">Featured Image</label>
       <ImageUploader
-        currentImageUrl={imageUrl}
+        imageUrl={imageUrl}
         onImageChange={onImageChange}
         bucket="pattern-images"
         folder={`${userId}/featured`}

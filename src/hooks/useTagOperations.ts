@@ -1,17 +1,17 @@
 
 import { useTagCRUD } from './useTagCRUD';
 import { useTagQueries } from './useTagQueries';
-import { useProjectTagOperations } from './useProjectTagOperations';
+import { usePatternTagOperations } from './usePatternTagOperations';
 
 export const useTagOperations = (userId: string) => {
   const tagCRUD = useTagCRUD(userId);
   const tagQueries = useTagQueries(userId);
-  const projectTagOps = useProjectTagOperations();
+  const patternTagOps = usePatternTagOperations();
 
   return {
-    loading: tagCRUD.loading || projectTagOps.loading,
+    loading: tagCRUD.loading,
     ...tagQueries,
     ...tagCRUD,
-    ...projectTagOps,
+    ...patternTagOps,
   };
 };

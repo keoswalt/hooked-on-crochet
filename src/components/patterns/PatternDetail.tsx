@@ -36,7 +36,9 @@ export const PatternDetail = ({
   onDuplicate,
   userId,
 }: PatternDetailProps) => {
-  const [mode, setMode] = useState<'edit' | 'make'>(pattern.last_mode || 'edit');
+  const [mode, setMode] = useState<'edit' | 'make'>(
+    (pattern.last_mode as 'edit' | 'make') || 'edit'
+  );
 
   const {
     displayedRows,
@@ -107,9 +109,9 @@ export const PatternDetail = ({
               mode={mode}
               hideCompleted={hideCompleted}
               onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
-              onUpdateRow={handleUpdateRow}
-              onDeleteRow={handleDeleteRow}
-              onMoveRow={handleMoveRow}
+              onRowUpdate={handleUpdateRow}
+              onRowDelete={handleDeleteRow}
+              onRowMove={handleMoveRow}
               onResetProgress={handleResetProgress}
               onCompleteRow={handleCompleteRow}
               onUncompleteRow={handleUncompleteRow}
@@ -125,8 +127,8 @@ export const PatternDetail = ({
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
         onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        description={confirmDialog.description}
+        confirmTitle={confirmDialog.title}
+        confirmDescription={confirmDialog.description}
       />
     </div>
   );

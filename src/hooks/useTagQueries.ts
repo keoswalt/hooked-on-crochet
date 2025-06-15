@@ -21,20 +21,20 @@ export const useTagQueries = (userId: string) => {
     }
   };
 
-  const fetchProjectTags = async (projectId: string): Promise<Tag[]> => {
+  const fetchPatternTags = async (patternId: string): Promise<Tag[]> => {
     try {
       const { data, error } = await supabase
-        .from('project_tags')
+        .from('pattern_tags')
         .select(`
           tag_id,
           tags (*)
         `)
-        .eq('project_id', projectId);
+        .eq('pattern_id', patternId);
 
       if (error) throw error;
       return data?.map(pt => pt.tags).filter(Boolean) as Tag[] || [];
     } catch (error: any) {
-      console.error('Error fetching project tags:', error);
+      console.error('Error fetching pattern tags:', error);
       return [];
     }
   };
@@ -42,7 +42,7 @@ export const useTagQueries = (userId: string) => {
   const getTagUsageCount = async (tagId: string): Promise<number> => {
     try {
       const { count, error } = await supabase
-        .from('project_tags')
+        .from('pattern_tags')
         .select('*', { count: 'exact' })
         .eq('tag_id', tagId);
 
@@ -56,7 +56,7 @@ export const useTagQueries = (userId: string) => {
 
   return {
     fetchUserTags,
-    fetchProjectTags,
+    fetchPatternTags,
     getTagUsageCount,
   };
 };
