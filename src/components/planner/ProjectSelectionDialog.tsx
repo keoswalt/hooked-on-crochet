@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import ProjectPreviewCard from "./ProjectPreviewCard";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectSearch } from "@/components/projects/ProjectSearch"; // Import the search input
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
@@ -27,6 +28,7 @@ export default function ProjectSelectionDialog({
   const [projects, setProjects] = useState<Project[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // NEW: search term state
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,29 +69,49 @@ export default function ProjectSelectionDialog({
     onOpenChange(false);
   };
 
+  // Filter projects by search
+  const filteredProjects = projects
+    .filter((proj) => !excludedProjectIds.includes(proj.id))
+    .filter((proj) =>
+      !searchTerm
+        ? true
+        : proj.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          proj.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl flex flex-col p-0">
         <DialogHeader className="bg-gray-50 px-6 py-3 border-b border-gray-100">
           <DialogTitle>Attach Projects to Plan</DialogTitle>
         </DialogHeader>
+        {/* Sticky search bar */}
+        <div
+          className="sticky top-0 z-20 bg-white px-6 pt-4 pb-2 border-b border-gray-100"
+          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.01)" }}
+        >
+          <ProjectSearch
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
+        </div>
         <div className="flex-1 overflow-y-auto px-6 py-4 min-h-[200px]">
           {loading ? (
             <div className="text-center text-sm text-gray-600">Loading...</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {projects
-                .filter((p) => !excludedProjectIds.includes(p.id))
-                .map((project) => (
-                  <ProjectPreviewCard
-                    key={project.id}
-                    project={project}
-                    selected={selected.includes(project.id)}
-                    onSelect={() => handleSelect(project.id)}
-                  />
-                ))}
-              {projects.filter((p) => !excludedProjectIds.includes(p.id)).length === 0 && (
-                <div className="col-span-full text-sm text-gray-400 py-4">No projects available to attach.</div>
+              {filteredProjects.map((project) => (
+                <ProjectPreviewCard
+                  key={project.id}
+                  project={project}
+                  selected={selected.includes(project.id)}
+                  onSelect={() => handleSelect(project.id)}
+                />
+              ))}
+              {filteredProjects.length === 0 && (
+                <div className="col-span-full text-sm text-gray-400 py-4">
+                  No projects found.
+                </div>
               )}
             </div>
           )}
@@ -106,3 +128,4 @@ export default function ProjectSelectionDialog({
     </Dialog>
   );
 }
+
