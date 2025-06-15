@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { CanvasElements } from "./canvasTypes";
+import type { Json } from "@/integrations/supabase/types";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -34,7 +35,7 @@ export function useAutoSave({ planId, elements, debounceMs = 1200, onSaved }: Us
       try {
         const { error } = await supabase
           .from("plans")
-          .update({ canvas_data: elements as unknown }) // Explicitly cast as unknown, which matches Json type
+          .update({ canvas_data: elements as unknown as Json }) // Fix: double cast for Supabase type
           .eq("id", planId);
 
         if (error) {
