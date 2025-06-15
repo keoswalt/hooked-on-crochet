@@ -106,17 +106,28 @@ export const PatternDetail = ({
           ) : (
             <RowsList
               rows={displayedRows}
+              allRows={editModeRows}
               mode={mode}
-              hideCompleted={hideCompleted}
-              onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
-              onRowUpdate={handleUpdateRow}
-              onRowDelete={handleDeleteRow}
-              onRowMove={handleMoveRow}
-              onResetProgress={handleResetProgress}
-              onCompleteRow={handleCompleteRow}
-              onUncompleteRow={handleUncompleteRow}
-              onMarkInProgress={handleMarkInProgress}
               userId={userId}
+              hideCompleted={hideCompleted}
+              hiddenCount={0}
+              hasCompletedRows={false}
+              inProgressIndex={0}
+              onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
+              onDragEnd={() => {}}
+              onUpdateCounter={(id, counter) => handleUpdateRow(id, { counter })}
+              onUpdateInstructions={(id, instructions) => handleUpdateRow(id, { instructions })}
+              onUpdateLabel={(id, label) => handleUpdateRow(id, { label })}
+              onUpdateTotalStitches={(id, total_stitches) => handleUpdateRow(id, { total_stitches })}
+              onUpdateMakeModeCounter={(id, make_mode_counter) => handleUpdateRow(id, { make_mode_counter })}
+              onUpdateMakeModeStatus={(id, make_mode_status) => handleUpdateRow(id, { make_mode_status })}
+              onToggleLock={(id, is_locked) => handleUpdateRow(id, { is_locked })}
+              onDuplicate={() => {}}
+              onDelete={handleDeleteRow}
+              onUpdateRowImage={(id, image_url) => handleUpdateRow(id, { image_url })}
+              onAddRow={handleAddRow}
+              onAddNote={handleAddNote}
+              onAddDivider={handleAddDivider}
             />
           )}
         </CardContent>
@@ -127,8 +138,8 @@ export const PatternDetail = ({
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
         onConfirm={confirmDialog.onConfirm}
-        confirmTitle={confirmDialog.title}
-        confirmDescription={confirmDialog.description}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
       />
     </div>
   );

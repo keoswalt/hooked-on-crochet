@@ -7,11 +7,11 @@ import { RowCard } from './RowCard';
 import { RowInsertButton } from './RowInsertButton';
 import type { Database } from '@/integrations/supabase/types';
 
-type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
+type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
 
 interface RowsListProps {
-  rows: ProjectRow[];
-  allRows: ProjectRow[]; // All rows for consistent numbering
+  rows: PatternRow[];
+  allRows?: PatternRow[]; // Make optional with default
   mode: 'edit' | 'make';
   userId: string;
   hideCompleted: boolean;
@@ -27,7 +27,7 @@ interface RowsListProps {
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
-  onDuplicate: (row: ProjectRow) => void;
+  onDuplicate: (row: PatternRow) => void;
   onDelete: (id: string) => void;
   onUpdateRowImage: (id: string, imageUrl: string | null) => void;
   onAddRow: (insertAfterPosition?: number) => void;
@@ -37,7 +37,7 @@ interface RowsListProps {
 
 export const RowsList = ({
   rows,
-  allRows,
+  allRows = rows, // Default to rows if allRows not provided
   mode,
   userId,
   hideCompleted,
@@ -61,8 +61,11 @@ export const RowsList = ({
   onAddDivider
 }: RowsListProps) => {
   // Calculate row numbers based on all rows (not filtered) for consistent numbering
-  const getRowNumber = (currentRow: ProjectRow): number | undefined => {
+  const getRowNumber = (currentRow: PatternRow): number | undefined => {
     if (currentRow.type !== 'row') return undefined;
+    
+    // Safely handle allRows being undefined
+    if (!allRows) return undefined;
     
     const currentIndex = allRows.findIndex(row => row.id === currentRow.id);
     if (currentIndex === -1) return undefined;

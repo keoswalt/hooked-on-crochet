@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { PatternSearch } from './PatternSearch';
 import { PatternGrid } from './PatternGrid';
@@ -43,25 +42,31 @@ export const PatternListView = ({
 }: PatternListViewProps) => {
   const [patternTags, setPatternTags] = useState<Record<string, Tag[]>>({});
   const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
-  const { fetchProjectTags } = useTagOperations(userId);
+  const tagOps = useTagOperations(userId);
 
   // Load tags for all patterns
   useEffect(() => {
     const loadAllPatternTags = async () => {
-      const tagsMap: Record<string, Tag[]> = {};
-      
-      for (const pattern of patterns) {
-        const tags = await fetchProjectTags(pattern.id);
-        tagsMap[pattern.id] = tags;
+      try {
+        const allTags = await Promise.all(
+          patterns.map(pattern => tagOps.fetchPatternTags(pattern.id))
+        );
+        
+        const tagMap = new Map();
+        patterns.forEach((pattern, index) => {
+          tagMap.set(pattern.id, allTags[index]);
+        });
+        
+        setPatternTags(tagMap);
+      } catch (error) {
+        console.error('Error loading pattern tags:', error);
       }
-      
-      setPatternTags(tagsMap);
     };
 
     if (patterns.length > 0) {
       loadAllPatternTags();
     }
-  }, [patterns, fetchProjectTags, tagsRefreshTrigger]);
+  }, [patterns, tagOps, tagsRefreshTrigger]);
 
   // Filter patterns based on search term (patterns are already sorted by database)
   const filteredPatterns = useMemo(() => {

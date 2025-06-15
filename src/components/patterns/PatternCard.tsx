@@ -1,144 +1,110 @@
-
 import { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Heart, Edit, Trash2, Copy, MoreHorizontal } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Star, StarOff, Copy } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { PatternStatusChip } from './PatternStatusChip';
-import { TagDisplay } from '@/components/tags/TagDisplay';
-import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type Pattern = Database['public']['Tables']['patterns']['Row'];
 
 interface PatternCardProps {
   pattern: Pattern;
-  onEdit: () => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
-  onToggleFavorite: () => void;
-  onClick: () => void;
-  onTagsUpdate: () => void;
+  onEdit: (pattern: Pattern) => void;
+  onDelete: (patternId: string) => void;
+  onDuplicate: (pattern: Pattern) => Promise<void>;
+  onToggleFavorite: (patternId: string, isFavorite: boolean) => Promise<void>;
+  onCardClick: (pattern: Pattern) => void;
   userId: string;
 }
 
-export const PatternCard = ({
-  pattern,
-  onEdit,
-  onDelete,
-  onDuplicate,
-  onToggleFavorite,
-  onClick,
-  onTagsUpdate,
-  userId,
+export const PatternCard = ({ 
+  pattern, 
+  onEdit, 
+  onDelete, 
+  onDuplicate, 
+  onToggleFavorite, 
+  onCardClick, 
+  userId 
 }: PatternCardProps) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(pattern.is_favorite);
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    onCardClick(pattern);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(pattern);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDeleteDialog(true);
+    onDelete(pattern.id);
   };
 
-  const handleConfirmDelete = () => {
-    onDelete();
-    setShowDeleteDialog(false);
+  const handleDuplicateClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await onDuplicate(pattern);
   };
 
-  const handleCardClick = () => {
-    onClick();
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await onToggleFavorite(pattern.id, pattern.is_favorite);
   };
 
   return (
-    <>
-      <Card className="group hover:shadow-md transition-shadow cursor-pointer">
-        <CardHeader className="p-4" onClick={handleCardClick}>
-          {pattern.featured_image_url && (
-            <div className="w-full h-48 bg-gray-100 rounded-lg mb-3 overflow-hidden">
-              <img
-                src={pattern.featured_image_url}
-                alt={pattern.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          <div className="flex items-start justify-between">
-            <h3 className="font-semibold text-lg truncate flex-1">{pattern.name}</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite();
-              }}
-              className="ml-2 text-gray-400 hover:text-red-500 p-1"
-            >
-              <Heart className={`h-4 w-4 ${pattern.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
-            </Button>
-          </div>
-        </CardHeader>
+    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 ease-in-out" onClick={handleCardClick}>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{pattern.name}</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleEditClick}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicateClick}>
+                <Copy className="mr-2 h-4 w-4" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDeleteClick}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        <CardContent className="p-4 pt-0" onClick={handleCardClick}>
-          <div className="space-y-3">
-            <div className="flex gap-2 flex-wrap">
-              <Badge variant="outline" className="text-xs">
-                Hook: {pattern.hook_size}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                Yarn: {pattern.yarn_weight}
-              </Badge>
-            </div>
-
-            <PatternStatusChip status={pattern.status} />
-
-            <TagDisplay
-              entityId={pattern.id}
-              entityType="pattern"
-              userId={userId}
-              onTagsUpdate={onTagsUpdate}
-              readonly={true}
-            />
-
-            {pattern.details && (
-              <p className="text-sm text-gray-600 line-clamp-2">{pattern.details}</p>
+        <div className="flex items-center justify-between mb-3">
+          <PatternStatusChip status={pattern.status} />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggleFavorite}
+          >
+            {pattern.is_favorite ? (
+              <Star className="h-4 w-4 text-yellow-500" />
+            ) : (
+              <StarOff className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             )}
-          </div>
-        </CardContent>
+            <span className="sr-only">Toggle Favorite</span>
+          </Button>
+        </div>
 
-        <CardFooter className="p-4 pt-0">
-          <div className="flex w-full gap-2">
-            <Button variant="outline" size="sm" onClick={onEdit} className="flex-1">
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onDuplicate}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Duplicate
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardFooter>
-      </Card>
-
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleConfirmDelete}
-        title="Delete Pattern"
-        description={`Are you sure you want to delete "${pattern.name}"? This action cannot be undone.`}
-      />
-    </>
+        <p className="text-gray-700 dark:text-gray-300">Hook: {pattern.hook_size}, Yarn: {pattern.yarn_weight}</p>
+      </CardContent>
+    </Card>
   );
 };
