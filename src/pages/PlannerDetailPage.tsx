@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, CheckCircle2, XCircle } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -24,12 +23,20 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
   const { plannerId } = useParams();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [editableName, setEditableName] = useState("");
   const [editableDesc, setEditableDesc] = useState("");
+
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+  const debouncedSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // fetch plan logic (unchanged)
   useEffect(() => {
     const fetchPlan = async () => {
       setLoading(true);
@@ -52,11 +59,58 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
       }
     };
     if (plannerId) fetchPlan();
-  }, [plannerId, user.id, toast, navigate]);
+    // eslint-disable-next-line
+  }, [plannerId, user.id]); // do not depend on toast/navigate, as previously
 
-  const handleSave = async () => {
+  // Debounced save effect
+  useEffect(() => {
+    if (!plan) return;
+    // If nothing changed from what's in the db, do not save
+    if (
+      editableName === plan.name &&
+      (editableDesc === (plan.description || ""))
+    ) {
+      return;
+    }
+
+    // Clear previous error/success
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    // Set up debounce
+    if (debouncedSaveTimeout.current) clearTimeout(debouncedSaveTimeout.current);
+    setSaving(true);
+    debouncedSaveTimeout.current = setTimeout(() => {
+      savePlanFields();
+    }, 1000);
+
+    // Cleanup on unmount
+    return () => {
+      if (debouncedSaveTimeout.current) clearTimeout(debouncedSaveTimeout.current);
+    };
+    // eslint-disable-next-line
+  }, [editableName, editableDesc]);
+  
+  // Save on blur in case user clicks away quickly
+  const handleFieldBlur = () => {
+    if (!plan) return;
+    // Only save if there are changes and if debounce hasn't already triggered a save
+    if (
+      editableName === plan.name &&
+      (editableDesc === (plan.description || ""))
+    ) return;
+    if (debouncedSaveTimeout.current) {
+      clearTimeout(debouncedSaveTimeout.current);
+      debouncedSaveTimeout.current = null;
+      savePlanFields();
+    }
+  };
+
+  const savePlanFields = async () => {
     if (!plan) return;
     setSaving(true);
+    setSaveError(null);
+
     try {
       const { error } = await supabase
         .from("plans")
@@ -64,11 +118,15 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
         .eq("id", plan.id);
       if (error) throw error;
       setPlan({ ...plan, name: editableName, description: editableDesc });
+      setSaveSuccess(true);
       toast({ title: "Saved", description: "Plan updated successfully." });
     } catch (err: any) {
+      setSaveError(err.message);
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
+      // Reset success after 2s
+      setTimeout(() => setSaveSuccess(false), 2000);
     }
   };
 
@@ -99,32 +157,33 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
       {/* Page Header and Edit Fields */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 mb-8">
         <div className="flex-1 max-w-2xl">
-          <Input
-            value={editableName}
-            onChange={e => setEditableName(e.target.value)}
-            disabled={saving}
-            maxLength={100}
-            className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
-            placeholder="Plan Name"
-          />
+          <div className="relative">
+            <Input
+              value={editableName}
+              onChange={e => setEditableName(e.target.value)}
+              onBlur={handleFieldBlur}
+              disabled={loading}
+              maxLength={100}
+              className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
+              placeholder="Plan Name"
+            />
+            {/* Show auto-save status */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {saving && <Loader2 className="animate-spin h-5 w-5 text-gray-300" title="Saving..." />}
+              {saveSuccess && !saving && <CheckCircle2 className="h-5 w-5 text-green-500" title="Saved" />}
+              {saveError && !saving && <XCircle className="h-5 w-5 text-red-500" title="Error" />}
+            </div>
+          </div>
           <Textarea
             value={editableDesc}
             onChange={e => setEditableDesc(e.target.value)}
+            onBlur={handleFieldBlur}
             placeholder="Description"
             rows={2}
-            disabled={saving}
+            disabled={loading}
             maxLength={400}
             className="mt-2 resize-none border-none bg-transparent shadow-none p-0 text-base focus:ring-0 focus:outline-none"
           />
-        </div>
-        <div className="shrink-0 flex items-center gap-2">
-          <Button
-            onClick={handleSave}
-            disabled={saving || !editableName.trim() || (editableName === plan.name && editableDesc === (plan.description || ""))}
-            size="sm"
-          >
-            {saving ? "Saving..." : "Save"}
-          </Button>
         </div>
       </div>
 
@@ -137,12 +196,10 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
             Add Image
           </Button>
         </div>
-        {/* IMAGES CONTENT / EMPTY STATE */}
         <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
           Feature coming soon: upload images for your plan.
         </div>
       </section>
-
       {/* RESOURCES SECTION */}
       <section className="mb-8">
         <div className="flex justify-between items-center mb-2">
@@ -156,7 +213,6 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
           Feature coming soon: add and view resources.
         </div>
       </section>
-
       {/* YARN SECTION */}
       <section className="mb-8">
         <div className="flex justify-between items-center mb-2">
@@ -170,7 +226,6 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
           Feature coming soon: attach yarn from your stash.
         </div>
       </section>
-
       {/* SWATCHES SECTION */}
       <section className="mb-8">
         <div className="flex justify-between items-center mb-2">
@@ -184,7 +239,6 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
           Feature coming soon: attach swatches.
         </div>
       </section>
-
       {/* NOTES SECTION */}
       <section className="mb-8">
         <div className="flex justify-between items-center mb-2">
