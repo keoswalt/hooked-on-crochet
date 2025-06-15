@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRowOperations } from './useRowOperations';
@@ -258,11 +257,14 @@ export const useProjectRowsOperations = (
       // Get the row to check for image
       const rowToDelete = rows.find(row => row.id === id);
       
-      // Delete the image from storage if it exists
+      // Start image deletion in background (don't await)
       if (rowToDelete?.image_url) {
-        await deleteImage(rowToDelete.image_url);
+        deleteImage(rowToDelete.image_url).catch(error => {
+          console.error('Background image deletion failed:', error);
+        });
       }
 
+      // Delete the row first
       const { error } = await supabase
         .from('project_rows')
         .delete()
@@ -270,20 +272,42 @@ export const useProjectRowsOperations = (
 
       if (error) throw error;
       
+      // Get updated rows and calculate new positions
       const updatedRows = rows.filter(row => row.id !== id);
       const reorderedRows = updatedRows.map((row, index) => ({
         ...row,
         position: index + 1
       }));
       
-      for (const row of reorderedRows) {
-        await supabase
-          .from('project_rows')
-          .update({ position: row.position })
-          .eq('id', row.id);
+      // Batch update all positions in a single transaction
+      if (reorderedRows.length > 0) {
+        const { error: batchError } = await supabase.rpc('batch_update_positions', {
+          row_updates: reorderedRows.map(row => ({
+            id: row.id,
+            position: row.position
+          }))
+        });
+
+        // If batch function doesn't exist, fall back to the original method but with Promise.all
+        if (batchError?.code === '42883') { // Function doesn't exist
+          const updatePromises = reorderedRows.map(row => 
+            supabase
+              .from('project_rows')
+              .update({ position: row.position })
+              .eq('id', row.id)
+          );
+          
+          const results = await Promise.all(updatePromises);
+          const updateError = results.find(result => result.error);
+          if (updateError?.error) throw updateError.error;
+        } else if (batchError) {
+          throw batchError;
+        }
       }
       
+      // Update local state immediately
       setRows(reorderedRows);
+      
     } catch (error: any) {
       toast({
         title: "Error",
