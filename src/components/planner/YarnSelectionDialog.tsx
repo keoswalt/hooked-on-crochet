@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { YarnFilters } from "@/components/stash/YarnFilters";
@@ -40,11 +39,6 @@ export default function YarnSelectionDialog({
     setSelected(sel => sel.includes(id) ? sel.filter(sid => sid !== id) : [...sel, id]);
   };
 
-  const handleCheckboxClick = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    handleToggleSelect(id);
-  };
-
   const handleSave = () => {
     if (selected.length === 0) {
       toast({ title: "No yarn selected", description: "Select at least one yarn.", variant: "destructive"});
@@ -84,9 +78,10 @@ export default function YarnSelectionDialog({
                     <Checkbox
                       checked={checked}
                       onCheckedChange={() => handleToggleSelect(yarn.id)}
+                      aria-checked={checked}
+                      aria-label={`Select yarn ${yarn.name}`}
                       className="absolute top-2 left-2 bg-white z-10"
-                      tabIndex={-1}
-                      onClick={e => handleCheckboxClick(e, yarn.id)}
+                      tabIndex={0}
                     />
                   </YarnPreviewCard>
                 );
