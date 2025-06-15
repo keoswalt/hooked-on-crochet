@@ -6,8 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import type { Database } from "@/integrations/supabase/types";
 import type { User } from "@supabase/supabase-js";
 
@@ -75,75 +82,127 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
   if (!plan) return null;
 
   return (
-    <div className="container max-w-4xl mx-auto py-8">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Edit Plan</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-3">
-            <Input
-              value={editableName}
-              onChange={e => setEditableName(e.target.value)}
-              disabled={saving}
-              maxLength={100}
-            />
-            <Textarea
-              value={editableDesc}
-              onChange={e => setEditableDesc(e.target.value)}
-              placeholder="Description"
-              rows={3}
-              disabled={saving}
-              maxLength={400}
-            />
-            <div>
-              <Button onClick={handleSave} disabled={saving || !editableName.trim()} size="sm">
-                {saving ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="w-full px-2 md:px-6 py-8">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/planner">Planner</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{plan.name || "..."}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div className="mb-8">
-        <h2 className="font-semibold text-lg mb-2">Images</h2>
-        <div className="border p-4 rounded-md bg-gray-50">
-          {/* TODO: PlanImageManager */}
-          <span className="text-muted-foreground">Feature coming soon: upload images for your plan.</span>
+      {/* Page Header and Edit Fields */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 mb-8">
+        <div className="flex-1 max-w-2xl">
+          <Input
+            value={editableName}
+            onChange={e => setEditableName(e.target.value)}
+            disabled={saving}
+            maxLength={100}
+            className="text-3xl font-bold px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
+            placeholder="Plan Name"
+          />
+          <Textarea
+            value={editableDesc}
+            onChange={e => setEditableDesc(e.target.value)}
+            placeholder="Description"
+            rows={2}
+            disabled={saving}
+            maxLength={400}
+            className="mt-2 resize-none border-none bg-transparent shadow-none p-0 text-base focus:ring-0 focus:outline-none"
+          />
+        </div>
+        <div className="shrink-0 flex items-center gap-2">
+          <Button
+            onClick={handleSave}
+            disabled={saving || !editableName.trim() || (editableName === plan.name && editableDesc === (plan.description || ""))}
+            size="sm"
+          >
+            {saving ? "Saving..." : "Save"}
+          </Button>
         </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="font-semibold text-lg mb-2">Resources</h2>
-        <div className="border p-4 rounded-md bg-gray-50">
-          {/* TODO: PlanResourceManager */}
-          <span className="text-muted-foreground">Feature coming soon: add and view resources.</span>
+      {/* IMAGES SECTION */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold text-lg">Images</h2>
+          <Button size="sm" variant="outline">
+            <Plus className="w-4 h-4 mr-1" />
+            Add Image
+          </Button>
         </div>
-      </div>
+        {/* IMAGES CONTENT / EMPTY STATE */}
+        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+          Feature coming soon: upload images for your plan.
+        </div>
+      </section>
 
-      <div className="mb-8">
-        <h2 className="font-semibold text-lg mb-2">Yarn</h2>
-        <div className="border p-4 rounded-md bg-gray-50">
-          {/* TODO: PlanYarnManager */}
-          <span className="text-muted-foreground">Feature coming soon: attach yarn from your stash.</span>
+      {/* RESOURCES SECTION */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold text-lg">Resources</h2>
+          <Button size="sm" variant="outline">
+            <Plus className="w-4 h-4 mr-1" />
+            Add Resource
+          </Button>
         </div>
-      </div>
+        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+          Feature coming soon: add and view resources.
+        </div>
+      </section>
 
-      <div className="mb-8">
-        <h2 className="font-semibold text-lg mb-2">Swatches</h2>
-        <div className="border p-4 rounded-md bg-gray-50">
-          {/* TODO: PlanSwatchManager */}
-          <span className="text-muted-foreground">Feature coming soon: attach swatches.</span>
+      {/* YARN SECTION */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold text-lg">Yarn</h2>
+          <Button size="sm" variant="outline">
+            <Plus className="w-4 h-4 mr-1" />
+            Add Yarn
+          </Button>
         </div>
-      </div>
+        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+          Feature coming soon: attach yarn from your stash.
+        </div>
+      </section>
 
-      <div className="mb-8">
-        <h2 className="font-semibold text-lg mb-2">Notes</h2>
-        <div className="border p-4 rounded-md bg-gray-50">
-          {/* TODO: Open text field to capture planning notes */}
-          <span className="text-muted-foreground">Feature coming soon: jot down notes about your plan.</span>
+      {/* SWATCHES SECTION */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold text-lg">Swatches</h2>
+          <Button size="sm" variant="outline">
+            <Plus className="w-4 h-4 mr-1" />
+            Add Swatch
+          </Button>
         </div>
-      </div>
+        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+          Feature coming soon: attach swatches.
+        </div>
+      </section>
+
+      {/* NOTES SECTION */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold text-lg">Notes</h2>
+          <Button size="sm" variant="outline">
+            <Plus className="w-4 h-4 mr-1" />
+            Add Note
+          </Button>
+        </div>
+        <div>
+          <Textarea
+            placeholder="Jot down notes about your plan..."
+            rows={3}
+            disabled
+            className="resize-none bg-gray-50"
+          />
+        </div>
+      </section>
     </div>
   );
 };
