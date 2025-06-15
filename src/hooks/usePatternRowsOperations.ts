@@ -25,21 +25,14 @@ export const usePatternRowsOperations = (
   const handleAddRow = useCallback(async (insertAfterPosition?: number) => {
     try {
       let position: number;
-      let counter: number;
 
       if (insertAfterPosition !== undefined) {
         // Insert after specific position
         position = insertAfterPosition + 0.5;
-        // Calculate counter based on position in the list
-        const rowsAtOrBeforePosition = rows.filter(r => 
-          r.type === 'row' && (r.position || 0) <= insertAfterPosition
-        ).length;
-        counter = rowsAtOrBeforePosition + 1;
       } else {
         // Add at the end
         const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
         position = maxPosition + 1;
-        counter = rows.filter(r => r.type === 'row').length + 1;
       }
 
       const { data, error } = await supabase
@@ -49,7 +42,7 @@ export const usePatternRowsOperations = (
           type: 'row',
           instructions: '',
           label: '',
-          counter: counter,
+          counter: 1, // Always start with counter 1 for new rows
           position: position,
         })
         .select()
@@ -61,7 +54,7 @@ export const usePatternRowsOperations = (
       if (insertAfterPosition !== undefined) {
         await reorderPositions();
       } else {
-        setRows([...rows, data]);
+        await fetchRows(); // Refresh to get proper ordering
       }
     } catch (error: any) {
       toast({
@@ -70,7 +63,7 @@ export const usePatternRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [patternId, rows, setRows, toast]);
+  }, [patternId, rows, fetchRows, toast]);
 
   const handleAddNote = useCallback(async (insertAfterPosition?: number) => {
     try {
@@ -100,7 +93,7 @@ export const usePatternRowsOperations = (
       if (insertAfterPosition !== undefined) {
         await reorderPositions();
       } else {
-        setRows([...rows, data]);
+        await fetchRows();
       }
     } catch (error: any) {
       toast({
@@ -109,7 +102,7 @@ export const usePatternRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [patternId, rows, setRows, toast]);
+  }, [patternId, rows, fetchRows, toast]);
 
   const handleAddDivider = useCallback(async (insertAfterPosition?: number) => {
     try {
@@ -139,7 +132,7 @@ export const usePatternRowsOperations = (
       if (insertAfterPosition !== undefined) {
         await reorderPositions();
       } else {
-        setRows([...rows, data]);
+        await fetchRows();
       }
     } catch (error: any) {
       toast({
@@ -148,7 +141,7 @@ export const usePatternRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [patternId, rows, setRows, toast]);
+  }, [patternId, rows, fetchRows, toast]);
 
   const reorderPositions = useCallback(async () => {
     try {
@@ -213,7 +206,7 @@ export const usePatternRowsOperations = (
 
           if (error) throw error;
 
-          setRows(rows.filter(r => r.id !== rowId));
+          await fetchRows();
           
           toast({
             title: "Deleted",
@@ -228,7 +221,7 @@ export const usePatternRowsOperations = (
         }
       }
     });
-  }, [rows, setRows, setConfirmDialog, toast]);
+  }, [rows, fetchRows, setConfirmDialog, toast]);
 
   const handleMoveRow = useCallback(async (rowId: string, direction: 'up' | 'down') => {
     const sortedRows = [...rows].sort((a, b) => (a.position || 0) - (b.position || 0));

@@ -66,6 +66,15 @@ export const PatternDetail = ({
     // Update pattern's last_mode in database would go here
   };
 
+  // Calculate helper values for RowsList
+  const hiddenCount = editModeRows.length - makeModeRows.length;
+  const hasCompletedRows = editModeRows.some(row => row.make_mode_status === 'completed');
+  const inProgressIndex = displayedRows.findIndex(row => row.make_mode_status === 'in_progress');
+
+  const handleDuplicateRow = async (row: Database['public']['Tables']['pattern_rows']['Row']) => {
+    await handleAddRow(row.position);
+  };
+
   return (
     <div className="space-y-6">
       {/* Back Button */}
@@ -110,9 +119,9 @@ export const PatternDetail = ({
               mode={mode}
               userId={userId}
               hideCompleted={hideCompleted}
-              hiddenCount={0}
-              hasCompletedRows={false}
-              inProgressIndex={0}
+              hiddenCount={hiddenCount}
+              hasCompletedRows={hasCompletedRows}
+              inProgressIndex={inProgressIndex}
               onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
               onDragEnd={() => {}}
               onUpdateCounter={(id, counter) => handleUpdateRow(id, { counter })}
@@ -122,7 +131,7 @@ export const PatternDetail = ({
               onUpdateMakeModeCounter={(id, make_mode_counter) => handleUpdateRow(id, { make_mode_counter })}
               onUpdateMakeModeStatus={(id, make_mode_status) => handleUpdateRow(id, { make_mode_status })}
               onToggleLock={(id, is_locked) => handleUpdateRow(id, { is_locked })}
-              onDuplicate={() => {}}
+              onDuplicate={handleDuplicateRow}
               onDelete={handleDeleteRow}
               onUpdateRowImage={(id, image_url) => handleUpdateRow(id, { image_url })}
               onAddRow={handleAddRow}
