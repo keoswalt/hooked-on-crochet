@@ -2,6 +2,7 @@
 import { ExternalLink, Trash2, Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import React from "react";
 
 interface PlanResourceCardProps {
@@ -9,6 +10,26 @@ interface PlanResourceCardProps {
   url: string;
   onDelete?: () => void;
   onEdit?: () => void;
+}
+
+function extractDomain(url: string): string {
+  // Ensure protocol exists for URL parsing
+  let parsedUrlString = url.trim();
+  if (!/^https?:\/\//.test(parsedUrlString)) {
+    parsedUrlString = "https://" + parsedUrlString.replace(/^\/\//, "");
+  }
+  try {
+    // @ts-ignore
+    const parsed = new URL(parsedUrlString);
+    let hostname = parsed.hostname;
+    // Remove www.
+    if (hostname.startsWith("www.")) hostname = hostname.replace("www.", "");
+    return hostname;
+  } catch (e) {
+    // Fallback: extract first part or show as-is
+    const match = parsedUrlString.match(/^(?:https?:\/\/)?(?:www\.)?([^\/?#]+)/i);
+    return match?.[1] || url;
+  }
 }
 
 export default function PlanResourceCard({
@@ -32,6 +53,8 @@ export default function PlanResourceCard({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const domain = extractDomain(url);
+
   return (
     <Card
       className="flex flex-col justify-between px-4 py-3 gap-2 cursor-pointer group"
@@ -45,58 +68,67 @@ export default function PlanResourceCard({
         }
       }}
     >
-      <div className="flex-1 min-w-0 truncate font-medium">
-        {title}
-      </div>
-      <div className="flex flex-row items-center justify-end gap-1 pt-2">
-        {/* Launch button */}
-        <Button
-          asChild
-          size="icon"
-          variant="ghost"
-          aria-label="Open resource link"
-          className="transition-colors"
+      <div className="flex-1 min-w-0 truncate font-medium">{title}</div>
+      <div className="flex flex-row items-center justify-between pt-2">
+        {/* URL prefix chip (left) */}
+        <Badge
+          variant="secondary"
+          className="text-xs px-2 py-0.5 select-none"
+          tabIndex={-1}
         >
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={url}
-            tabIndex={-1}
-            data-icon="launch"
-            onClick={e => e.stopPropagation()} // Prevent click bubbling to Card
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        </Button>
-        {/* Edit button */}
-        {onEdit && (
+          {domain}
+        </Badge>
+        {/* Icon buttons (right) */}
+        <div className="flex flex-row items-center gap-1">
+          {/* Launch button */}
           <Button
+            asChild
             size="icon"
             variant="ghost"
-            aria-label="Edit resource"
-            onClick={e => {
-              e.stopPropagation();
-              onEdit();
-            }}
+            aria-label="Open resource link"
+            className="transition-colors"
           >
-            <Edit className="w-4 h-4" />
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={url}
+              tabIndex={-1}
+              data-icon="launch"
+              onClick={e => e.stopPropagation()} // Prevent click bubbling to Card
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
           </Button>
-        )}
-        {/* Delete button */}
-        {onDelete && (
-          <Button
-            size="icon"
-            variant="ghost"
-            aria-label="Delete resource"
-            onClick={e => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        )}
+          {/* Edit button */}
+          {onEdit && (
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label="Edit resource"
+              onClick={e => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          )}
+          {/* Delete button */}
+          {onDelete && (
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label="Delete resource"
+              onClick={e => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
