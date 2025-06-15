@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -194,7 +196,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                         <p className="text-sm text-gray-600">{yarn.brand} - {yarn.color}</p>
                       </div>
                       <div className="text-right text-sm text-gray-500">
-                        {yarn.remaining_yardage}/{yarn.yardage} yds
+                        {yarn.weight ? getYarnWeightLabel(yarn.weight) : 'No weight'}
                       </div>
                     </div>
                   </CardContent>
