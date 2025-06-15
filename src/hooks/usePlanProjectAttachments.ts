@@ -29,8 +29,9 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
         .eq("plan_id", planId)
         .eq("user_id", user.id)
         .order("attached_at");
-      if (!error && data) {
-        setAttachments(data as PlanProjectAttachmentRow[]);
+      // Only set attachments if data exists and is an array
+      if (!error && Array.isArray(data)) {
+        setAttachments(data as unknown as PlanProjectAttachmentRow[]);
       }
       setLoading(false);
     };
@@ -79,7 +80,9 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
         .eq("user_id", user.id)
         .order("attached_at")
         .then(({ data, error }) => {
-          if (!error && data) setAttachments(data as PlanProjectAttachmentRow[]);
+          if (!error && Array.isArray(data)) {
+            setAttachments(data as unknown as PlanProjectAttachmentRow[]);
+          }
           setLoading(false);
         });
     },
