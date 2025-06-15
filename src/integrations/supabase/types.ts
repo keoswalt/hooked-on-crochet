@@ -68,6 +68,7 @@ export type Database = {
           image_url: string
           is_featured: boolean | null
           plan_id: string
+          position: number
           uploaded_at: string | null
           user_id: string
         }
@@ -76,6 +77,7 @@ export type Database = {
           image_url: string
           is_featured?: boolean | null
           plan_id: string
+          position?: number
           uploaded_at?: string | null
           user_id: string
         }
@@ -84,6 +86,7 @@ export type Database = {
           image_url?: string
           is_featured?: boolean | null
           plan_id?: string
+          position?: number
           uploaded_at?: string | null
           user_id?: string
         }

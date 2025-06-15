@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PlannerSection from "./PlannerSection";
 import PlanImagesGrid from "./PlanImagesGrid";
 import PlanImageUploadDialog from "./PlanImageUploadDialog";
+import { usePlanImagesReorder } from "@/hooks/usePlanImagesReorder";
 
 interface PlannerImagesSectionProps {
   plannerId: string;
@@ -25,8 +25,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         .from("plan_images")
         .select("*")
         .eq("plan_id", plannerId)
-        .order("is_featured", { ascending: false })
-        .order("uploaded_at", { ascending: true })
+        .order("position", { ascending: true })
         .limit(100);
       if (!error && data) setImages(data);
       setImagesLoading(false);
@@ -36,16 +35,19 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
 
   // Add image handler
   const handleImageAdded = async (imageUrl: string) => {
+    // Add new image at the end
+    const maxPos = images.length > 0 ? Math.max(...images.map(img => img.position ?? 0)) : 0;
     const { data, error } = await supabase
       .from("plan_images")
       .insert({
         plan_id: plannerId,
         user_id: userId,
-        image_url: imageUrl
+        image_url: imageUrl,
+        position: maxPos + 1,
       })
       .select();
     if (!error && data?.[0]) {
-      setImages(images => [data[0], ...images]);
+      setImages(images => [...images, data[0]]);
     }
   };
 
@@ -53,9 +55,37 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
   const handleDeleteImage = async (imageId: string) => {
     setImagesLoading(true);
     await supabase.from("plan_images").delete().eq("id", imageId).eq("plan_id", plannerId);
-    setImages(imgs => imgs.filter(i => i.id !== imageId));
+    // Re-number remaining positions for sequential order
+    setImages(prev => {
+      const filtered = prev.filter(i => i.id !== imageId);
+      // Update positions to be sequential (1-based)
+      return filtered
+        .map((img, idx) => ({ ...img, position: idx + 1 }));
+    });
     setImagesLoading(false);
   };
+
+  // Sync positions in DB if deleted
+  useEffect(() => {
+    async function syncPositions() {
+      if (!images.length) return;
+      const needsUpdate = images.some((img, idx) => img.position !== idx + 1);
+      if (!needsUpdate) return;
+      const updates = images.map((img, idx) => ({
+        id: img.id,
+        position: idx + 1,
+      }));
+      await supabase.from("plan_images").upsert(updates, { onConflict: "id" });
+    }
+    syncPositions();
+    // eslint-disable-next-line
+  }, [images.length]);
+
+  // Drag and drop reorder logic
+  const { reorderImages, reordering } = usePlanImagesReorder(
+    images,
+    setImages
+  );
 
   return (
     <PlannerSection
@@ -68,6 +98,8 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         images={images}
         loading={imagesLoading}
         onDeleteImage={handleDeleteImage}
+        onReorder={reorderImages}
+        reordering={reordering}
       />
       <PlanImageUploadDialog
         open={showImagesUpload}
