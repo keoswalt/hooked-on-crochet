@@ -1,19 +1,13 @@
 
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { ProjectDetail } from '@/components/projects/ProjectDetail';
-import { ProjectForm } from '@/components/projects/ProjectForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useProjectOperations } from '@/hooks/useProjectOperations';
-import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
-import type { User } from '@supabase/supabase-js';
-
-type Project = Database['public']['Tables']['projects']['Row'];
-type HookSize = Database['public']['Enums']['hook_size'];
-type YarnWeight = Database['public']['Enums']['yarn_weight'];
+import { useParams } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ProjectDetail } from "@/components/projects/ProjectDetail";
+import { ProjectForm } from "@/components/projects/ProjectForm";
+import { useProjectDetailPageState } from "@/hooks/useProjectDetailPageState";
+import ProjectNotFoundScreen from "@/components/projects/ProjectNotFoundScreen";
+import ProjectLoadingScreen from "@/components/projects/ProjectLoadingScreen";
+import type { User } from "@supabase/supabase-js";
 
 interface ProjectDetailPageProps {
   user: User;
@@ -21,158 +15,29 @@ interface ProjectDetailPageProps {
 
 export const ProjectDetailPage = ({ user }: ProjectDetailPageProps) => {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<{
-    name: string;
-    hook_size: HookSize | '';
-    yarn_weight: YarnWeight | '';
-    details: string;
-    featured_image_url: string | null;
-  }>({
-    name: '',
-    hook_size: '',
-    yarn_weight: '',
-    details: '',
-    featured_image_url: null,
-  });
 
   const {
-    loading: operationsLoading,
-    handleSaveProject,
-    handleDeleteProject,
-    handleDuplicateProject,
+    project,
+    loading,
+    notFound,
+    showForm,
+    setShowForm,
+    formData,
+    setFormData,
+    handleBack,
+    handleProjectDelete,
+    handleEditProject,
+    handleProjectUpdate,
+    handleDuplicate,
+    handleFormSubmit,
+    handleFormCancel,
+    fetchProject,
     handleExportProject,
     handleExportPDF,
-  } = useProjectOperations(user, fetchProject);
+  } = useProjectDetailPageState({ projectId, user });
 
-  async function fetchProject() {
-    if (!projectId) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('id', projectId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      
-      if (!data) {
-        setNotFound(true);
-      } else {
-        setProject(data);
-        setNotFound(false);
-      }
-    } catch (error: any) {
-      console.error('Error fetching project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load project",
-        variant: "destructive",
-      });
-      setNotFound(true);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchProject();
-  }, [projectId, user.id]);
-
-  // Reset form data when project changes
-  useEffect(() => {
-    if (project) {
-      setFormData({
-        name: project.name,
-        hook_size: project.hook_size,
-        yarn_weight: project.yarn_weight,
-        details: project.details || '',
-        featured_image_url: project.featured_image_url || null,
-      });
-    }
-  }, [project]);
-
-  const handleBack = () => {
-    navigate('/projects');
-  };
-
-  const handleProjectDelete = async () => {
-    if (project) {
-      await handleDeleteProject(project.id);
-      navigate('/projects');
-    }
-  };
-
-  const handleEditProject = (projectToEdit: Project) => {
-    setProject(projectToEdit);
-    setShowForm(true);
-  };
-
-  const handleProjectUpdate = (updatedProject: Project) => {
-    setProject(updatedProject);
-  };
-
-  const handleDuplicate = async () => {
-    if (project) {
-      await handleDuplicateProject(project);
-    }
-  };
-
-  const handleFormSubmit = async () => {
-    if (formData.hook_size && formData.yarn_weight && project) {
-      const projectData = {
-        name: formData.name,
-        hook_size: formData.hook_size,
-        yarn_weight: formData.yarn_weight,
-        details: formData.details || null,
-        featured_image_url: formData.featured_image_url,
-        is_favorite: project.is_favorite,
-        last_mode: project.last_mode,
-        status: project.status,
-      };
-
-      const savedProject = await handleSaveProject(projectData, project);
-      if (savedProject) {
-        setProject(savedProject);
-        setShowForm(false);
-      }
-    }
-  };
-
-  const handleFormCancel = () => {
-    setShowForm(false);
-  };
-
-  if (loading) {
-    return <div className="container mx-auto px-4 py-8 text-center">Loading...</div>;
-  }
-
-  if (notFound) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
-        <p className="text-gray-600 mb-6">The project you're looking for doesn't exist or you don't have access to it.</p>
-        <Button onClick={handleBack}>Back to Projects</Button>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return <div className="container mx-auto px-4 py-8 text-center">Project not found</div>;
-  }
+  if (loading) return <ProjectLoadingScreen />;
+  if (notFound || !project) return <ProjectNotFoundScreen onBack={handleBack} />;
 
   return (
     <div className="container mx-auto px-4 py-8">
