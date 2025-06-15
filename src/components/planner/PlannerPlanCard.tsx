@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
@@ -24,7 +23,7 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
       {/* Image Section with Square Aspect Ratio */}
       <div className="w-full shrink-0 relative">
         <AspectRatio ratio={1 / 1} className="w-full">
-          <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 border p-2 flex items-center justify-center">
+          <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 p-2 flex items-center justify-center">
             {plan.featured_image_url ? (
               <img
                 src={plan.featured_image_url}
