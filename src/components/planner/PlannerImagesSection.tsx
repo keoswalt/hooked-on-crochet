@@ -5,13 +5,17 @@ import { useToast } from "@/hooks/use-toast";
 import PlannerSection from "./PlannerSection";
 import PlanImagesGrid from "./PlanImagesGrid";
 import PlanImageUploadDialog from "./PlanImageUploadDialog";
+import { uploadImageFiles } from "@/utils/uploadImageFiles";
 
 interface PlannerImagesSectionProps {
   plannerId: string;
   userId: string;
 }
 
-const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) => {
+const PlannerImagesSection = ({
+  plannerId,
+  userId,
+}: PlannerImagesSectionProps) => {
   const [images, setImages] = useState<any[]>([]);
   const [imagesLoading, setImagesLoading] = useState(true);
   const [showImagesUpload, setShowImagesUpload] = useState(false);
@@ -34,26 +38,68 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     if (plannerId) fetchImages();
   }, [plannerId]);
 
-  // Add image handler
+  // Add image handler (from dialog)
   const handleImageAdded = async (imageUrl: string) => {
     const { data, error } = await supabase
       .from("plan_images")
       .insert({
         plan_id: plannerId,
         user_id: userId,
-        image_url: imageUrl
+        image_url: imageUrl,
       })
       .select();
     if (!error && data?.[0]) {
-      setImages(images => [data[0], ...images]);
+      setImages((images) => [data[0], ...images]);
+    }
+  };
+
+  // Drag & drop image upload handler
+  const handleDropFiles = async (files: File[]) => {
+    setImagesLoading(true);
+    const { publicUrls, errors } = await uploadImageFiles({
+      files,
+      userId,
+      folder: "plans",
+    });
+    // For each successful upload, insert record
+    for (const url of publicUrls) {
+      const { data, error } = await supabase
+        .from("plan_images")
+        .insert({
+          plan_id: plannerId,
+          user_id: userId,
+          image_url: url,
+        })
+        .select();
+      if (!error && data?.[0]) {
+        setImages((prev) => [data[0], ...prev]);
+      }
+    }
+    setImagesLoading(false);
+    if (publicUrls.length) {
+      toast({
+        title: "Images uploaded",
+        description: `${publicUrls.length} images uploaded successfully.`,
+      });
+    }
+    for (const err of errors) {
+      toast({
+        title: "Error",
+        description: err,
+        variant: "destructive",
+      });
     }
   };
 
   // Delete image handler
   const handleDeleteImage = async (imageId: string) => {
     setImagesLoading(true);
-    await supabase.from("plan_images").delete().eq("id", imageId).eq("plan_id", plannerId);
-    setImages(imgs => imgs.filter(i => i.id !== imageId));
+    await supabase
+      .from("plan_images")
+      .delete()
+      .eq("id", imageId)
+      .eq("plan_id", plannerId);
+    setImages((imgs) => imgs.filter((i) => i.id !== imageId));
     setImagesLoading(false);
   };
 
@@ -68,6 +114,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         images={images}
         loading={imagesLoading}
         onDeleteImage={handleDeleteImage}
+        onDropFiles={handleDropFiles}
       />
       <PlanImageUploadDialog
         open={showImagesUpload}
