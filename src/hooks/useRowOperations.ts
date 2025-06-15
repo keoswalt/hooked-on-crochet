@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -222,6 +221,7 @@ export const useRowOperations = () => {
           counter: rowToDuplicate.type === 'divider' ? 1 : rowToDuplicate.counter,
           type: rowToDuplicate.type,
           total_stitches: rowToDuplicate.total_stitches,
+          label: rowToDuplicate.label, // Include label when duplicating
           image_url: rowToDuplicate.image_url, // Include image when duplicating
         })
         .select()
