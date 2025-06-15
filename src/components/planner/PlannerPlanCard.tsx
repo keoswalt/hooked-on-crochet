@@ -2,6 +2,7 @@
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface PlannerPlanCardProps {
   plan: {
@@ -20,20 +21,22 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
       key={plan.id}
       className="hover:shadow-lg transition-shadow relative group flex flex-col items-stretch h-full"
     >
-      {/* Image Section */}
-      <div className="w-full h-48 flex items-center justify-center p-4 shrink-0 relative">
-        <div className="w-full h-40 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-          {plan.featured_image_url ? (
-            <img
-              src={plan.featured_image_url}
-              alt={plan.name || 'Plan image'}
-              className="w-full h-full object-cover object-center"
-              draggable={false}
-            />
-          ) : (
-            <div className="text-gray-300 text-xs text-center w-full">No image</div>
-          )}
-        </div>
+      {/* Image Section with Square Aspect Ratio */}
+      <div className="w-full shrink-0 relative">
+        <AspectRatio ratio={1 / 1} className="w-full">
+          <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+            {plan.featured_image_url ? (
+              <img
+                src={plan.featured_image_url}
+                alt={plan.name || 'Plan image'}
+                className="w-full h-full object-cover object-center"
+                draggable={false}
+              />
+            ) : (
+              <div className="text-gray-300 text-xs text-center w-full">No image</div>
+            )}
+          </div>
+        </AspectRatio>
       </div>
       {/* Card Content */}
       <div
