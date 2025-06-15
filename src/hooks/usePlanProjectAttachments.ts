@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { User } from "@supabase/supabase-js";
 
+// Manual row type, since Supabase types aren't updated yet
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 type PlanProjectAttachmentRow = {
   id: string;
@@ -11,7 +12,6 @@ type PlanProjectAttachmentRow = {
   project_id: string;
   user_id: string;
   attached_at: string;
-  // The expanded project info (if present in query)
   project?: Project;
 };
 
@@ -24,13 +24,13 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
     setLoading(true);
     const fetch = async () => {
       const { data, error } = await supabase
-        .from("plan_project_attachments")
+        .from("plan_project_attachments" as any)
         .select("*, project:project_id(*)")
         .eq("plan_id", planId)
         .eq("user_id", user.id)
         .order("attached_at");
       if (!error && data) {
-        setAttachments(data as any);
+        setAttachments(data as PlanProjectAttachmentRow[]);
       }
       setLoading(false);
     };
@@ -42,7 +42,7 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
     if (!planId || !user || projectIds.length === 0) return;
     // Insert rows for each project, using only required fields
     const { error } = await supabase
-      .from("plan_project_attachments")
+      .from("plan_project_attachments" as any)
       .insert(
         projectIds.map((project_id) => ({
           plan_id: planId,
@@ -57,7 +57,7 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
   const detachProject = async (projectId: string) => {
     if (!planId || !user) return;
     await supabase
-      .from("plan_project_attachments")
+      .from("plan_project_attachments" as any)
       .delete()
       .eq("plan_id", planId)
       .eq("project_id", projectId)
@@ -73,13 +73,13 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
       if (!planId || !user) return;
       setLoading(true);
       supabase
-        .from("plan_project_attachments")
+        .from("plan_project_attachments" as any)
         .select("*, project:project_id(*)")
         .eq("plan_id", planId)
         .eq("user_id", user.id)
         .order("attached_at")
         .then(({ data, error }) => {
-          if (!error && data) setAttachments(data as any);
+          if (!error && data) setAttachments(data as PlanProjectAttachmentRow[]);
           setLoading(false);
         });
     },
