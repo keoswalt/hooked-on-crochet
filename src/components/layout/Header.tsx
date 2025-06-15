@@ -26,7 +26,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
     }
   };
 
-  const isPatternManager = location.pathname.startsWith('/projects') || location.pathname === '/';
+  const isPatternManager = location.pathname.startsWith('/patterns') || location.pathname === '/';
   const isProjectPlanner = location.pathname.startsWith('/planner');
 
   return (
@@ -42,7 +42,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
               <nav className="flex space-x-4">
                 <Button
                   variant={isPatternManager ? "default" : "outline"}
-                  onClick={() => navigate('/projects')}
+                  onClick={() => navigate('/patterns')}
                   className="flex items-center gap-2"
                 >
                   <Grid3X3 className="h-4 w-4" />

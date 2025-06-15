@@ -62,37 +62,7 @@ export type Database = {
           },
         ]
       }
-      planner_projects: {
-        Row: {
-          canvas_data: Json | null
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          canvas_data?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          canvas_data?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      project_rows: {
+      pattern_rows: {
         Row: {
           counter: number
           created_at: string
@@ -103,8 +73,8 @@ export type Database = {
           label: string | null
           make_mode_counter: number
           make_mode_status: string
+          pattern_id: string
           position: number
-          project_id: string
           total_stitches: string
           type: string
           updated_at: string
@@ -119,8 +89,8 @@ export type Database = {
           label?: string | null
           make_mode_counter?: number
           make_mode_status?: string
+          pattern_id: string
           position: number
-          project_id: string
           total_stitches?: string
           type?: string
           updated_at?: string
@@ -135,47 +105,47 @@ export type Database = {
           label?: string | null
           make_mode_counter?: number
           make_mode_status?: string
+          pattern_id?: string
           position?: number
-          project_id?: string
           total_stitches?: string
           type?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "project_rows_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "pattern_rows_pattern_id_fkey"
+            columns: ["pattern_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "patterns"
             referencedColumns: ["id"]
           },
         ]
       }
-      project_tags: {
+      pattern_tags: {
         Row: {
           created_at: string
           id: string
-          project_id: string
+          pattern_id: string
           tag_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          project_id: string
+          pattern_id: string
           tag_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          project_id?: string
+          pattern_id?: string
           tag_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_project_tags_project_id"
-            columns: ["project_id"]
+            foreignKeyName: "fk_pattern_tags_pattern_id"
+            columns: ["pattern_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "patterns"
             referencedColumns: ["id"]
           },
           {
@@ -187,7 +157,7 @@ export type Database = {
           },
         ]
       }
-      projects: {
+      patterns: {
         Row: {
           created_at: string
           details: string | null
@@ -229,6 +199,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           yarn_weight?: Database["public"]["Enums"]["yarn_weight"]
+        }
+        Relationships: []
+      }
+      planner_projects: {
+        Row: {
+          canvas_data: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canvas_data?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canvas_data?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
