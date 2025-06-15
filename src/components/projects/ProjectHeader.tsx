@@ -1,7 +1,4 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { ProjectInfo } from './ProjectInfo';
+import { Card, CardHeader } from '@/components/ui/card';
 import { ProjectActions } from './ProjectActions';
 import { ProjectStatusChip } from './ProjectStatusChip';
 import { ImageViewer } from '@/components/images/ImageViewer';
@@ -13,6 +10,7 @@ import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getYarnWeightLabel } from '@/utils/yarnWeights';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -128,37 +126,46 @@ export const ProjectHeader = ({
 
   // Remove the back button and put nothing here, as the breadcrumb is now in ProjectDetailPage
   return (
-    <>
-      {/* Breadcrumb now at page level */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 flex-wrap mb-4">
-                  <h1 className="text-2xl font-bold">{project.name}</h1>
-                  <TagDisplay 
-                    tags={projectTags} 
-                    onRemoveTag={handleRemoveTag}
-                    showRemoveButton={false}
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                  <span>Hook: {project.hook_size}</span>
-                  <span>•</span>
-                  <span>Yarn Weight: {getYarnWeightLabel(project.yarn_weight)}</span>
-                </div>
-                
-                {project.details && (
-                  <LinkifiedText 
-                    text={project.details} 
-                    className="text-gray-700 mt-2"
-                  />
-                )}
-              </div>
+    <Card>
+      <CardHeader>
+        {/* Responsive horizontal layout */}
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Featured Image Section */}
+          {project.featured_image_url && (
+            <div className="md:w-64 w-full flex-shrink-0 flex items-start justify-center">
+              <AspectRatio ratio={1 / 1} className="w-full max-w-[256px]">
+                <ImageViewer
+                  imageUrl={project.featured_image_url}
+                  alt={`${project.name} featured image`}
+                  className="w-full h-full rounded-lg"
+                  onDelete={handleDeleteFeaturedImage}
+                />
+              </AspectRatio>
             </div>
-
+          )}
+          {/* Details Section */}
+          <div className="flex-1 flex flex-col space-y-4">
+            <div>
+              <div className="flex items-center gap-3 flex-wrap mb-4">
+                <h1 className="text-2xl font-bold">{project.name}</h1>
+                <TagDisplay 
+                  tags={projectTags} 
+                  onRemoveTag={handleRemoveTag}
+                  showRemoveButton={false}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                <span>Hook: {project.hook_size}</span>
+                <span>•</span>
+                <span>Yarn Weight: {getYarnWeightLabel(project.yarn_weight)}</span>
+              </div>
+              {project.details && (
+                <LinkifiedText 
+                  text={project.details} 
+                  className="text-gray-700 mt-2"
+                />
+              )}
+            </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span>Status:</span>
@@ -175,18 +182,6 @@ export const ProjectHeader = ({
                 </Select>
               </div>
             </div>
-            
-            {project.featured_image_url && (
-              <div className="w-full">
-                <ImageViewer
-                  imageUrl={project.featured_image_url}
-                  alt={`${project.name} featured image`}
-                  className="w-full h-64 rounded-lg"
-                  onDelete={handleDeleteFeaturedImage}
-                />
-              </div>
-            )}
-            
             <ProjectActions
               project={project}
               onEdit={onEdit}
@@ -196,8 +191,8 @@ export const ProjectHeader = ({
               onDuplicate={onDuplicate}
             />
           </div>
-        </CardHeader>
-      </Card>
-    </>
+        </div>
+      </CardHeader>
+    </Card>
   );
 };
