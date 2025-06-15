@@ -9,6 +9,8 @@ import type { User } from "@supabase/supabase-js";
 import PlannerTitleSection from "@/components/planner/PlannerTitleSection";
 import PlannerSection from "@/components/planner/PlannerSection";
 import { Textarea } from "@/components/ui/textarea";
+import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
+import PlanImagesGrid from "@/components/planner/PlanImagesGrid";
 type Plan = Database['public']['Tables']['plans']['Row'];
 
 export const PlannerDetailPage = ({
@@ -25,6 +27,11 @@ export const PlannerDetailPage = ({
   const debouncedSaveTimeout = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Images state
+  const [images, setImages] = useState<any[]>([]);
+  const [imagesLoading, setImagesLoading] = useState(true);
+  const [showImagesUpload, setShowImagesUpload] = useState(false);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -127,6 +134,50 @@ export const PlannerDetailPage = ({
     }
   };
 
+  // Fetch images
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (!plannerId) return;
+      setImagesLoading(true);
+      const { data, error } = await supabase
+        .from("plan_images")
+        .select("*")
+        .eq("plan_id", plannerId)
+        .order("is_featured", { ascending: false })
+        .order("uploaded_at", { ascending: true })
+        .limit(100);
+      if (!error && data) setImages(data);
+      setImagesLoading(false);
+    };
+    fetchImages();
+  }, [plannerId]);
+
+  // Add image handler
+  const handleImageAdded = async (imageUrl: string) => {
+    if (!plannerId || !user?.id) return;
+    // Insert in DB
+    const { data, error } = await supabase
+      .from("plan_images")
+      .insert({
+        plan_id: plannerId,
+        user_id: user.id,
+        image_url: imageUrl
+      })
+      .select();
+    if (!error && data?.[0]) {
+      setImages(images => [data[0], ...images]);
+    }
+  };
+
+  // Delete image handler
+  const handleDeleteImage = async (imageId: string) => {
+    if (!plannerId) return;
+    setImagesLoading(true);
+    await supabase.from("plan_images").delete().eq("id", imageId).eq("plan_id", plannerId);
+    setImages(imgs => imgs.filter(i => i.id !== imageId));
+    setImagesLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
@@ -172,11 +223,21 @@ export const PlannerDetailPage = ({
       <PlannerSection
         title="Images"
         buttonText="Add Image"
-        buttonDisabled
+        buttonDisabled={false}
+        onAdd={() => setShowImagesUpload(true)}
       >
-        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
-          Feature coming soon: upload images for your plan.
-        </div>
+        <PlanImagesGrid
+          images={images}
+          loading={imagesLoading}
+          onDeleteImage={handleDeleteImage}
+        />
+        <PlanImageUploadDialog
+          open={showImagesUpload}
+          onOpenChange={setShowImagesUpload}
+          userId={user.id}
+          planId={plannerId as string}
+          onImageAdded={handleImageAdded}
+        />
       </PlannerSection>
 
       {/* RESOURCES SECTION */}
