@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface UserMenuProps {
@@ -33,11 +33,6 @@ export const UserMenu = ({ userEmail }: UserMenuProps) => {
     }
   };
 
-  const handleSettings = () => {
-    // Placeholder for future user settings page
-    console.log('User settings clicked');
-  };
-
   // Get user initials from email
   const getUserInitials = (email: string) => {
     return email.charAt(0).toUpperCase();
@@ -55,11 +50,6 @@ export const UserMenu = ({ userEmail }: UserMenuProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
-          <Settings className="mr-2 h-4 w-4" />
-          User Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem 
           onClick={handleSignOut} 
           disabled={isLoading}
