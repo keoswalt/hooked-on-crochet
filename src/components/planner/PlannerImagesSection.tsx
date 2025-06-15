@@ -116,7 +116,9 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     // Update DB
     // Unset all others in DB, set this one as featured (compound request)
     const updates: Promise<any>[] = [];
-    if (prevFeatured) {
+
+    if (prevFeatured && prevFeatured.id !== imageId) {
+      // push PROMISE to updates
       updates.push(
         supabase
           .from("plan_images")
@@ -124,13 +126,19 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
           .eq("id", prevFeatured.id)
       );
     }
+
+    // push PROMISE to updates
     updates.push(
       supabase
         .from("plan_images")
         .update({ is_featured: true })
         .eq("id", imageId)
     );
+
+    // Await all updates
     const results = await Promise.all(updates);
+
+    // Check for errors
     const error = results.find(r => r?.error)?.error;
     if (error) {
       toast({
