@@ -50,9 +50,9 @@ export default function PlanProjectCard({ project, onRemove, planName, plannerId
         <Trash className="w-4 h-4" />
       </Button>
       <CardHeader className="pb-2">
-        <CardTitle className="truncate">{project.name}</CardTitle>
+        <CardTitle className="truncate text-sm">{project.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col justify-center items-center px-2 py-0">
+      <CardContent className="flex-1 flex flex-col justify-center items-center px-4 py-3">
         <div className="w-full h-20 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center mb-2">
           {project.featured_image_url ? (
             <img
@@ -75,4 +75,3 @@ export default function PlanProjectCard({ project, onRemove, planName, plannerId
     </Card>
   );
 }
-
