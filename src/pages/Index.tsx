@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,6 +6,8 @@ import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
 import { ProjectListPage } from './ProjectListPage';
 import { ProjectDetailPage } from './ProjectDetailPage';
+import { PlannerPage } from './PlannerPage';
+import { PlannerDetailPage } from './PlannerDetailPage';
 import { StashPage } from './StashPage';
 import { SwatchesPage } from './SwatchesPage';
 import type { User } from '@supabase/supabase-js';
@@ -41,6 +44,12 @@ const Index = () => {
     if (location.pathname.startsWith('/projects/') && projectId) {
       return 'projects-detail';
     }
+    if (location.pathname === '/planner') {
+      return 'planner-list';
+    }
+    if (location.pathname.startsWith('/planner/') && plannerId) {
+      return 'planner-detail';
+    }
     if (location.pathname === '/stash') {
       return 'stash';
     }
@@ -73,6 +82,12 @@ const Index = () => {
       )}
       {currentPage === 'projects-detail' && (
         <ProjectDetailPage user={user} />
+      )}
+      {currentPage === 'planner-list' && (
+        <PlannerPage user={user} />
+      )}
+      {currentPage === 'planner-detail' && (
+        <PlannerDetailPage user={user} />
       )}
       {currentPage === 'stash' && (
         <StashPage user={user} />

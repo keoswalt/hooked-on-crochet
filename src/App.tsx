@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/projects" element={<Index />} />
           <Route path="/projects/:projectId" element={<Index />} />
+          <Route path="/planner" element={<Index />} />
+          <Route path="/planner/:plannerId" element={<Index />} />
           <Route path="/stash" element={<Index />} />
           <Route path="/swatches" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
