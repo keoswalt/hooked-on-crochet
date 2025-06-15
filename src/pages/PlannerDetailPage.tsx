@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Save, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { PlanCanvas } from '@/components/planner/PlanCanvas';
 import { PlanImages } from '@/components/planner/PlanImages';
 import { PlanResources } from '@/components/planner/PlanResources';
 import { PlanAttachments } from '@/components/planner/PlanAttachments';
@@ -225,18 +223,13 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="canvas" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="canvas">Canvas</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="attachments">Yarn & Swatches</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="canvas">
-          <PlanCanvas plan={plan} onUpdatePlan={handleUpdatePlan} />
-        </TabsContent>
 
         <TabsContent value="images">
           <PlanImages planId={plan.id} userId={user.id} />
