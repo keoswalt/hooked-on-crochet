@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -137,18 +136,19 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Yarn Name *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
-            placeholder="Enter yarn name"
-            required
-          />
-        </div>
+      {/* Full width yarn name field */}
+      <div>
+        <Label htmlFor="name">Yarn Name *</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => handleChange('name', e.target.value)}
+          placeholder="Enter yarn name"
+          required
+        />
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="brand">Brand</Label>
           <Input
@@ -167,6 +167,22 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             onChange={(e) => handleChange('color', e.target.value)}
             placeholder="Enter color"
           />
+        </div>
+
+        <div>
+          <Label htmlFor="weight">Weight</Label>
+          <Select value={formData.weight} onValueChange={(value) => handleChange('weight', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select yarn weight" />
+            </SelectTrigger>
+            <SelectContent>
+              {YARN_WEIGHTS.map((weight) => (
+                <SelectItem key={weight.value} value={weight.value}>
+                  {weight.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
@@ -200,23 +216,6 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             placeholder="Enter remaining yards"
           />
         </div>
-      </div>
-
-      {/* Full width yarn weight field */}
-      <div>
-        <Label htmlFor="weight">Weight</Label>
-        <Select value={formData.weight} onValueChange={(value) => handleChange('weight', value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select yarn weight" />
-          </SelectTrigger>
-          <SelectContent>
-            {YARN_WEIGHTS.map((weight) => (
-              <SelectItem key={weight.value} value={weight.value}>
-                {weight.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Image Upload Section */}
