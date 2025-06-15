@@ -1,6 +1,6 @@
 
 import { Badge } from '@/components/ui/badge';
-import { BadgeInfo, BadgeCheck, BadgeAlert, CircleCheck } from 'lucide-react';
+import { Pencil, BadgeCheck, BadgeAlert, CircleCheck } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectStatus = Database['public']['Enums']['project_status'];
@@ -12,10 +12,10 @@ interface ProjectStatusChipProps {
 
 const statusConfig = {
   Writing: {
-    icon: BadgeInfo,
-    bgColor: 'bg-amber-100',
-    textColor: 'text-amber-800',
-    borderColor: 'border-amber-200'
+    icon: Pencil,
+    bgColor: 'bg-red-100',
+    textColor: 'text-red-800',
+    borderColor: 'border-red-200'
   },
   Ready: {
     icon: BadgeCheck,
