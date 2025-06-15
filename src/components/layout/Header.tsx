@@ -1,8 +1,8 @@
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Pencil, Archive, Palette } from 'lucide-react';
 import { UserMenu } from './UserMenu';
-import BallOfYarnIcon from "@/components/icons/BallOfYarnIcon";
 
 interface HeaderProps {
   userEmail?: string;
@@ -56,7 +56,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   onClick={() => navigate('/stash')}
                   className="flex items-center gap-2"
                 >
-                  <BallOfYarnIcon className="h-4 w-4" />
+                  <Archive className="h-4 w-4" />
                   <span className="hidden sm:inline">Stash</span>
                 </Button>
                 <Button
@@ -80,3 +80,4 @@ export const Header = ({ userEmail }: HeaderProps) => {
     </header>
   );
 };
+
