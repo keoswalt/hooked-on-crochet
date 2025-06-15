@@ -5,17 +5,18 @@ import type { Database } from "@/integrations/supabase/types";
 import type { User } from "@supabase/supabase-js";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
-type PlanProjectAttachment = {
+type PlanProjectAttachmentRow = {
   id: string;
   plan_id: string;
   project_id: string;
   user_id: string;
   attached_at: string;
-  project: Project;
+  // The expanded project info (if present in query)
+  project?: Project;
 };
 
 export function usePlanProjectAttachments(planId: string | null, user: User | null) {
-  const [attachments, setAttachments] = useState<PlanProjectAttachment[]>([]);
+  const [attachments, setAttachments] = useState<PlanProjectAttachmentRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
     const fetch = async () => {
       const { data, error } = await supabase
         .from("plan_project_attachments")
-        .select(`*, project:project_id(*)`)
+        .select("*, project:project_id(*)")
         .eq("plan_id", planId)
         .eq("user_id", user.id)
         .order("attached_at");
@@ -39,6 +40,7 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
   // Attach projects (by project IDs)
   const attachProjects = async (projectIds: string[]) => {
     if (!planId || !user || projectIds.length === 0) return;
+    // Insert rows for each project, using only required fields
     const { error } = await supabase
       .from("plan_project_attachments")
       .insert(
@@ -68,12 +70,11 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
     attachProjects,
     detachProject,
     refresh: () => {
-      // fetch attachments again
       if (!planId || !user) return;
       setLoading(true);
       supabase
         .from("plan_project_attachments")
-        .select(`*, project:project_id(*)`)
+        .select("*, project:project_id(*)")
         .eq("plan_id", planId)
         .eq("user_id", user.id)
         .order("attached_at")
@@ -84,4 +85,3 @@ export function usePlanProjectAttachments(planId: string | null, user: User | nu
     },
   };
 }
-

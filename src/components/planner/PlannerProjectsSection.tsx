@@ -40,7 +40,7 @@ export default function PlannerProjectsSection({ plannerId, user }: PlannerProje
         title="Projects"
         buttonText="Add Projects"
         buttonDisabled={false}
-        onButtonClick={() => setShowDialog(true)}
+        onAdd={() => setShowDialog(true)}
       >
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading...</div>
@@ -53,7 +53,7 @@ export default function PlannerProjectsSection({ plannerId, user }: PlannerProje
             {attachments.map((att) => (
               <PlanProjectCard
                 key={att.id}
-                project={att.project}
+                project={att.project!}
                 onRemove={() => handleRemove(att.project_id)}
               />
             ))}
