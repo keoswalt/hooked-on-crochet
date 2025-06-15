@@ -2,6 +2,7 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { YARN_WEIGHTS } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type HookSize = Database['public']['Enums']['hook_size'];
@@ -21,7 +22,6 @@ interface ProjectBasicFieldsProps {
 }
 
 const hookSizes: HookSize[] = ['2mm', '2.2mm', '3mm', '3.5mm', '4mm', '4.5mm', '5mm', '5.5mm', '6mm', '6.5mm', '9mm', '10mm'];
-const yarnWeights: YarnWeight[] = ['0', '1', '2', '3', '4', '5', '6', '7'];
 
 export const ProjectBasicFields = ({ formData, onFormDataChange }: ProjectBasicFieldsProps) => {
   return (
@@ -57,8 +57,8 @@ export const ProjectBasicFields = ({ formData, onFormDataChange }: ProjectBasicF
             <SelectValue placeholder="Select yarn weight" />
           </SelectTrigger>
           <SelectContent>
-            {yarnWeights.map((weight) => (
-              <SelectItem key={weight} value={weight}>{weight}</SelectItem>
+            {YARN_WEIGHTS.map((weight) => (
+              <SelectItem key={weight.value} value={weight.value}>{weight.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
