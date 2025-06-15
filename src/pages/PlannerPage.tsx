@@ -123,6 +123,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
@@ -171,7 +172,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Yarn</h2>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => navigate('/stash')}>
               <Package className="h-4 w-4 mr-2" />
               Manage Stash
             </Button>
