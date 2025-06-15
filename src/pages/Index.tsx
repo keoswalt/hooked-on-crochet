@@ -34,8 +34,9 @@ const Index = () => {
   }, []);
 
   const getCurrentPage = () => {
+    // Home should now be planner-list
     if (location.pathname === '/') {
-      return 'projects-list';
+      return 'planner-list';
     }
     if (location.pathname === '/projects') {
       return 'projects-list';
@@ -55,7 +56,8 @@ const Index = () => {
     if (location.pathname === '/swatches') {
       return 'swatches';
     }
-    return 'projects-list';
+    // Default to planner-list
+    return 'planner-list';
   };
 
   if (loading) {

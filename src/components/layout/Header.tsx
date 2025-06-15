@@ -1,4 +1,3 @@
-
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Palette, Pencil } from 'lucide-react';
@@ -13,11 +12,12 @@ export const Header = ({ userEmail }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
-    navigate('/projects');
+    navigate('/planner');
   };
 
-  const isProjectsActive = location.pathname.startsWith('/projects') || location.pathname === '/';
-  const isPlannerActive = location.pathname.startsWith('/planner');
+  const isProjectsActive = location.pathname.startsWith('/projects');
+  // root "/" and /planner are both considered planner active
+  const isPlannerActive = location.pathname === '/' || location.pathname.startsWith('/planner');
 
   return (
     <header className="border-b border-gray-200 bg-white">
