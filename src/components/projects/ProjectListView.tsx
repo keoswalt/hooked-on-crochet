@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { ProjectSearch } from './ProjectSearch';
 import { ProjectGrid } from './ProjectGrid';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useTagOperations } from '@/hooks/useTagOperations';
 import { useEffect, useState } from 'react';
+import { sortProjects } from '@/utils/projectSorting';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -83,12 +83,8 @@ export const ProjectListView = ({
       });
     }
     
-    // Sort by favorite status first, then by updated_at
-    return filtered.sort((a, b) => {
-      if (a.is_favorite && !b.is_favorite) return -1;
-      if (!a.is_favorite && b.is_favorite) return 1;
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-    });
+    // Use the shared sorting utility for consistency
+    return sortProjects(filtered);
   }, [projects, searchTerm, projectTags]);
 
   const handleClearSearch = () => {
