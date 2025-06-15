@@ -11,6 +11,7 @@ import PlannerSection from "@/components/planner/PlannerSection";
 import { Textarea } from "@/components/ui/textarea";
 import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
 import PlanImagesGrid from "@/components/planner/PlanImagesGrid";
+import EmptyState from "@/components/ui/EmptyState";
 type Plan = Database['public']['Tables']['plans']['Row'];
 
 export const PlannerDetailPage = ({
@@ -246,9 +247,9 @@ export const PlannerDetailPage = ({
         buttonText="Add Resource"
         buttonDisabled
       >
-        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+        <EmptyState>
           Feature coming soon: add and view resources.
-        </div>
+        </EmptyState>
       </PlannerSection>
 
       {/* YARN SECTION */}
@@ -257,9 +258,9 @@ export const PlannerDetailPage = ({
         buttonText="Add Yarn"
         buttonDisabled
       >
-        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+        <EmptyState>
           Feature coming soon: attach yarn from your stash.
-        </div>
+        </EmptyState>
       </PlannerSection>
 
       {/* SWATCHES SECTION */}
@@ -268,9 +269,9 @@ export const PlannerDetailPage = ({
         buttonText="Add Swatch"
         buttonDisabled
       >
-        <div className="border rounded-md py-6 px-4 flex items-center justify-center text-muted-foreground min-h-[64px]">
+        <EmptyState>
           Feature coming soon: attach swatches.
-        </div>
+        </EmptyState>
       </PlannerSection>
 
       {/* NOTES SECTION */}
@@ -279,14 +280,9 @@ export const PlannerDetailPage = ({
         buttonText="Add Note"
         buttonDisabled
       >
-        <div>
-          <Textarea
-            placeholder="Jot down notes about your plan..."
-            rows={3}
-            disabled
-            className="resize-none bg-gray-50"
-          />
-        </div>
+        <EmptyState>
+          Jot down notes about your plan here.
+        </EmptyState>
       </PlannerSection>
     </div>
   );
