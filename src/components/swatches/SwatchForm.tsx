@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +8,7 @@ import { SwatchMeasurementFields } from './SwatchMeasurementFields';
 import { SwatchYarnField } from './SwatchYarnField';
 import { SwatchImageUpload } from './SwatchImageUpload';
 import { SwatchNotesField } from './SwatchNotesField';
+import { useSwatchImages } from "@/hooks/useSwatchImages";
 import type { Database } from '@/integrations/supabase/types';
 
 type Swatch = Database['public']['Tables']['swatches']['Row'];
@@ -20,6 +21,10 @@ interface SwatchFormProps {
 }
 
 export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps) => {
+  // Fetch associated images if editing
+  const { images, loading: imagesLoading } = useSwatchImages(swatch?.id || "");
+
+  // Use the primary image URL as initial state if editing a swatch
   const [formData, setFormData] = useState({
     title: swatch?.title || '',
     description: swatch?.description || '',
@@ -28,8 +33,17 @@ export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps
     stitches_per_inch: swatch?.stitches_per_inch?.toString() || '',
     rows_per_inch: swatch?.rows_per_inch?.toString() || '',
     notes: swatch?.notes || '',
-    image_url: '',
+    image_url: '', // Set this after image fetched
   });
+
+  // When images load for editing, ensure formData.image_url is set ONCE if swatch exists
+  useEffect(() => {
+    if (swatch && images.length > 0 && !formData.image_url) {
+      setFormData(prev => ({ ...prev, image_url: images[0] || "" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swatch?.id, images]);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -55,7 +69,7 @@ export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps
       if (selectedFile) {
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${userId}/${Date.now()}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from('swatch-images')
           .upload(fileName, selectedFile);
@@ -112,18 +126,31 @@ export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps
         });
       }
 
-      // Handle image upload to swatch_images table if we have an image
-      if (imageUrl && swatchId) {
-        const { error: imageError } = await supabase
-          .from('swatch_images')
-          .insert({
-            swatch_id: swatchId,
-            image_url: imageUrl,
-            is_primary: true,
-          });
-
-        if (imageError) {
-          console.error('Error saving swatch image:', imageError);
+      // --- IMAGE HANDLING LOGIC ---
+      if (swatchId) {
+        // If new image upload or changed image URL, replace image
+        if (imageUrl) {
+          // If editing, remove previous images if changed (replace, simple logic for now)
+          if (swatch && images.length > 0 && imageUrl !== images[0]) {
+            // Delete existing primary image(s)
+            await supabase
+              .from('swatch_images')
+              .delete()
+              .eq('swatch_id', swatchId);
+          }
+          // Only insert if it's new or changed
+          if (!swatch || images.length === 0 || imageUrl !== images[0]) {
+            const { error: imageError } = await supabase
+              .from('swatch_images')
+              .insert({
+                swatch_id: swatchId,
+                image_url: imageUrl,
+                is_primary: true,
+              });
+            if (imageError) {
+              console.error('Error saving swatch image:', imageError);
+            }
+          }
         }
       }
 
@@ -146,6 +173,7 @@ export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps
 
   const handleImageUrlChange = (url: string) => {
     setFormData(prev => ({ ...prev, image_url: url }));
+    setSelectedFile(null);
   };
 
   const handleYarnUsedChange = (yarnUsed: string) => {
@@ -196,7 +224,7 @@ export const SwatchForm = ({ userId, swatch, onSave, onCancel }: SwatchFormProps
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || imagesLoading}>
           {loading ? 'Saving...' : swatch ? 'Update Swatch' : 'Add Swatch'}
         </Button>
       </div>
