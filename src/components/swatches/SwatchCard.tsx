@@ -20,7 +20,8 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { images } = useSwatchImages(swatch.id);
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setShowDeleteConfirm(true);
   };
 
@@ -29,9 +30,25 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
     setShowDeleteConfirm(false);
   };
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(swatch);
+  };
+
+  const handleCloneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClone(swatch);
+  };
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card
+        className="hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => onEdit(swatch)}
+        tabIndex={0}
+        role="button"
+        aria-label={`Edit swatch "${swatch.title}"`}
+      >
         <div className="w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
           {images.length > 0 ? (
             <img
@@ -54,14 +71,14 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onEdit(swatch)}
+                onClick={handleEditClick}
               >
                 <Edit className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onClone(swatch)}
+                onClick={handleCloneClick}
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -123,3 +140,4 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
     </>
   );
 };
+
