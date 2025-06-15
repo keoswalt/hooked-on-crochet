@@ -2,18 +2,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Palette, Package, Search, X } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import { YarnForm } from '@/components/stash/YarnForm';
 import { SwatchForm } from '@/components/swatches/SwatchForm';
+import { PlansSearch } from '@/components/planner/PlansSearch';
+import { PlansGrid } from '@/components/planner/PlansGrid';
+import { PlansPagination } from '@/components/planner/PlansPagination';
+import { YarnOverview } from '@/components/planner/YarnOverview';
+import { SwatchesOverview } from '@/components/planner/SwatchesOverview';
+import { usePlansPagination } from '@/hooks/usePlansPagination';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -34,11 +37,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [loading, setLoading] = useState(true);
   const [plansLoading, setPlansLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPlans, setTotalPlans] = useState(0);
   const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
-  const [showNewYarnDialog, setShowNewYarnDialog] = useState(false);
-  const [showNewSwatchDialog, setShowNewSwatchDialog] = useState(false);
   const [newPlanName, setNewPlanName] = useState('');
   const [newPlanDescription, setNewPlanDescription] = useState('');
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
@@ -46,22 +45,22 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const totalPages = Math.ceil(totalPlans / PLANS_PER_PAGE);
+  const {
+    currentPage,
+    totalPages,
+    totalItems,
+    setTotalItems,
+    handlePageChange,
+    resetToFirstPage,
+  } = usePlansPagination({
+    itemsPerPage: PLANS_PER_PAGE,
+    onPageChange: (page: number) => fetchPlans(searchQuery, page),
+  });
 
-  // Debounced search function
-  const debounceSearch = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return (query: string) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          setCurrentPage(1); // Reset to first page on new search
-          fetchPlans(query, 1);
-        }, 300);
-      };
-    })(),
-    []
-  );
+  const debouncedSearch = useDebounce((query: string) => {
+    resetToFirstPage();
+    fetchPlans(query, 1);
+  }, 300);
 
   useEffect(() => {
     fetchInitialData();
@@ -69,18 +68,17 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
 
   useEffect(() => {
     if (searchQuery) {
-      debounceSearch(searchQuery);
+      debouncedSearch(searchQuery);
     } else {
-      setCurrentPage(1);
+      resetToFirstPage();
       fetchPlans('', 1);
     }
-  }, [searchQuery, debounceSearch]);
+  }, [searchQuery, debouncedSearch, resetToFirstPage]);
 
   const fetchInitialData = async () => {
     try {
       setLoading(true);
       
-      // Fetch initial plans data
       await fetchPlans('', 1);
 
       // Fetch yarn stash (limit to recent entries for overview)
@@ -144,7 +142,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       // Execute count query
       const { count, error: countError } = await countQuery;
       if (countError) throw countError;
-      setTotalPlans(count || 0);
+      setTotalItems(count || 0);
 
       // Execute plans query with pagination
       const { data: planData, error: plansError } = await plansQuery
@@ -201,6 +199,14 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     }
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   const handleEditYarn = (yarn: YarnStash) => {
     setEditingYarn(yarn);
   };
@@ -217,25 +223,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const handleSwatchSaved = () => {
     fetchInitialData();
     setEditingSwatch(null);
-  };
-
-  const handleNewYarnSaved = () => {
-    fetchInitialData();
-    setShowNewYarnDialog(false);
-  };
-
-  const handleNewSwatchSaved = () => {
-    fetchInitialData();
-    setShowNewSwatchDialog(false);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchPlans(searchQuery, page);
-  };
-
-  const clearSearch = () => {
-    setSearchQuery('');
   };
 
   if (loading) {
@@ -260,189 +247,43 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Your Plans</h2>
         
-        {/* Search Input */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search plans..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearSearch}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        <PlansSearch
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onClearSearch={clearSearch}
+        />
 
-        {/* Plans Grid */}
-        {plansLoading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">Loading plans...</p>
-          </div>
-        ) : plans.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              {searchQuery ? (
-                <div>
-                  <p className="text-gray-600 mb-2">No plans found matching "{searchQuery}"</p>
-                  <Button variant="outline" onClick={clearSearch}>
-                    Clear search
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-gray-600">No plans yet. Create your first one!</p>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {plans.map((plan) => (
-                <Card key={plan.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${plan.id}`)}>
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    {plan.description && (
-                      <CardDescription>{plan.description}</CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500">
-                      Last modified: {new Date(plan.updated_at).toLocaleDateString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <PlansGrid
+          plans={plans}
+          loading={plansLoading}
+          searchQuery={searchQuery}
+          onClearSearch={clearSearch}
+        />
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * PLANS_PER_PAGE) + 1}-{Math.min(currentPage * PLANS_PER_PAGE, totalPlans)} of {totalPlans} plans
-                </p>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </>
-        )}
+        <PlansPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={PLANS_PER_PAGE}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {/* Quick Overview Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Yarn Stash Overview */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Recent Yarn</h2>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('/stash')}>
-                Manage Stash
-              </Button>
-              <Button size="sm" onClick={() => setShowNewYarnDialog(true)}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          {yarnStash.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-6">
-                <p className="text-gray-600">No yarn in your stash yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {yarnStash.map((yarn) => (
-                <Card key={yarn.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEditYarn(yarn)}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{yarn.name}</p>
-                        <p className="text-sm text-gray-600">{yarn.brand} - {yarn.color}</p>
-                      </div>
-                      <div className="text-right">
-                        {yarn.weight ? (
-                          <Badge variant="secondary">{getYarnWeightLabel(yarn.weight)}</Badge>
-                        ) : (
-                          <Badge variant="secondary">No weight</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        <YarnOverview
+          yarnStash={yarnStash}
+          userId={user.id}
+          onYarnEdit={handleEditYarn}
+          onRefresh={fetchInitialData}
+        />
 
-        {/* Swatches Overview */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Recent Swatches</h2>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('/swatches')}>
-                Manage Swatches
-              </Button>
-              <Button size="sm" onClick={() => setShowNewSwatchDialog(true)}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          {swatches.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-6">
-                <p className="text-gray-600">No swatches created yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {swatches.map((swatch) => (
-                <Card key={swatch.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEditSwatch(swatch)}>
-                  <CardContent className="p-4">
-                    <p className="font-medium">{swatch.title}</p>
-                    {swatch.hook_size && (
-                      <p className="text-xs text-gray-500 mt-1">Hook: {swatch.hook_size}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        <SwatchesOverview
+          swatches={swatches}
+          userId={user.id}
+          onSwatchEdit={handleEditSwatch}
+          onRefresh={fetchInitialData}
+        />
       </div>
 
       {/* New Plan Dialog */}
@@ -484,34 +325,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
               Create Plan
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* New Yarn Dialog */}
-      <Dialog open={showNewYarnDialog} onOpenChange={setShowNewYarnDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Yarn</DialogTitle>
-          </DialogHeader>
-          <YarnForm
-            userId={user.id}
-            onSave={handleNewYarnSaved}
-            onCancel={() => setShowNewYarnDialog(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* New Swatch Dialog */}
-      <Dialog open={showNewSwatchDialog} onOpenChange={setShowNewSwatchDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Swatch</DialogTitle>
-          </DialogHeader>
-          <SwatchForm
-            userId={user.id}
-            onSave={handleNewSwatchSaved}
-            onCancel={() => setShowNewSwatchDialog(false)}
-          />
         </DialogContent>
       </Dialog>
 
