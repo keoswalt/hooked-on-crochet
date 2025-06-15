@@ -21,9 +21,10 @@ export const Header = ({ userEmail }: HeaderProps) => {
   const isSwatchesActive = location.pathname.startsWith('/swatches');
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    // Use a wrapper div for full-width bg and border, then inner .container for content
+    <div className="w-full border-b border-gray-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <header className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             {/* Logo/Favicon and Title */}
             <div 
@@ -75,9 +76,9 @@ export const Header = ({ userEmail }: HeaderProps) => {
           <div className="flex items-center">
             {userEmail && <UserMenu userEmail={userEmail} />}
           </div>
-        </div>
+        </header>
       </div>
-    </header>
+    </div>
   );
 };
 
