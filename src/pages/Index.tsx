@@ -9,6 +9,7 @@ import { ProjectDetailPage } from './ProjectDetailPage';
 import { PlannerPage } from './PlannerPage';
 import { PlannerDetailPage } from './PlannerDetailPage';
 import { StashPage } from './StashPage';
+import { SwatchesPage } from './SwatchesPage';
 import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
@@ -52,6 +53,9 @@ const Index = () => {
     if (location.pathname === '/stash') {
       return 'stash';
     }
+    if (location.pathname === '/swatches') {
+      return 'swatches';
+    }
     return 'projects-list';
   };
 
@@ -87,6 +91,9 @@ const Index = () => {
       )}
       {currentPage === 'stash' && (
         <StashPage user={user} />
+      )}
+      {currentPage === 'swatches' && (
+        <SwatchesPage user={user} />
       )}
     </div>
   );

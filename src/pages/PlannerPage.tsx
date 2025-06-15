@@ -208,7 +208,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Swatches</h2>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => navigate('/swatches')}>
               Manage Swatches
             </Button>
           </div>

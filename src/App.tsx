@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/planner" element={<Index />} />
           <Route path="/planner/:plannerId" element={<Index />} />
           <Route path="/stash" element={<Index />} />
+          <Route path="/swatches" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
