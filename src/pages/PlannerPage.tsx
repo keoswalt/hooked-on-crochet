@@ -17,6 +17,8 @@ import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-di
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import { NewPlanDialog } from '@/components/planner/NewPlanDialog';
+import { PlansGrid } from '@/components/planner/PlansGrid';
+import { PlannerRelatedOverview } from '@/components/planner/PlannerRelatedOverview';
 
 type Plan = Database['public']['Tables']['plans']['Row'] & {
   featured_image_url?: string | null;
@@ -284,143 +286,21 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       {/* Plans Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Your Plans</h2>
-        
-        {/* Search Input */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search plans..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearSearch}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
 
-        {/* Plans Grid */}
-        {plansLoading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">Loading plans...</p>
-          </div>
-        ) : plans.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              {searchQuery ? (
-                <div>
-                  <p className="text-gray-600 mb-2">No plans found matching "{searchQuery}"</p>
-                  <Button variant="outline" onClick={clearSearch}>
-                    Clear search
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-gray-600">No plans yet. Create your first one!</p>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            {/* Plan cards row: Responsive stacked on mobile, horizontal on desktop */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              {plans.map((plan) => (
-                <Card
-                  key={plan.id}
-                  className="hover:shadow-lg transition-shadow relative group flex flex-col md:flex-row items-stretch h-full"
-                >
-                  {/* Image Section (stacked on mobile, left on desktop) */}
-                  <div className="w-full md:w-48 md:h-48 flex items-center justify-center p-4 shrink-0 relative">
-                    <div className="w-full h-48 md:w-48 md:h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                      {plan.featured_image_url ? (
-                        <img
-                          src={plan.featured_image_url}
-                          alt={plan.name || 'Plan image'}
-                          className="w-full h-full object-cover object-center"
-                          draggable={false}
-                        />
-                      ) : (
-                        <div className="text-gray-300 text-xs text-center w-full">No image</div>
-                      )}
-                    </div>
-                  </div>
-                  {/* Card Content Section */}
-                  <div
-                    className="w-full flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
-                    onClick={() => navigate(`/planner/${plan.id}`)}
-                  >
-                    {/* Title row with delete button */}
-                    <div className="flex items-start justify-between gap-x-2">
-                      <CardHeader className="p-0 mb-2 flex-1 min-w-0">
-                        <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
-                        {plan.description && (
-                          <CardDescription className="truncate">{plan.description}</CardDescription>
-                        )}
-                      </CardHeader>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPlanToDelete(plan);
-                        }}
-                        className="h-8 w-8 p-0 shrink-0 ml-2"
-                        tabIndex={0}
-                        aria-label="Delete plan"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * PLANS_PER_PAGE) + 1}-{Math.min(currentPage * PLANS_PER_PAGE, totalPlans)} of {totalPlans} plans
-                </p>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </>
-        )}
+        <PlansGrid
+          plans={plans}
+          loading={plansLoading}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClearSearch={clearSearch}
+          onPlanClick={(id) => navigate(`/planner/${id}`)}
+          onPlanDelete={setPlanToDelete}
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          totalPlans={totalPlans}
+          PLANS_PER_PAGE={PLANS_PER_PAGE}
+        />
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -432,67 +312,22 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         description="Are you sure you want to delete this plan? This action cannot be undone and will permanently delete the plan and all associated canvas elements."
       />
 
-      {/* New Yarn Dialog */}
-      <Dialog open={showNewYarnDialog} onOpenChange={setShowNewYarnDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Yarn</DialogTitle>
-          </DialogHeader>
-          <YarnForm
-            userId={user.id}
-            onSave={handleNewYarnSaved}
-            onCancel={() => setShowNewYarnDialog(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* New Swatch Dialog */}
-      <Dialog open={showNewSwatchDialog} onOpenChange={setShowNewSwatchDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Swatch</DialogTitle>
-          </DialogHeader>
-          <SwatchForm
-            userId={user.id}
-            onSave={handleNewSwatchSaved}
-            onCancel={() => setShowNewSwatchDialog(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Yarn Dialog */}
-      <Dialog open={!!editingYarn} onOpenChange={() => setEditingYarn(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Yarn</DialogTitle>
-          </DialogHeader>
-          {editingYarn && (
-            <YarnForm
-              userId={user.id}
-              yarn={editingYarn}
-              onSave={handleYarnSaved}
-              onCancel={() => setEditingYarn(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Swatch Dialog */}
-      <Dialog open={!!editingSwatch} onOpenChange={() => setEditingSwatch(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Swatch</DialogTitle>
-          </DialogHeader>
-          {editingSwatch && (
-            <SwatchForm
-              userId={user.id}
-              swatch={editingSwatch}
-              onSave={handleSwatchSaved}
-              onCancel={() => setEditingSwatch(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* All Yarn and Swatch related dialogs */}
+      <PlannerRelatedOverview
+        showNewYarnDialog={showNewYarnDialog}
+        setShowNewYarnDialog={setShowNewYarnDialog}
+        showNewSwatchDialog={showNewSwatchDialog}
+        setShowNewSwatchDialog={setShowNewSwatchDialog}
+        editingYarn={editingYarn}
+        setEditingYarn={setEditingYarn}
+        editingSwatch={editingSwatch}
+        setEditingSwatch={setEditingSwatch}
+        userId={user.id}
+        handleNewYarnSaved={handleNewYarnSaved}
+        handleNewSwatchSaved={handleNewSwatchSaved}
+        handleYarnSaved={handleYarnSaved}
+        handleSwatchSaved={handleSwatchSaved}
+      />
     </div>
   );
 };
