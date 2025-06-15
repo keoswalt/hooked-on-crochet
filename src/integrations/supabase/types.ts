@@ -15,7 +15,7 @@ export type Database = {
           element_type: string
           height: number | null
           id: string
-          planner_project_id: string
+          plan_id: string
           position_x: number
           position_y: number
           properties: Json | null
@@ -29,7 +29,7 @@ export type Database = {
           element_type: string
           height?: number | null
           id?: string
-          planner_project_id: string
+          plan_id: string
           position_x?: number
           position_y?: number
           properties?: Json | null
@@ -43,7 +43,7 @@ export type Database = {
           element_type?: string
           height?: number | null
           id?: string
-          planner_project_id?: string
+          plan_id?: string
           position_x?: number
           position_y?: number
           properties?: Json | null
@@ -54,15 +54,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "canvas_elements_planner_project_id_fkey"
-            columns: ["planner_project_id"]
+            foreignKeyName: "canvas_elements_plan_id_fkey"
+            columns: ["plan_id"]
             isOneToOne: false
-            referencedRelation: "planner_projects"
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
       }
-      planner_projects: {
+      plans: {
         Row: {
           canvas_data: Json | null
           created_at: string

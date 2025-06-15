@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-type PlannerProject = Database['public']['Tables']['planner_projects']['Row'];
+type Plan = Database['public']['Tables']['plans']['Row'];
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 type Swatch = Database['public']['Tables']['swatches']['Row'];
 
@@ -21,13 +20,13 @@ interface PlannerPageProps {
 }
 
 export const PlannerPage = ({ user }: PlannerPageProps) => {
-  const [plannerProjects, setPlannerProjects] = useState<PlannerProject[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [yarnStash, setYarnStash] = useState<YarnStash[]>([]);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
+  const [newPlanName, setNewPlanName] = useState('');
+  const [newPlanDescription, setNewPlanDescription] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -39,15 +38,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     try {
       setLoading(true);
       
-      // Fetch planner projects
-      const { data: projects, error: projectsError } = await supabase
-        .from('planner_projects')
+      // Fetch plans
+      const { data: planData, error: plansError } = await supabase
+        .from('plans')
         .select('*')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
-      if (projectsError) throw projectsError;
-      setPlannerProjects(projects || []);
+      if (plansError) throw plansError;
+      setPlans(planData || []);
 
       // Fetch yarn stash (limit to recent entries for overview)
       const { data: yarn, error: yarnError } = await supabase
@@ -75,7 +74,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to load planner data",
+        description: "Failed to load data",
         variant: "destructive",
       });
     } finally {
@@ -83,15 +82,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     }
   };
 
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim()) return;
+  const handleCreatePlan = async () => {
+    if (!newPlanName.trim()) return;
 
     try {
       const { data, error } = await supabase
-        .from('planner_projects')
+        .from('plans')
         .insert({
-          name: newProjectName,
-          description: newProjectDescription,
+          name: newPlanName,
+          description: newPlanDescription,
           user_id: user.id,
         })
         .select()
@@ -101,18 +100,18 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
 
       toast({
         title: "Success",
-        description: "Project created successfully",
+        description: "Plan created successfully",
       });
 
-      setShowNewProjectDialog(false);
-      setNewProjectName('');
-      setNewProjectDescription('');
+      setShowNewPlanDialog(false);
+      setNewPlanName('');
+      setNewPlanDescription('');
       navigate(`/planner/${data.id}`);
     } catch (error: any) {
-      console.error('Error creating project:', error);
+      console.error('Error creating plan:', error);
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: "Failed to create plan",
         variant: "destructive",
       });
     }
@@ -129,35 +128,35 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
-        <Button onClick={() => setShowNewProjectDialog(true)}>
+        <Button onClick={() => setShowNewPlanDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          New Planner Project
+          New Plan
         </Button>
       </div>
 
-      {/* Projects Section */}
+      {/* Plans Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Your Planner Projects</h2>
-        {plannerProjects.length === 0 ? (
+        <h2 className="text-2xl font-semibold mb-4">Your Plans</h2>
+        {plans.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
               <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No planner projects yet. Create your first one!</p>
+              <p className="text-gray-600">No plans yet. Create your first one!</p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plannerProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${project.id}`)}>
+            {plans.map((plan) => (
+              <Card key={plan.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${plan.id}`)}>
                 <CardHeader>
-                  <CardTitle>{project.name}</CardTitle>
-                  {project.description && (
-                    <CardDescription>{project.description}</CardDescription>
+                  <CardTitle>{plan.name}</CardTitle>
+                  {plan.description && (
+                    <CardDescription>{plan.description}</CardDescription>
                   )}
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-500">
-                    Last modified: {new Date(project.updated_at).toLocaleDateString()}
+                    Last modified: {new Date(plan.updated_at).toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>
@@ -236,43 +235,43 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         </div>
       </div>
 
-      {/* New Project Dialog */}
-      <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+      {/* New Plan Dialog */}
+      <Dialog open={showNewPlanDialog} onOpenChange={setShowNewPlanDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Planner Project</DialogTitle>
+            <DialogTitle>Create New Plan</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="project-name" className="block text-sm font-medium mb-2">
-                Project Name
+              <label htmlFor="plan-name" className="block text-sm font-medium mb-2">
+                Plan Name
               </label>
               <Input
-                id="project-name"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                placeholder="Enter project name"
+                id="plan-name"
+                value={newPlanName}
+                onChange={(e) => setNewPlanName(e.target.value)}
+                placeholder="Enter plan name"
               />
             </div>
             <div>
-              <label htmlFor="project-description" className="block text-sm font-medium mb-2">
+              <label htmlFor="plan-description" className="block text-sm font-medium mb-2">
                 Description (optional)
               </label>
               <Textarea
-                id="project-description"
-                value={newProjectDescription}
-                onChange={(e) => setNewProjectDescription(e.target.value)}
-                placeholder="Describe your project"
+                id="plan-description"
+                value={newPlanDescription}
+                onChange={(e) => setNewPlanDescription(e.target.value)}
+                placeholder="Describe your plan"
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>
+            <Button variant="outline" onClick={() => setShowNewPlanDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>
-              Create Project
+            <Button onClick={handleCreatePlan} disabled={!newPlanName.trim()}>
+              Create Plan
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -9,7 +9,7 @@ type CanvasElementType = Database['public']['Tables']['canvas_elements']['Row'];
 
 interface InfiniteCanvasProps {
   userId: string;
-  projectId: string;
+  planId: string;
 }
 
 interface CanvasState {
@@ -18,7 +18,7 @@ interface CanvasState {
   panY: number;
 }
 
-export const InfiniteCanvas = ({ userId, projectId }: InfiniteCanvasProps) => {
+export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
   const [elements, setElements] = useState<CanvasElementType[]>([]);
   const [canvasState, setCanvasState] = useState<CanvasState>({
     zoom: 1,
@@ -33,14 +33,14 @@ export const InfiniteCanvas = ({ userId, projectId }: InfiniteCanvasProps) => {
 
   useEffect(() => {
     fetchElements();
-  }, [projectId]);
+  }, [planId]);
 
   const fetchElements = async () => {
     try {
       const { data, error } = await supabase
         .from('canvas_elements')
         .select('*')
-        .eq('planner_project_id', projectId)
+        .eq('plan_id', planId)
         .order('z_index', { ascending: true });
 
       if (error) throw error;
@@ -139,7 +139,7 @@ export const InfiniteCanvas = ({ userId, projectId }: InfiniteCanvasProps) => {
       const { data, error } = await supabase
         .from('canvas_elements')
         .insert({
-          planner_project_id: projectId,
+          plan_id: planId,
           ...elementData,
         })
         .select()

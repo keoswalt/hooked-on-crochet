@@ -10,7 +10,7 @@ import { PlannerSidebar } from '@/components/planner/PlannerSidebar';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-type PlannerProject = Database['public']['Tables']['planner_projects']['Row'];
+type Plan = Database['public']['Tables']['plans']['Row'];
 
 interface PlannerDetailPageProps {
   user: User;
@@ -20,32 +20,32 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   const { plannerId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [project, setProject] = useState<PlannerProject | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (plannerId) {
-      fetchProject();
+      fetchPlan();
     }
   }, [plannerId, user.id]);
 
-  const fetchProject = async () => {
+  const fetchPlan = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('planner_projects')
+        .from('plans')
         .select('*')
         .eq('id', plannerId)
         .eq('user_id', user.id)
         .single();
 
       if (error) throw error;
-      setProject(data);
+      setPlan(data);
     } catch (error: any) {
-      console.error('Error fetching project:', error);
+      console.error('Error fetching plan:', error);
       toast({
         title: "Error",
-        description: "Failed to load project",
+        description: "Failed to load plan",
         variant: "destructive",
       });
       navigate('/planner');
@@ -58,8 +58,8 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  if (!project) {
-    return <div className="min-h-screen flex items-center justify-center">Project not found</div>;
+  if (!plan) {
+    return <div className="min-h-screen flex items-center justify-center">Plan not found</div>;
   }
 
   return (
@@ -73,9 +73,9 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
               Back to Planner
             </Button>
             <div>
-              <h1 className="text-xl font-semibold">{project.name}</h1>
-              {project.description && (
-                <p className="text-sm text-gray-600">{project.description}</p>
+              <h1 className="text-xl font-semibold">{plan.name}</h1>
+              {plan.description && (
+                <p className="text-sm text-gray-600">{plan.description}</p>
               )}
             </div>
           </div>
@@ -84,9 +84,9 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-120px)]">
-        <PlannerSidebar userId={user.id} projectId={project.id} />
+        <PlannerSidebar userId={user.id} planId={plan.id} />
         <div className="flex-1">
-          <InfiniteCanvas userId={user.id} projectId={project.id} />
+          <InfiniteCanvas userId={user.id} planId={plan.id} />
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -15,10 +14,10 @@ type Swatch = Database['public']['Tables']['swatches']['Row'];
 
 interface PlannerSidebarProps {
   userId: string;
-  projectId: string;
+  planId: string;
 }
 
-export const PlannerSidebar = ({ userId, projectId }: PlannerSidebarProps) => {
+export const PlannerSidebar = ({ userId, planId }: PlannerSidebarProps) => {
   const [yarnStash, setYarnStash] = useState<YarnStash[]>([]);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
