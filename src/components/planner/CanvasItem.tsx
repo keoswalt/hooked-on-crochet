@@ -9,50 +9,73 @@ interface CanvasItemProps {
   onMove: (id: string, x: number, y: number) => void;
   isSelected: boolean;
   onSelect: (id: string) => void;
+  canvasPanZoom?: { pan: { x: number; y: number }; zoom: number };
 }
 
 export const CanvasItem: React.FC<CanvasItemProps> = ({
-  id, x, y, content, onMove, isSelected, onSelect
+  id, x, y, content, onMove, isSelected, onSelect, canvasPanZoom
 }) => {
   const [dragging, setDragging] = useState(false);
-  const offset = useRef({ x: 0, y: 0 });
+  const pointerOffset = useRef({ x: 0, y: 0 });
+
+  // Helper: get screen coordinates from canvas coords considering pan/zoom
+  function canvasToScreen(cx: number, cy: number) {
+    if (!canvasPanZoom) return { sx: cx, sy: cy };
+    const { pan, zoom } = canvasPanZoom;
+    return {
+      sx: cx * zoom + pan.x,
+      sy: cy * zoom + pan.y
+    };
+  }
+  // Helper: get canvas coords from screen
+  function screenToCanvas(sx: number, sy: number) {
+    if (!canvasPanZoom) return { cx: sx, cy: sy };
+    const { pan, zoom } = canvasPanZoom;
+    return {
+      cx: (sx - pan.x) / zoom,
+      cy: (sy - pan.y) / zoom,
+    };
+  }
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setDragging(true);
-    offset.current = { x: e.clientX - x, y: e.clientY - y };
+    // Calculate pointer offset relative to element origin in canvas coords
+    const { cx, cy } = screenToCanvas(e.clientX, e.clientY);
+    pointerOffset.current = { x: cx - x, y: cy - y };
     e.stopPropagation();
     onSelect(id);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!dragging) return;
-    const newX = e.clientX - offset.current.x;
-    const newY = e.clientY - offset.current.y;
-    onMove(id, newX, newY);
-  };
-
-  const handleMouseUp = () => setDragging(false);
-
   React.useEffect(() => {
-    if (dragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+    if (!dragging) return;
+
+    const handleMove = (e: MouseEvent) => {
+      const { cx, cy } = screenToCanvas(e.clientX, e.clientY);
+      const newX = cx - pointerOffset.current.x;
+      const newY = cy - pointerOffset.current.y;
+      onMove(id, newX, newY);
     };
-  });
+
+    const handleUp = () => setDragging(false);
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging]);
+
+  // Compute absolute position for CSS
+  const { sx, sy } = canvasToScreen(x, y);
 
   return (
     <div
       className={`absolute select-none cursor-move ${isSelected ? "ring-2 ring-blue-400" : ""}`}
       style={{
-        left: x,
-        top: y,
+        left: sx,
+        top: sy,
         minWidth: 120,
         minHeight: 40,
         padding: 12,
@@ -60,7 +83,9 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
         border: "1px solid #ddd",
         borderRadius: 6,
         zIndex: isSelected ? 2 : 1,
-        userSelect: "none"
+        userSelect: "none",
+        transform: "translate(0, 0)",
+        pointerEvents: "auto", // Ensure events bubble here, not canvas
       }}
       onMouseDown={handleMouseDown}
       tabIndex={0}
