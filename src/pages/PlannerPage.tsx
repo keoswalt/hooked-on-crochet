@@ -263,7 +263,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
         <div>
-          <Button onClick={() => setShowNewPlanDialog(true)} className="w-full sm:w-auto">
+          <Button onClick={() => setShowNewPlanDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Plan
           </Button>
