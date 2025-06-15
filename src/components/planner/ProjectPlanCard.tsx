@@ -41,14 +41,14 @@ export function ProjectPlanCard({
     >
       <CardContent
         className={cn(
-          // Responsive: stack column on mobile, row on desktop
-          "flex flex-col sm:flex-row items-stretch sm:items-center p-3 gap-3"
+          // Always horizontal
+          "flex flex-row items-center p-3 gap-3"
         )}
       >
         <div
           className={cn(
-            // Responsive: image full width, small on desktop
-            "w-full aspect-square rounded bg-gray-100 overflow-hidden flex items-center justify-center sm:w-16 sm:h-16 sm:flex-shrink-0"
+            // Image: square, always left
+            "w-16 h-16 flex-shrink-0 rounded bg-gray-100 overflow-hidden flex items-center justify-center"
           )}
         >
           {imageUrl ? (
@@ -65,7 +65,7 @@ export function ProjectPlanCard({
         <div className="flex-1 flex items-center min-w-0">
           <div
             className={cn(
-              // Allow full wrapping on mobile, restrict lines on desktop only
+              // Text: wrap as needed on mobile, clamp lines only on desktop
               "text-sm text-left font-medium break-words",
               "sm:line-clamp-2"
             )}
