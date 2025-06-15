@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import PlannerSection from "./PlannerSection";
 import EmptyState from "@/components/ui/EmptyState";
@@ -6,7 +5,9 @@ import { usePlanYarnAttachments } from "@/hooks/usePlanYarnAttachments";
 import PlanYarnCard from "./PlanYarnCard";
 import YarnSelectionDialog from "./YarnSelectionDialog";
 import { supabase } from "@/integrations/supabase/client";
-import YarnForm from "@/components/stash/YarnForm";
+import { YarnForm } from "@/components/stash/YarnForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { Database } from "@/integrations/supabase/types";
 
 type YarnStash = Database["public"]["Tables"]["yarn_stash"]["Row"];
 
