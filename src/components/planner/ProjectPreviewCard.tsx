@@ -1,8 +1,7 @@
 
 import type { Database } from "@/integrations/supabase/types";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ProjectStatusChip } from "@/components/projects/ProjectStatusChip";
-import { getYarnWeightLabel } from "@/utils/yarnWeights";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
@@ -24,8 +23,8 @@ export default function ProjectPreviewCard({ project, selected, onSelect }: Proj
       <CardHeader className="pb-2">
         <CardTitle className="truncate text-sm">{project.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center px-2 py-0">
-        <div className="w-full h-14 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center mb-1">
+      <CardContent className="flex flex-col items-center p-4">
+        <div className="w-full h-14 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center mb-2">
           {project.featured_image_url ? (
             <img
               src={project.featured_image_url}
@@ -37,9 +36,7 @@ export default function ProjectPreviewCard({ project, selected, onSelect }: Proj
             <div className="text-gray-400 text-xs">No image</div>
           )}
         </div>
-        <CardDescription className="w-full text-xs text-gray-600 mb-1">
-          Hook: {project.hook_size} &nbsp;•&nbsp; Yarn: {getYarnWeightLabel(project.yarn_weight)}
-        </CardDescription>
+        {/* Removed hook and yarn details line */}
         <div className="flex justify-between w-full items-center">
           <ProjectStatusChip status={project.status} size="sm" />
         </div>
