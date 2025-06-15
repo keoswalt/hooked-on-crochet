@@ -85,10 +85,10 @@ export default function ProjectSelectionDialog({
         <DialogHeader className="bg-gray-50 px-6 py-3 border-b border-gray-100">
           <DialogTitle>Attach Projects to Plan</DialogTitle>
         </DialogHeader>
-        {/* Sticky search bar with rounded top corners */}
+        {/* Sticky search bar */}
         <div
-          className="sticky top-0 z-20 bg-white px-6 pt-4 pb-2 border-b border-gray-100 rounded-t-lg"
-          // Remove boxShadow—DialogContent background/rounding will handle it
+          className="sticky top-0 z-20 bg-white px-6 pt-4 pb-2 border-b border-gray-100"
+          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.01)" }}
         >
           <ProjectSearch
             searchTerm={searchTerm}
@@ -128,3 +128,4 @@ export default function ProjectSelectionDialog({
     </Dialog>
   );
 }
+
