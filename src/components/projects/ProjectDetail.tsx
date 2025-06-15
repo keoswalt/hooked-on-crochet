@@ -143,8 +143,8 @@ export const ProjectDetail = ({
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        description={confirmDialog.description}
+        title={confirmDialog.title || "Mark Row as Incomplete?"}
+        description={confirmDialog.description || "Marking this row as incomplete will also mark all subsequent rows as incomplete and reset their progress. Are you sure you want to continue?"}
       />
     </div>
   );

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 
 export const useProjectNavigation = () => {
   const [currentView, setCurrentView] = useState<'list' | 'detail' | 'form'>('list');

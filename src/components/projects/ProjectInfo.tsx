@@ -2,7 +2,7 @@
 import { LinkifiedText } from '@/components/ui/linkified-text';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 
 interface ProjectInfoProps {
   project: Project;

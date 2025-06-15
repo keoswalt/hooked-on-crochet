@@ -10,7 +10,7 @@ import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
