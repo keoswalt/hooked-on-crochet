@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,8 +32,47 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Debug authentication state
+  const checkAuthState = async () => {
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      console.log('=== Authentication Debug ===');
+      console.log('Session:', session);
+      console.log('Session error:', sessionError);
+      console.log('User:', user);
+      console.log('User error:', userError);
+      console.log('User ID from props:', userId);
+      console.log('Plan ID:', planId);
+      console.log('========================');
+      
+      if (!session || !user) {
+        console.error('No active session or user found');
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to add elements to the canvas",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (user.id !== userId) {
+        console.error('User ID mismatch:', { authUserId: user.id, propsUserId: userId });
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error checking auth state:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchElements();
+    // Check auth state on component mount
+    checkAuthState();
   }, [planId]);
 
   const fetchElements = async () => {
@@ -94,7 +132,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     }));
   }, []);
 
-  // Improved coordinate conversion with better validation
   const screenToCanvasCoords = useCallback((screenX: number, screenY: number) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) {
@@ -102,7 +139,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       return { x: 0, y: 0 };
     }
 
-    // Convert screen coordinates to canvas coordinates
     const canvasX = (screenX - rect.left - canvasState.panX) / canvasState.zoom;
     const canvasY = (screenY - rect.top - canvasState.panY) / canvasState.zoom;
     
@@ -116,7 +152,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     return { x: canvasX, y: canvasY };
   }, [canvasState]);
 
-  // Handle drag and drop from drawer
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
@@ -136,7 +171,14 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     setIsProcessingDrop(true);
 
     try {
+      console.log('=== Drop Event Debug ===');
       console.log('Drop event triggered');
+      
+      // Step 1: Check authentication first
+      const isAuthenticated = await checkAuthState();
+      if (!isAuthenticated) {
+        throw new Error('Authentication failed - user not logged in');
+      }
       
       // Validate plan ID
       if (!planId) {
@@ -159,7 +201,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       
       const canvasCoords = screenToCanvasCoords(e.clientX, e.clientY);
       
-      // Validate coordinates
       if (isNaN(canvasCoords.x) || isNaN(canvasCoords.y)) {
         throw new Error('Invalid coordinates calculated');
       }
@@ -173,7 +214,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
         properties: {},
       };
 
-      // Set element-specific properties and dimensions
       switch (type) {
         case 'text':
           elementData.properties = { content: data?.content || 'New Text' };
@@ -225,8 +265,14 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       });
       
       console.log('Element successfully added to canvas');
+      console.log('=======================');
     } catch (error: any) {
-      console.error('Error handling drop:', error);
+      console.error('=== Drop Error ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('=================');
+      
       toast({
         title: "Error",
         description: error.message || "Failed to add element to canvas",
@@ -236,6 +282,83 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       setIsProcessingDrop(false);
     }
   }, [canvasState, planId, screenToCanvasCoords, toast]);
+
+  const addElement = async (elementData: {
+    element_type: string;
+    position_x: number;
+    position_y: number;
+    width: number;
+    height: number;
+    properties: any;
+  }) => {
+    try {
+      console.log('=== Database Insert Debug ===');
+      console.log('Attempting to insert element:', elementData);
+      console.log('Plan ID:', planId);
+      
+      // Step 2: Test RLS policy with a direct query first
+      console.log('Testing plan access...');
+      const { data: planTest, error: planError } = await supabase
+        .from('plans')
+        .select('id, user_id')
+        .eq('id', planId)
+        .single();
+      
+      console.log('Plan test result:', planTest);
+      console.log('Plan test error:', planError);
+      
+      if (planError) {
+        throw new Error(`Cannot access plan: ${planError.message}`);
+      }
+      
+      if (!planTest) {
+        throw new Error('Plan not found or access denied');
+      }
+      
+      // Step 3: Attempt the insert with detailed error logging
+      const insertPayload = {
+        plan_id: planId,
+        ...elementData,
+      };
+      
+      console.log('Final insert payload:', insertPayload);
+      
+      const { data, error } = await supabase
+        .from('canvas_elements')
+        .insert(insertPayload)
+        .select()
+        .single();
+
+      console.log('Insert result:', data);
+      console.log('Insert error:', error);
+      
+      if (error) {
+        console.error('Database insert error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      if (!data) {
+        throw new Error('Insert succeeded but no data returned');
+      }
+      
+      console.log('Element inserted successfully:', data);
+      setElements(prev => [...prev, data]);
+      console.log('============================');
+      return data;
+    } catch (error: any) {
+      console.error('=== Add Element Error ===');
+      console.error('Error in addElement:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error constructor:', error.constructor.name);
+      console.error('========================');
+      throw error;
+    }
+  };
 
   const updateElement = async (elementId: string, updates: Partial<CanvasElementType>) => {
     try {
@@ -287,40 +410,6 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
         description: "Failed to delete element",
         variant: "destructive",
       });
-    }
-  };
-
-  const addElement = async (elementData: {
-    element_type: string;
-    position_x: number;
-    position_y: number;
-    width: number;
-    height: number;
-    properties: any;
-  }) => {
-    try {
-      console.log('Adding element to database:', elementData);
-      
-      const { data, error } = await supabase
-        .from('canvas_elements')
-        .insert({
-          plan_id: planId,
-          ...elementData,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Database error inserting element:', error);
-        throw error;
-      }
-      
-      console.log('Element inserted successfully:', data);
-      setElements(prev => [...prev, data]);
-      return data;
-    } catch (error: any) {
-      console.error('Error adding element:', error);
-      throw error;
     }
   };
 

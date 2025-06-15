@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InfiniteCanvas } from '@/components/planner/InfiniteCanvas';
 import { BottomDrawer } from '@/components/planner/BottomDrawer';
+import { DebugPanel } from '@/components/planner/DebugPanel';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -89,6 +90,9 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
 
       {/* Bottom Drawer */}
       <BottomDrawer userId={user.id} planId={plan.id} />
+      
+      {/* Debug Panel */}
+      <DebugPanel planId={plan.id} userId={user.id} />
     </div>
   );
 };
