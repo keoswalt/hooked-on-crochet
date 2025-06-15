@@ -185,13 +185,21 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
 
   // Background is tabIndex for accessibility and focus handlers
   const handleCanvasClick = (e: React.MouseEvent) => {
-    // Only respond if text tool is selected
+    // Only respond if text tool is selected (shouldn't fire after double-click)
     if (selectedTool !== "text") {
       setSelectedId(null);
       return;
     }
-
-    // Clicking with text tool: create new text box at this position
+    // Double-click hack: don't trigger after doubleclick event
+    if (justDoubleClicked.current) {
+      // Reset the flag here, next click is valid again.
+      justDoubleClicked.current = false;
+      return;
+    }
+    // Only act if clicking directly the background, not another element (like a text box)
+    if (e.target !== e.currentTarget) {
+      return;
+    }
     if (boardRef.current) {
       const boardRect = boardRef.current.getBoundingClientRect();
       const mouseX = e.clientX - boardRect.left;
@@ -255,8 +263,13 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
   };
 
   // Handle double click on CanvasItem to make a text box editable again
+  // Set the justDoubleClicked flag and clear it after a short time (e.g., 10ms)
   const handleItemDoubleClick = (id: string, type: string) => {
     if (type === "text") {
+      justDoubleClicked.current = true;
+      setTimeout(() => {
+        justDoubleClicked.current = false;
+      }, 10);
       setItems((prev) =>
         prev.map((el) =>
           el.id === id ? { ...el, isEditing: true } : el,
