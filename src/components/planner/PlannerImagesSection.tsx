@@ -124,7 +124,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
           .from("plan_images")
           .update({ is_featured: false })
           .eq("id", prevFeatured.id)
-          .select()
+          .select('*') // <-- Fix: select '*' to return Promise
       );
     }
 
@@ -133,7 +133,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         .from("plan_images")
         .update({ is_featured: true })
         .eq("id", imageId)
-        .select()
+        .select('*') // <-- Fix: select '*' to return Promise
     );
 
     // Await all updates
