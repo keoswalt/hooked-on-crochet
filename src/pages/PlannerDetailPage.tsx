@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Save, X } from 'lucide-react';
+import { ArrowLeft, Edit, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PlanImages } from '@/components/planner/PlanImages';
@@ -24,23 +25,29 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
+  // New: support create mode if planId === "new"
+  const createMode = planId === "new";
   const [plan, setPlan] = useState<Plan | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(!createMode);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (planId) {
+    if (!createMode && planId) {
       fetchPlan();
+    } else {
+      // Reset fields for create mode
+      setPlan(null);
+      setEditName('');
+      setEditDescription('');
+      setLoading(false);
     }
-  }, [planId]);
+  }, [planId, createMode]);
 
   const fetchPlan = async () => {
     if (!planId) return;
-    
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -79,9 +86,43 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
     }
   };
 
+  const handleCreatePlan = async () => {
+    if (!editName.trim()) return;
+    try {
+      setSaving(true);
+      const { data, error } = await supabase
+        .from('plans')
+        .insert({
+          name: editName.trim(),
+          description: editDescription.trim() || null,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Plan created successfully",
+      });
+
+      // Redirect to /planner/:planId after creation
+      navigate(`/planner/${data.id}`);
+    } catch (error: any) {
+      console.error('Error creating plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create plan",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleUpdatePlan = async (updates: Partial<Plan>) => {
     if (!plan) return;
-
     try {
       const { data, error } = await supabase
         .from('plans')
@@ -91,7 +132,6 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
         .single();
 
       if (error) throw error;
-
       setPlan(data);
     } catch (error: any) {
       console.error('Error updating plan:', error);
@@ -105,15 +145,12 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
 
   const handleSaveBasicInfo = async () => {
     if (!plan || !editName.trim()) return;
-
     try {
       setSaving(true);
       await handleUpdatePlan({
         name: editName.trim(),
         description: editDescription.trim() || null,
       });
-
-      setEditing(false);
       toast({
         title: "Success",
         description: "Plan updated successfully",
@@ -125,12 +162,6 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditName(plan?.name || '');
-    setEditDescription(plan?.description || '');
-    setEditing(false);
-  };
-
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -139,7 +170,8 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
     );
   }
 
-  if (!plan) {
+  if (!createMode && !plan) {
+    // Plan couldn't be loaded for some reason.
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -163,86 +195,76 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        
         <div className="flex-1">
-          {editing ? (
-            <div className="space-y-3">
-              <Input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Plan name"
-                className="text-lg font-semibold"
-              />
-              <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Plan description (optional)"
-                rows={2}
-              />
-              <div className="flex items-center gap-2">
+          <div className="space-y-3">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Plan name"
+              className="text-lg font-semibold"
+              disabled={!createMode && !plan}
+            />
+            <Textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              placeholder="Plan description (optional)"
+              rows={2}
+              disabled={!createMode && !plan}
+            />
+            <div className="flex items-center gap-2">
+              {createMode ? (
                 <Button 
-                  onClick={handleSaveBasicInfo} 
+                  onClick={handleCreatePlan}
+                  disabled={!editName.trim() || saving}
+                  size="sm"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  {saving ? 'Saving...' : 'Create Plan'}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSaveBasicInfo}
                   disabled={!editName.trim() || saving}
                   size="sm"
                 >
                   <Save className="h-4 w-4 mr-1" />
                   {saving ? 'Saving...' : 'Save'}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancelEdit}
-                  size="sm"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{plan.name}</h1>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditing(true)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-              {plan.description && (
-                <p className="text-gray-600">{plan.description}</p>
               )}
-              <p className="text-sm text-gray-500 mt-1">
-                Created: {new Date(plan.created_at).toLocaleDateString()} • 
-                Last modified: {new Date(plan.updated_at).toLocaleDateString()}
-              </p>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-          <TabsTrigger value="attachments">Yarn & Swatches</TabsTrigger>
+          <TabsTrigger value="images" disabled={createMode}>Images</TabsTrigger>
+          <TabsTrigger value="resources" disabled={createMode}>Resources</TabsTrigger>
+          <TabsTrigger value="attachments" disabled={createMode}>Yarn & Swatches</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
-
         <TabsContent value="images">
-          <PlanImages planId={plan.id} userId={user.id} />
+          {!createMode && plan ? (
+            <PlanImages planId={plan.id} userId={user.id} />
+          ) : (
+            <div className="text-center text-gray-500 py-8">Save your plan to add images.</div>
+          )}
         </TabsContent>
-
         <TabsContent value="resources">
-          <PlanResources planId={plan.id} />
+          {!createMode && plan ? (
+            <PlanResources planId={plan.id} />
+          ) : (
+            <div className="text-center text-gray-500 py-8">Save your plan to add resources.</div>
+          )}
         </TabsContent>
-
         <TabsContent value="attachments">
-          <PlanAttachments planId={plan.id} userId={user.id} />
+          {!createMode && plan ? (
+            <PlanAttachments planId={plan.id} userId={user.id} />
+          ) : (
+            <div className="text-center text-gray-500 py-8">Save your plan to attach yarn and swatches.</div>
+          )}
         </TabsContent>
-
         <TabsContent value="overview">
           <div className="space-y-6">
             <Card>
@@ -252,28 +274,30 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="font-medium mb-1">Name</h4>
-                  <p className="text-gray-600">{plan.name}</p>
+                  <p className="text-gray-600">{createMode ? editName : plan?.name}</p>
                 </div>
-                {plan.description && (
+                {(createMode ? editDescription : plan?.description) && (
                   <div>
                     <h4 className="font-medium mb-1">Description</h4>
-                    <p className="text-gray-600">{plan.description}</p>
+                    <p className="text-gray-600">{createMode ? editDescription : plan?.description}</p>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                  <div>
-                    <h4 className="font-medium mb-1">Created</h4>
-                    <p className="text-sm text-gray-600">
-                      {new Date(plan.created_at).toLocaleDateString()}
-                    </p>
+                {!createMode && plan && (
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div>
+                      <h4 className="font-medium mb-1">Created</h4>
+                      <p className="text-sm text-gray-600">
+                        {new Date(plan.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-1">Last Modified</h4>
+                      <p className="text-sm text-gray-600">
+                        {new Date(plan.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Last Modified</h4>
-                    <p className="text-sm text-gray-600">
-                      {new Date(plan.updated_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

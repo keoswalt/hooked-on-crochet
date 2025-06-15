@@ -36,11 +36,8 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPlans, setTotalPlans] = useState(0);
-  const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
   const [showNewYarnDialog, setShowNewYarnDialog] = useState(false);
   const [showNewSwatchDialog, setShowNewSwatchDialog] = useState(false);
-  const [newPlanName, setNewPlanName] = useState('');
-  const [newPlanDescription, setNewPlanDescription] = useState('');
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
   const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
@@ -167,41 +164,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     }
   };
 
-  const handleCreatePlan = async () => {
-    if (!newPlanName.trim()) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('plans')
-        .insert({
-          name: newPlanName,
-          description: newPlanDescription,
-          user_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Plan created successfully",
-      });
-
-      setShowNewPlanDialog(false);
-      setNewPlanName('');
-      setNewPlanDescription('');
-      navigate(`/planner/${data.id}`);
-    } catch (error: any) {
-      console.error('Error creating plan:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create plan",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleDeletePlan = async () => {
     if (!planToDelete) return;
 
@@ -287,7 +249,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
-        <Button onClick={() => setShowNewPlanDialog(true)}>
+        <Button onClick={() => navigate('/planner/new')}>
           <Plus className="h-4 w-4 mr-2" />
           New Plan
         </Button>
@@ -497,48 +459,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           )}
         </div>
       </div>
-
-      {/* New Plan Dialog */}
-      <Dialog open={showNewPlanDialog} onOpenChange={setShowNewPlanDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Plan</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="plan-name" className="block text-sm font-medium mb-2">
-                Plan Name
-              </label>
-              <Input
-                id="plan-name"
-                value={newPlanName}
-                onChange={(e) => setNewPlanName(e.target.value)}
-                placeholder="Enter plan name"
-              />
-            </div>
-            <div>
-              <label htmlFor="plan-description" className="block text-sm font-medium mb-2">
-                Description (optional)
-              </label>
-              <Textarea
-                id="plan-description"
-                value={newPlanDescription}
-                onChange={(e) => setNewPlanDescription(e.target.value)}
-                placeholder="Describe your plan"
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewPlanDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreatePlan} disabled={!newPlanName.trim()}>
-              Create Plan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
