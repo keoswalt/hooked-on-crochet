@@ -4,9 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 // Add planId and userId as required parameters for proper upsert
+type PlanImageReorderType = {
+  id: string;
+  position: number;
+  plan_id: string;
+  image_url: string;
+  user_id: string;
+  uploaded_at?: string | null;
+  is_featured?: boolean | null;
+};
+
 export function usePlanImagesReorder(
-  images: { id: string; position: number; plan_id: string; image_url: string; user_id: string }[],
-  setImages: (imgs: any[]) => void,
+  images: PlanImageReorderType[],
+  setImages: (imgs: PlanImageReorderType[]) => void,
   planId: string,
   userId: string
 ) {
@@ -29,9 +39,9 @@ export function usePlanImagesReorder(
       plan_id: img.plan_id || planId,
       image_url: img.image_url,
       user_id: img.user_id || userId,
-      // Optional: Copy over existing non-required fields if needed
-      ...(img.uploaded_at ? { uploaded_at: img.uploaded_at } : {}),
-      ...(img.is_featured !== undefined ? { is_featured: img.is_featured } : {})
+      // Only copy if actually present
+      ...(img.uploaded_at !== undefined ? { uploaded_at: img.uploaded_at } : {}),
+      ...(img.is_featured !== undefined ? { is_featured: img.is_featured } : {}),
     }));
 
     // Optimistically update UI (Direct array, not callback)
