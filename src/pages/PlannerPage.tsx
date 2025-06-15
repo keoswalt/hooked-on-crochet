@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Palette, Package, Search, X } from 'lucide-react';
+import { Plus, Palette, Package, Search, X, Trash } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -14,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import { YarnForm } from '@/components/stash/YarnForm';
 import { SwatchForm } from '@/components/swatches/SwatchForm';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -43,6 +43,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [newPlanDescription, setNewPlanDescription] = useState('');
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
   const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -201,6 +202,42 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     }
   };
 
+  const handleDeletePlan = async () => {
+    if (!planToDelete) return;
+
+    try {
+      // Delete associated canvas elements first
+      await supabase
+        .from('canvas_elements')
+        .delete()
+        .eq('plan_id', planToDelete.id);
+
+      // Delete the plan
+      const { error } = await supabase
+        .from('plans')
+        .delete()
+        .eq('id', planToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Plan deleted successfully",
+      });
+
+      // Refresh plans data
+      fetchPlans(searchQuery, currentPage);
+      setPlanToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete plan",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleEditYarn = (yarn: YarnStash) => {
     setEditingYarn(yarn);
   };
@@ -306,18 +343,34 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {plans.map((plan) => (
-                <Card key={plan.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${plan.id}`)}>
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    {plan.description && (
-                      <CardDescription>{plan.description}</CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500">
-                      Last modified: {new Date(plan.updated_at).toLocaleDateString()}
-                    </p>
-                  </CardContent>
+                <Card key={plan.id} className="hover:shadow-lg transition-shadow relative group">
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/planner/${plan.id}`)}
+                  >
+                    <CardHeader>
+                      <CardTitle>{plan.name}</CardTitle>
+                      {plan.description && (
+                        <CardDescription>{plan.description}</CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-500">
+                        Last modified: {new Date(plan.updated_at).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPlanToDelete(plan);
+                    }}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </Card>
               ))}
             </div>
@@ -486,6 +539,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={!!planToDelete}
+        onOpenChange={(open) => !open && setPlanToDelete(null)}
+        onConfirm={handleDeletePlan}
+        title="Delete Plan"
+        description="Are you sure you want to delete this plan? This action cannot be undone and will permanently delete the plan and all associated canvas elements."
+      />
 
       {/* New Yarn Dialog */}
       <Dialog open={showNewYarnDialog} onOpenChange={setShowNewYarnDialog}>
