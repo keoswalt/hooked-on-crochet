@@ -38,7 +38,7 @@ export const PlanCanvas = ({ plan, onUpdatePlan }: PlanCanvasProps) => {
   useEffect(() => {
     if (plan.canvas_data && typeof plan.canvas_data === 'object') {
       const canvasData = plan.canvas_data as any;
-      if (canvasData.elements) {
+      if (canvasData.elements && Array.isArray(canvasData.elements)) {
         setElements(canvasData.elements);
       }
     }
@@ -52,7 +52,7 @@ export const PlanCanvas = ({ plan, onUpdatePlan }: PlanCanvasProps) => {
     };
     
     onUpdatePlan({
-      canvas_data: canvasData,
+      canvas_data: canvasData as any,
     });
   };
 
