@@ -1,4 +1,3 @@
-
 import { ProjectStatusChip } from "@/components/projects/ProjectStatusChip";
 import { getYarnWeightLabel } from "@/utils/yarnWeights";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -7,63 +6,46 @@ import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { useNavigationContext } from "@/context/NavigationContext";
-
 type Project = Database["public"]["Tables"]["projects"]["Row"];
-
 interface PlanProjectCardProps {
   project: Project;
   onRemove: () => void;
   planName?: string;
   plannerId?: string;
 }
-
-export default function PlanProjectCard({ project, onRemove, planName, plannerId }: PlanProjectCardProps) {
+export default function PlanProjectCard({
+  project,
+  onRemove,
+  planName,
+  plannerId
+}: PlanProjectCardProps) {
   const navigate = useNavigate();
-  const { setPreviousPage } = useNavigationContext();
-
+  const {
+    setPreviousPage
+  } = useNavigationContext();
   const handleCardClick = () => {
     // If planner context is available, set previous page to the plan
     if (planName && plannerId) {
-      setPreviousPage({ label: planName, path: `/planner/${plannerId}` });
+      setPreviousPage({
+        label: planName,
+        path: `/planner/${plannerId}`
+      });
     }
     navigate(`/projects/${project.id}`);
   };
-
-  return (
-    <Card 
-      className="hover:shadow-lg transition-shadow h-52 flex flex-col relative cursor-pointer"
-      onClick={handleCardClick}
-      tabIndex={0}
-      aria-label={project.name}
-    >
-      <Button
-        type="button"
-        size="icon"
-        variant="ghost"
-        className="absolute top-2 right-2 z-10"
-        onClick={e => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        title="Remove project from plan"
-      >
+  return <Card onClick={handleCardClick} tabIndex={0} aria-label={project.name} className="hover:shadow-lg transition-shadow h-60 flex flex-col relative cursor-pointer pb-2">
+      <Button type="button" size="icon" variant="ghost" className="absolute top-2 right-2 z-10" onClick={e => {
+      e.stopPropagation();
+      onRemove();
+    }} title="Remove project from plan">
         <Trash className="w-4 h-4" />
       </Button>
       <CardHeader className="pb-2">
-        <CardTitle className="truncate text-sm">{project.name}</CardTitle>
+        <CardTitle className="text-lg font-semibold line-clamp-2">{project.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col justify-center items-center px-4 py-3">
+      <CardContent className="flex-1 flex flex-col justify-center items-center">
         <div className="w-full h-20 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center mb-2">
-          {project.featured_image_url ? (
-            <img
-              src={project.featured_image_url}
-              alt={`${project.name} featured`}
-              className="w-full h-full object-cover object-top"
-              draggable={false}
-            />
-          ) : (
-            <div className="text-gray-400 text-xs">No image</div>
-          )}
+          {project.featured_image_url ? <img src={project.featured_image_url} alt={`${project.name} featured`} className="w-full h-full object-cover object-top" draggable={false} /> : <div className="text-gray-400 text-xs">No image</div>}
         </div>
         <CardDescription className="w-full text-xs text-gray-600 mb-1">
           Hook: {project.hook_size} &nbsp;•&nbsp; Yarn: {getYarnWeightLabel(project.yarn_weight)}
@@ -72,6 +54,5 @@ export default function PlanProjectCard({ project, onRemove, planName, plannerId
           <ProjectStatusChip status={project.status} size="sm" />
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
