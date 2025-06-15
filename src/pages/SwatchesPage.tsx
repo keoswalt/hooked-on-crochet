@@ -89,11 +89,37 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
         user_id: user.id,
       };
 
-      const { error } = await supabase
+      const { data: newSwatch, error: swatchError } = await supabase
         .from('swatches')
-        .insert(clonedSwatchData);
+        .insert(clonedSwatchData)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (swatchError) throw swatchError;
+
+      // Clone associated images
+      const { data: originalImages, error: imagesError } = await supabase
+        .from('swatch_images')
+        .select('image_url, caption, is_primary')
+        .eq('swatch_id', swatch.id);
+
+      if (originalImages && originalImages.length > 0) {
+        const imageClones = originalImages.map(img => ({
+          swatch_id: newSwatch.id,
+          image_url: img.image_url,
+          caption: img.caption,
+          is_primary: img.is_primary,
+        }));
+
+        const { error: imageCloneError } = await supabase
+          .from('swatch_images')
+          .insert(imageClones);
+
+        if (imageCloneError) {
+          console.error('Error cloning swatch images:', imageCloneError);
+          // Don't throw here - swatch clone succeeded even if images failed
+        }
+      }
 
       toast({
         title: "Success",

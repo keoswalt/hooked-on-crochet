@@ -32,8 +32,8 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow">
-        {images.length > 0 && (
-          <div className="w-full h-48 overflow-hidden rounded-t-lg">
+        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+          {images.length > 0 ? (
             <img
               src={images[0]}
               alt={swatch.title}
@@ -42,8 +42,10 @@ export const SwatchCard = ({ swatch, onEdit, onDelete, onClone }: SwatchCardProp
                 e.currentTarget.style.display = 'none';
               }}
             />
-          </div>
-        )}
+          ) : (
+            <div className="text-gray-400 text-sm">No image</div>
+          )}
+        </div>
         
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
