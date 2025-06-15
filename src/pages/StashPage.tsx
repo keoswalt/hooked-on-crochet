@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { YarnFilters } from '@/components/stash/YarnFilters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import YarnDisplayCard from '@/components/shared/YarnDisplayCard';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 
@@ -166,7 +166,7 @@ export const StashPage = ({ user }: StashPageProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredYarns.map((yarn) => (
-            <YarnCard
+            <YarnDisplayCard
               key={yarn.id}
               yarn={yarn}
               onEdit={handleEditYarn}

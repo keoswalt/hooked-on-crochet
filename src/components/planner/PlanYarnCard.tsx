@@ -1,10 +1,13 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { YarnCard } from "@/components/stash/YarnCard";
+import YarnDisplayCard from "@/components/shared/YarnDisplayCard";
 import { Trash2, Edit } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import type { Database } from "@/integrations/supabase/types";
+
 type YarnStash = Database["public"]["Tables"]["yarn_stash"]["Row"];
+
 interface PlanYarnCardProps {
   yarn: YarnStash;
   onRemove: (yarnId: string) => void;
@@ -16,14 +19,22 @@ export default function PlanYarnCard({
   onEdit
 }: PlanYarnCardProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
-  return <div className="relative">
-      <YarnCard yarn={yarn} onEdit={() => onEdit(yarn)} onDelete={() => setShowRemoveConfirm(true)} />
-      <Button size="icon" variant="ghost" onClick={() => setShowRemoveConfirm(true)} title="Remove from plan" className="absolute top-2 right-2">
-        <Trash2 className="w-4 h-4" />
-      </Button>
-      <Button size="icon" variant="ghost" className="absolute top-2 right-12" onClick={() => onEdit(yarn)} title="Edit yarn">
-        <Edit className="w-4 h-4" />
-      </Button>
-      <ConfirmationDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm} title="Remove Yarn From Plan?" description={`Remove "${yarn.name}" from this plan? This won't delete the yarn from your stash.`} onConfirm={() => onRemove(yarn.id)} confirmText="Remove" cancelText="Cancel" />
-    </div>;
+  return (
+    <div className="relative">
+      <YarnDisplayCard
+        yarn={yarn}
+        onEdit={onEdit}
+        onDelete={() => setShowRemoveConfirm(true)}
+      />
+      <ConfirmationDialog
+        open={showRemoveConfirm}
+        onOpenChange={setShowRemoveConfirm}
+        title="Remove Yarn From Plan?"
+        description={`Remove "${yarn.name}" from this plan? This won't delete the yarn from your stash.`}
+        onConfirm={() => onRemove(yarn.id)}
+        confirmText="Remove"
+        cancelText="Cancel"
+      />
+    </div>
+  );
 }
