@@ -19,11 +19,10 @@ export default function PlanYarnCard({ yarn, onRemove, onEdit }: PlanYarnCardPro
 
   return (
     <div className="relative">
-      {/* YarnCard receives no-op props for onEdit and onDelete, so it renders no extra buttons */}
       <YarnCard
         yarn={yarn}
-        onEdit={() => {}}
-        onDelete={() => {}}
+        onEdit={() => onEdit(yarn)}
+        onDelete={() => setShowRemoveConfirm(true)}
       />
       <Button
         size="icon"
@@ -55,4 +54,3 @@ export default function PlanYarnCard({ yarn, onRemove, onEdit }: PlanYarnCardPro
     </div>
   );
 }
-
