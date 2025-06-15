@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Edit, Trash2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useSwatchImages } from "@/hooks/useSwatchImages";
 
 type Swatch = Database["public"]["Tables"]["swatches"]["Row"];
 
@@ -20,10 +21,27 @@ export default function PlanSwatchCard({
   onEdit,
 }: PlanSwatchCardProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const { images } = useSwatchImages(swatch.id);
 
   return (
     <div className="relative">
       <Card className="hover:shadow-lg transition-shadow">
+        {/* Image section */}
+        <div className="w-full h-36 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+          {images.length > 0 ? (
+            <img
+              src={images[0]}
+              alt={swatch.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+              draggable={false}
+            />
+          ) : (
+            <div className="text-gray-400 text-sm">No image</div>
+          )}
+        </div>
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold line-clamp-2">{swatch.title}</CardTitle>

@@ -1,6 +1,7 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import type { Database } from "@/integrations/supabase/types";
+import { useSwatchImages } from "@/hooks/useSwatchImages";
 
 type Swatch = Database["public"]["Tables"]["swatches"]["Row"];
 
@@ -12,6 +13,8 @@ interface SwatchPreviewCardProps {
 }
 
 export default function SwatchPreviewCard({ swatch, checked, onSelect, children }: SwatchPreviewCardProps) {
+  const { images } = useSwatchImages(swatch.id);
+
   return (
     <div
       className={`relative rounded-lg border transition-shadow shadow hover:shadow-md cursor-pointer ${checked ? "ring-2 ring-primary border-primary" : "ring-0 border-gray-200 bg-white"}`}
@@ -20,10 +23,28 @@ export default function SwatchPreviewCard({ swatch, checked, onSelect, children 
       aria-checked={checked}
       role="checkbox"
     >
+      {/* Image section */}
+      <div className="w-full h-36 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+        {images.length > 0 ? (
+          <img
+            src={images[0]}
+            alt={swatch.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+            draggable={false}
+          />
+        ) : (
+          <div className="text-gray-400 text-sm">No image</div>
+        )}
+      </div>
+
       {children && (
         <div className="pointer-events-auto">{children}</div>
       )}
-      <div className="pt-6 pb-2 px-2">
+
+      <div className="pt-4 pb-2 px-2">
         <CardTitle className="text-base font-semibold mb-1">
           {swatch.title}
         </CardTitle>
