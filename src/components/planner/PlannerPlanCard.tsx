@@ -21,10 +21,10 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
       key={plan.id}
       className="hover:shadow-lg transition-shadow relative group flex flex-col items-stretch h-full"
     >
-      {/* Image Section with Square Aspect Ratio */}
+      {/* Image Section with Square Aspect Ratio and Border */}
       <div className="w-full shrink-0 relative">
         <AspectRatio ratio={1 / 1} className="w-full">
-          <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+          <div className="w-full h-full rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border border-border">
             {plan.featured_image_url ? (
               <img
                 src={plan.featured_image_url}
@@ -69,3 +69,4 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
     </Card>
   );
 }
+
