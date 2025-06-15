@@ -8,6 +8,7 @@ import { TagDisplay } from '@/components/tags/TagDisplay';
 import { ProjectStatusChip } from './ProjectStatusChip';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { useState } from 'react';
+import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -84,7 +85,7 @@ export const ProjectCard = ({
           )}
 
           <CardDescription className="text-xs w-full mb-1 mt-4">
-            Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
+            Hook: {project.hook_size} • Yarn Weight: {getYarnWeightLabel(project.yarn_weight)}
           </CardDescription>
           
           <CardDescription className="text-xs text-gray-500 w-full">

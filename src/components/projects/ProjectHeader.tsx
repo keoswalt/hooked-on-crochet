@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -12,6 +13,7 @@ import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -151,7 +153,7 @@ export const ProjectHeader = ({
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <span>Hook: {project.hook_size}</span>
                   <span>•</span>
-                  <span>Yarn Weight: {project.yarn_weight}</span>
+                  <span>Yarn Weight: {getYarnWeightLabel(project.yarn_weight)}</span>
                 </div>
                 
                 {project.details && (
