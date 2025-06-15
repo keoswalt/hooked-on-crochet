@@ -1,13 +1,15 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+// Make position required
 export interface PlanImage {
   id: string;
   image_url: string;
   is_featured?: boolean;
   uploaded_at?: string;
-  position?: number;
+  position: number; // required now!
   plan_id?: string;
   user_id?: string;
 }

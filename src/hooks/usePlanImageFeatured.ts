@@ -1,8 +1,12 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PlanImage } from "./usePlanImages";
 
-export function usePlanImageFeatured(images: PlanImage[], setImages: (imgs: PlanImage[]) => void) {
+// Accepts either array or updater fn (align with useState)
+type SetImages = React.Dispatch<React.SetStateAction<PlanImage[]>>;
+
+export function usePlanImageFeatured(images: PlanImage[], setImages: SetImages) {
   const { toast } = useToast();
 
   const handleToggleFeatured = async (imageId: string) => {
@@ -19,7 +23,7 @@ export function usePlanImageFeatured(images: PlanImage[], setImages: (imgs: Plan
         .from("plan_images")
         .update({ is_featured: false })
         .eq("id", imageId)
-        .select('*');
+        .select('*'); // returns a promise
       if (error) {
         toast({
           title: "Error",
@@ -68,6 +72,7 @@ export function usePlanImageFeatured(images: PlanImage[], setImages: (imgs: Plan
         .eq("id", imageId)
         .select('*')
     );
+
     const results = await Promise.all(updates);
     const error = results.find(r => r?.error)?.error;
     if (error) {
