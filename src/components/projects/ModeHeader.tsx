@@ -19,7 +19,7 @@ export const ModeHeader = ({
   onAddDivider,
 }: ModeHeaderProps) => {
   return (
-    <div className="sticky top-0 z-50 bg-gray-50">
+    <div className="bg-gray-50">
       <Card className="border border-gray-200 rounded-lg shadow-sm">
         <CardContent className="py-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
