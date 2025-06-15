@@ -65,44 +65,91 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     setImagesLoading(false);
   };
 
-  // FEATURED image toggle: manual only
+  // New: Simpler featured toggle logic
   const handleToggleFeatured = async (imageId: string) => {
-    // 1. Find which image is currently featured
+    // Find currently featured image
     const prevFeatured = images.find(img => img.is_featured);
-    if (prevFeatured && prevFeatured.id === imageId) return; // already featured
 
-    // 2. Unset all others, set this one
-    const updatedImages = images.map(img => ({
-      ...img,
-      is_featured: img.id === imageId,
-    }));
-    setImages(updatedImages); // optimistically update
+    // If this image is currently featured, un-feature it
+    if (prevFeatured?.id === imageId) {
+      // Optimistic UI update
+      setImages(prev =>
+        prev.map(img =>
+          img.id === imageId ? { ...img, is_featured: false } : img
+        )
+      );
+      // Update DB: set is_featured = false for this image
+      const { error } = await supabase
+        .from("plan_images")
+        .update({ is_featured: false })
+        .eq("id", imageId);
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        // Revert UI change if error
+        setImages(prev =>
+          prev.map(img =>
+            img.id === imageId ? { ...img, is_featured: true } : img
+          )
+        );
+      } else {
+        toast({
+          title: "Featured image removed",
+          description: "This image is no longer featured.",
+        });
+      }
+      return;
+    }
 
-    // 3. Update DB
-    const upserts = updatedImages.map(img => ({
-      id: img.id,
-      is_featured: img.is_featured,
-      plan_id: img.plan_id,
-      user_id: img.user_id,
-      image_url: img.image_url,
-      position: img.position,
-      uploaded_at: img.uploaded_at,
-    }));
-
-    const { error } = await supabase
-      .from("plan_images")
-      .upsert(upserts, { onConflict: "id" });
-
+    // Otherwise, set this as featured and unset previous
+    // Optimistic UI update
+    setImages(prev =>
+      prev.map(img =>
+        img.id === imageId
+          ? { ...img, is_featured: true }
+          : { ...img, is_featured: false }
+      )
+    );
+    // Update DB
+    // Unset all others in DB, set this one as featured (compound request)
+    const updates: Promise<any>[] = [];
+    if (prevFeatured) {
+      updates.push(
+        supabase
+          .from("plan_images")
+          .update({ is_featured: false })
+          .eq("id", prevFeatured.id)
+      );
+    }
+    updates.push(
+      supabase
+        .from("plan_images")
+        .update({ is_featured: true })
+        .eq("id", imageId)
+    );
+    const results = await Promise.all(updates);
+    const error = results.find(r => r?.error)?.error;
     if (error) {
       toast({
-        title: "Failed to set featured image",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
+      // Try to revert UI state
+      setImages(prev =>
+        prev.map(img => {
+          if (img.id === imageId) return { ...img, is_featured: false };
+          if (img.id === prevFeatured?.id) return { ...img, is_featured: true };
+          return img;
+        })
+      );
     } else {
       toast({
         title: "Featured image updated!",
-        description: "This image is now the featured image.",
+        description: "This image is now featured.",
       });
     }
   };

@@ -1,9 +1,6 @@
-
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageViewer } from "@/components/images/ImageViewer";
-import { Loader2, GripVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Loader2, GripVertical, Star } from "lucide-react";
 import {
   DragDropContext,
   Draggable,
@@ -91,11 +88,12 @@ export const PlanImagesGrid = ({
                       ? "Featured image"
                       : "Set as featured image"
                   }
-                  className={`absolute z-20 right-2 top-2 transition-colors p-1 rounded-full bg-white/90 shadow ${
+                  className={`absolute z-20 right-2 top-2 p-1 rounded-full transition-colors ${
                     img.is_featured
                       ? "text-yellow-500"
                       : "text-gray-300 hover:text-yellow-500"
                   }`}
+                  style={{background: "none", boxShadow: "none"}} // Remove background
                   onClick={e => {
                     e.stopPropagation();
                     onToggleFeatured(img.id);
@@ -103,7 +101,7 @@ export const PlanImagesGrid = ({
                 >
                   <Star
                     fill={img.is_featured ? "currentColor" : "none"}
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     className="w-6 h-6"
                   />
                 </button>
@@ -139,7 +137,6 @@ export const PlanImagesGrid = ({
                     >
                       <GripVertical className="w-5 h-5 text-gray-400 opacity-80" />
                     </div>
-                    {/* Star button */}
                     {onToggleFeatured && (
                       <button
                         type="button"
@@ -148,11 +145,12 @@ export const PlanImagesGrid = ({
                             ? "Featured image"
                             : "Set as featured image"
                         }
-                        className={`absolute z-20 right-2 top-2 transition-colors p-1 rounded-full bg-white/90 shadow ${
+                        className={`absolute z-20 right-2 top-2 p-1 rounded-full transition-colors ${
                           img.is_featured
                             ? "text-yellow-500"
                             : "text-gray-300 hover:text-yellow-500"
                         }`}
+                        style={{background: "none", boxShadow: "none"}} // Remove background
                         onClick={e => {
                           e.stopPropagation();
                           onToggleFeatured(img.id);
@@ -160,7 +158,7 @@ export const PlanImagesGrid = ({
                       >
                         <Star
                           fill={img.is_featured ? "currentColor" : "none"}
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                           className="w-6 h-6"
                         />
                       </button>
