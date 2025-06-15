@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { sortProjects } from '@/utils/projectSorting';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
@@ -22,10 +21,7 @@ export const useProjectState = (user: User) => {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Apply sorting using the shared utility
-      const sortedProjects = sortProjects(data || []);
-      setProjects(sortedProjects);
+      setProjects(data || []);
     } catch (error: any) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -41,11 +37,7 @@ export const useProjectState = (user: User) => {
     console.log('Updating project in state:', updatedProject);
     
     // Update the projects array
-    setProjects(prev => {
-      const updated = prev.map(p => p.id === updatedProject.id ? updatedProject : p);
-      // Re-sort after updating to ensure proper order
-      return sortProjects(updated);
-    });
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
     
     // Update the selected project if it's the same one
     if (selectedProject && selectedProject.id === updatedProject.id) {
