@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
@@ -189,10 +188,6 @@ export const CanvasBoard: React.FC = () => {
             canvasPanZoom={{ pan, zoom }} // pass pan/zoom for correct drag move math
           />
         )}
-      </div>
-      {/* UI hint for pan/zoom */}
-      <div className="absolute bottom-2 left-2 bg-white/80 rounded px-3 py-1 text-xs border select-none pointer-events-none z-10">
-        Drag background to pan &nbsp; · &nbsp; Ctrl/Cmd+Scroll to zoom
       </div>
     </div>
   );
