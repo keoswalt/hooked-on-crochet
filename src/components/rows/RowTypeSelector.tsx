@@ -9,15 +9,15 @@ import {
 import { Plus, FileText, Minus, ChevronDown } from 'lucide-react';
 
 interface RowTypeSelectorProps {
-  onAddRow: () => void;
-  onAddNote: () => void;
-  onAddDivider: () => void;
+  onAddRow: (insertAfterPosition?: number) => void;
+  onAddNote: (insertAfterPosition?: number) => void;
+  onAddDivider: (insertAfterPosition?: number) => void;
 }
 
 export const RowTypeSelector = ({ onAddRow, onAddNote, onAddDivider }: RowTypeSelectorProps) => {
   return (
     <div className="flex">
-      <Button onClick={onAddRow} className="rounded-r-none border-r-0">
+      <Button onClick={() => onAddRow()} className="rounded-r-none border-r-0">
         <Plus className="h-4 w-4 mr-2" />
         Add
       </Button>
@@ -29,15 +29,15 @@ export const RowTypeSelector = ({ onAddRow, onAddNote, onAddDivider }: RowTypeSe
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-white border shadow-md">
-          <DropdownMenuItem onClick={onAddRow} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => onAddRow()} className="cursor-pointer">
             <Plus className="h-4 w-4 mr-2" />
             Add Row
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onAddNote} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => onAddNote()} className="cursor-pointer">
             <FileText className="h-4 w-4 mr-2" />
             Add Note
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onAddDivider} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => onAddDivider()} className="cursor-pointer">
             <Minus className="h-4 w-4 mr-2" />
             Add Divider
           </DropdownMenuItem>
