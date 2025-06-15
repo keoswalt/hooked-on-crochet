@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ProjectInfo } from './ProjectInfo';
 import { ProjectActions } from './ProjectActions';
+import { ProjectStatusChip } from './ProjectStatusChip';
 import { ImageViewer } from '@/components/images/ImageViewer';
 import { TagDisplay } from '@/components/tags/TagDisplay';
 import { LinkifiedText } from '@/components/ui/linkified-text';
@@ -162,20 +163,23 @@ export const ProjectHeader = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-                    <span>Status:</span>
-                    <Select value={project.status || ''} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Writing">Writing</SelectItem>
-                        <SelectItem value="Ready">Ready</SelectItem>
-                        <SelectItem value="Making">Making</SelectItem>
-                        <SelectItem value="Made">Made</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span>Status:</span>
+                <Select value={project.status || ''} onValueChange={handleStatusChange}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Writing">Writing</SelectItem>
+                    <SelectItem value="Ready">Ready</SelectItem>
+                    <SelectItem value="Making">Making</SelectItem>
+                    <SelectItem value="Made">Made</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ProjectStatusChip status={project.status} />
+            </div>
             
             {project.featured_image_url && (
               <div className="w-full">

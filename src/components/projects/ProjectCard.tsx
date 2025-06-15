@@ -1,10 +1,11 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Star, Copy } from 'lucide-react';
 import { formatLastModified } from '@/utils/dateUtils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { TagDisplay } from '@/components/tags/TagDisplay';
+import { ProjectStatusChip } from './ProjectStatusChip';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
@@ -108,11 +109,7 @@ export const ProjectCard = ({
         <div className="bg-gray-800 p-3 rounded-b-lg mt-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              {project.status && (
-                <Badge variant="secondary" className="text-xs bg-white text-gray-800">
-                  {project.status}
-                </Badge>
-              )}
+              <ProjectStatusChip status={project.status} size="sm" />
             </div>
             <div className="flex space-x-1">
               <Button variant="outline" size="sm" onClick={handleEditClick} className="bg-white hover:bg-gray-100">
