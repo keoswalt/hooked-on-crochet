@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,8 +18,12 @@ interface PlannerResourcesSectionProps {
   userId: string;
 }
 
-const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionProps) => {
+const PlannerResourcesSection = ({
+  plannerId,
+  userId,
+}: PlannerResourcesSectionProps) => {
   const [openDialog, setOpenDialog] = useState(false);
+  const [editingResource, setEditingResource] = useState<PlanResource | null>(null);
   const [resources, setResources] = useState<PlanResource[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -36,7 +41,7 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
         toast({
           title: "Failed to load resources",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         setResources(data as PlanResource[]);
@@ -47,8 +52,13 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
     // eslint-disable-next-line
   }, [plannerId]);
 
-  const handleAdd = async ({ title, url }: { title: string; url: string }) => {
-    // Save to DB
+  const handleAdd = async ({
+    title,
+    url,
+  }: {
+    title: string;
+    url: string;
+  }) => {
     const { data, error } = await supabase
       .from("plan_resources")
       .insert({
@@ -61,10 +71,40 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
     if (error || !data?.[0]) {
       throw new Error(error?.message || "Could not add resource");
     }
-    setResources(rs => [...rs, data[0]]);
+    setResources((rs) => [...rs, data[0]]);
     toast({
       title: "Resource added",
       description: "Your resource was added successfully.",
+    });
+  };
+
+  const handleEdit = async ({
+    id,
+    title,
+    url,
+  }: {
+    id: string;
+    title: string;
+    url: string;
+  }) => {
+    const { error } = await supabase
+      .from("plan_resources")
+      .update({
+        title,
+        url,
+      })
+      .eq("id", id)
+      .eq("plan_id", plannerId)
+      .select("id, title, url");
+    if (error) {
+      throw new Error(error?.message || "Could not update resource");
+    }
+    setResources((rs) =>
+      rs.map((r) => (r.id === id ? { ...r, title, url } : r))
+    );
+    toast({
+      title: "Resource updated",
+      description: "Resource was updated successfully.",
     });
   };
 
@@ -78,14 +118,34 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
       toast({
         title: "Could not delete",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    setResources(rs => rs.filter(r => r.id !== id));
+    setResources((rs) => rs.filter((r) => r.id !== id));
     toast({
       title: "Resource deleted",
     });
+  };
+
+  // Unified dialog close handler
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setEditingResource(null);
+  };
+
+  // Handle save from dialog: add or edit based on editingResource presence
+  const handleDialogSave = async (resource: { title: string; url: string }) => {
+    if (editingResource) {
+      await handleEdit({
+        id: editingResource.id,
+        title: resource.title,
+        url: resource.url,
+      });
+    } else {
+      await handleAdd(resource);
+    }
+    handleDialogClose();
   };
 
   return (
@@ -93,7 +153,10 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
       title="Resources"
       buttonText="Add Resource"
       buttonDisabled={false}
-      onAdd={() => setOpenDialog(true)}
+      onAdd={() => {
+        setOpenDialog(true);
+        setEditingResource(null);
+      }}
     >
       {loading ? (
         <div className="py-6 text-muted-foreground">Loading...</div>
@@ -103,20 +166,33 @@ const PlannerResourcesSection = ({ plannerId, userId }: PlannerResourcesSectionP
         </EmptyState>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {resources.map(res => (
+          {resources.map((res) => (
             <PlanResourceCard
               key={res.id}
               title={res.title}
               url={res.url}
               onDelete={() => handleDelete(res.id)}
+              onEdit={() => {
+                setEditingResource(res);
+                setOpenDialog(true);
+              }}
             />
           ))}
         </div>
       )}
       <PlanResourceDialog
         open={openDialog}
-        onOpenChange={setOpenDialog}
-        onAdd={handleAdd}
+        onOpenChange={(open) => {
+          setOpenDialog(open);
+          if (!open) setEditingResource(null);
+        }}
+        onAdd={handleDialogSave}
+        initialValue={
+          editingResource
+            ? { title: editingResource.title, url: editingResource.url }
+            : undefined
+        }
+        isEditing={!!editingResource}
       />
     </PlannerSection>
   );

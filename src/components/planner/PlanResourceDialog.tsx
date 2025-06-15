@@ -1,6 +1,13 @@
-
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -9,19 +16,33 @@ interface PlanResourceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (resource: { title: string; url: string }) => Promise<void>;
+  initialValue?: { title: string; url: string };
+  isEditing?: boolean;
 }
 
-export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanResourceDialogProps) {
+export default function PlanResourceDialog({
+  open,
+  onOpenChange,
+  onAdd,
+  initialValue,
+  isEditing,
+}: PlanResourceDialogProps) {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const reset = () => {
-    setTitle("");
-    setUrl("");
-  };
+  useEffect(() => {
+    if (open && initialValue) {
+      setTitle(initialValue.title);
+      setUrl(initialValue.url);
+    } else if (open) {
+      setTitle("");
+      setUrl("");
+    }
+  }, [open, initialValue]);
 
+  // For forward compatibility, keep a single handler for add/edit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !url.trim()) {
@@ -34,12 +55,14 @@ export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanRe
     }
     setLoading(true);
     try {
-      await onAdd({ title: title.trim(), url: url.trim().startsWith("http") ? url.trim() : `https://${url.trim()}` });
-      reset();
-      onOpenChange(false);
+      await onAdd({
+        title: title.trim(),
+        url: url.trim().startsWith("http") ? url.trim() : `https://${url.trim()}`,
+      });
+      // Dialog closed by parent after add/edit
     } catch (err: any) {
       toast({
-        title: "Could not add resource",
+        title: isEditing ? "Could not update resource" : "Could not add resource",
         description: err?.message || "Please try again.",
         variant: "destructive",
       });
@@ -49,12 +72,19 @@ export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanRe
   };
 
   return (
-    <Dialog open={open} onOpenChange={o => { onOpenChange(o); if (!o) reset(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        onOpenChange(o);
+      }}
+    >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Resource</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Resource" : "Add Resource"}</DialogTitle>
           <DialogDescription>
-            Add a helpful link or reference for your plan.
+            {isEditing
+              ? "Edit your reference label and link."
+              : "Add a helpful link or reference for your plan."}
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -64,7 +94,7 @@ export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanRe
               autoFocus
               placeholder="e.g. Google"
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
               disabled={loading}
             />
           </div>
@@ -73,7 +103,7 @@ export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanRe
             <Input
               placeholder="e.g. google.com"
               value={url}
-              onChange={e => setUrl(e.target.value)}
+              onChange={(e) => setUrl(e.target.value)}
               disabled={loading}
               type="url"
               inputMode="url"
@@ -82,9 +112,16 @@ export default function PlanResourceDialog({ open, onOpenChange, onAdd }: PlanRe
             />
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={loading || !title.trim() || !url.trim()}>Save</Button>
+            <Button
+              type="submit"
+              disabled={loading || !title.trim() || !url.trim()}
+            >
+              {isEditing ? "Save Changes" : "Save"}
+            </Button>
             <DialogClose asChild>
-              <Button type="button" variant="ghost" disabled={loading}>Cancel</Button>
+              <Button type="button" variant="ghost" disabled={loading}>
+                Cancel
+              </Button>
             </DialogClose>
           </DialogFooter>
         </form>

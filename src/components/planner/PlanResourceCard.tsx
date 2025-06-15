@@ -1,39 +1,57 @@
 
-import { ExternalLink } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ExternalLink, Trash2, Edit } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface PlanResourceCardProps {
   title: string;
   url: string;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export default function PlanResourceCard({ title, url, onDelete }: PlanResourceCardProps) {
+export default function PlanResourceCard({
+  title,
+  url,
+  onDelete,
+  onEdit,
+}: PlanResourceCardProps) {
   return (
-    <Card className="flex flex-col">
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex-1 flex items-center gap-2 px-4 py-3 font-medium text-primary hover:underline"
-        title={url}
-      >
+    <Card className="flex flex-row items-center justify-between px-4 py-3 gap-4">
+      <div className="truncate font-medium flex-1 min-w-0">
         {title}
-        <ExternalLink className="w-4 h-4 ml-1" />
-      </a>
-      {onDelete && (
-        <CardContent className="p-2 pt-0 flex justify-end">
+      </div>
+      <div className="flex flex-row gap-1 items-center">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center text-primary hover:bg-accent rounded-md p-1 transition"
+          title={url}
+        >
+          <ExternalLink className="w-4 h-4" />
+        </a>
+        {onEdit && (
           <Button
-            size="sm"
-            variant="destructive"
+            size="icon"
+            variant="ghost"
+            onClick={onEdit}
+            aria-label="Edit resource"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            size="icon"
+            variant="ghost"
             onClick={onDelete}
             aria-label="Delete resource"
           >
-            Delete
+            <Trash2 className="w-4 h-4" />
           </Button>
-        </CardContent>
-      )}
+        )}
+      </div>
     </Card>
   );
 }
