@@ -52,7 +52,7 @@ export const PlannerTitleSection = ({
       rows={2}
       disabled={loading}
       maxLength={400}
-      className="mt-4 resize-none border-none bg-transparent shadow-none p-0 text-base focus:ring-0 focus:outline-none"
+      className="mt-4 resize-none p-3 border border-muted focus:border-ring focus:outline-none bg-transparent shadow-none text-base transition-colors"
     />
   </div>
 );
