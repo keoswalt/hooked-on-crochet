@@ -22,10 +22,10 @@ export default function PlanProjectCard({
   plannerId
 }: PlanProjectCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
-
   const navigate = useNavigate();
-  const { setPreviousPage } = useNavigationContext();
-
+  const {
+    setPreviousPage
+  } = useNavigationContext();
   const handleCardClick = () => {
     if (planName && plannerId) {
       setPreviousPage({
@@ -35,54 +35,23 @@ export default function PlanProjectCard({
     }
     navigate(`/projects/${project.id}`);
   };
-
-  return (
-    <Card
-      onClick={handleCardClick}
-      tabIndex={0}
-      aria-label={project.name}
-      className="hover:shadow-lg transition-shadow h-60 flex flex-col relative cursor-pointer pb-2"
-    >
-      <Button
-        type="button"
-        size="icon"
-        variant="ghost"
-        className="absolute top-2 right-2 z-10"
-        onClick={e => {
-          e.stopPropagation();
-          setShowConfirm(true);
-        }}
-        title="Remove project from plan"
-      >
+  return <Card onClick={handleCardClick} tabIndex={0} aria-label={project.name} className="hover:shadow-lg transition-shadow h-60 flex flex-col relative cursor-pointer pb-2">
+      <Button type="button" size="icon" variant="ghost" className="absolute top-2 right-2 z-10" onClick={e => {
+      e.stopPropagation();
+      setShowConfirm(true);
+    }} title="Remove project from plan">
         <Trash className="w-4 h-4" />
       </Button>
-      <ConfirmationDialog
-        open={showConfirm}
-        onOpenChange={setShowConfirm}
-        onConfirm={() => {
-          setShowConfirm(false);
-          onRemove();
-        }}
-        title="Remove Project?"
-        description="Are you sure you want to remove this project from the plan? This will only detach it from this plan, not delete the project itself."
-        confirmText="Remove"
-        cancelText="Cancel"
-      />
+      <ConfirmationDialog open={showConfirm} onOpenChange={setShowConfirm} onConfirm={() => {
+      setShowConfirm(false);
+      onRemove();
+    }} title="Remove Project?" description="Are you sure you want to remove this project from the plan? This will only detach it from this plan, not delete the project itself." confirmText="Remove" cancelText="Cancel" />
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold line-clamp-2">{project.name}</CardTitle>
+        <CardTitle className="text-lg font-semibold line-clamp-2">{project.name}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-center items-center px-4 py-3">
         <div className="w-full h-20 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center mb-2">
-          {project.featured_image_url ? (
-            <img
-              src={project.featured_image_url}
-              alt={`${project.name} featured`}
-              className="w-full h-full object-cover object-top"
-              draggable={false}
-            />
-          ) : (
-            <div className="text-gray-400 text-xs">No image</div>
-          )}
+          {project.featured_image_url ? <img src={project.featured_image_url} alt={`${project.name} featured`} className="w-full h-full object-cover object-top" draggable={false} /> : <div className="text-gray-400 text-xs">No image</div>}
         </div>
         <CardDescription className="w-full text-xs text-gray-600 mb-1">
           Hook: {project.hook_size} &nbsp;•&nbsp; Yarn: {getYarnWeightLabel(project.yarn_weight)}
@@ -91,6 +60,5 @@ export default function PlanProjectCard({
           <ProjectStatusChip status={project.status} size="sm" />
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
