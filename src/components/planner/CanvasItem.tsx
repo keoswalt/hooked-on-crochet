@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 
 interface CanvasItemProps {
@@ -10,10 +9,11 @@ interface CanvasItemProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   canvasPanZoom?: { pan: { x: number; y: number }; zoom: number };
+  onDoubleClick?: () => void;
 }
 
 export const CanvasItem: React.FC<CanvasItemProps> = ({
-  id, x, y, content, onMove, isSelected, onSelect, canvasPanZoom
+  id, x, y, content, onMove, isSelected, onSelect, canvasPanZoom, onDoubleClick
 }) => {
   const [dragging, setDragging] = useState(false);
   const pointerOffset = useRef({ x: 0, y: 0 });
@@ -44,6 +44,13 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
     pointerOffset.current = { x: cx - x, y: cy - y };
     e.stopPropagation();
     onSelect(id);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (onDoubleClick) {
+      e.stopPropagation();
+      onDoubleClick();
+    }
   };
 
   React.useEffect(() => {
@@ -85,9 +92,10 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
         zIndex: isSelected ? 2 : 1,
         userSelect: "none",
         transform: "translate(0, 0)",
-        pointerEvents: "auto", // Ensure events bubble here, not canvas
+        pointerEvents: "auto",
       }}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
       tabIndex={0}
     >
       {content}
