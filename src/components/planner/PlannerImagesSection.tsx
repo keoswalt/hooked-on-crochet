@@ -113,26 +113,28 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
           : { ...img, is_featured: false }
       )
     );
+
     // Update DB
-    // Unset all others in DB, set this one as featured (compound request)
+    // Instead of pushing builder objects, "await" each and collect actual Promises
+
     const updates: Promise<any>[] = [];
 
     if (prevFeatured && prevFeatured.id !== imageId) {
-      // push PROMISE to updates
       updates.push(
         supabase
           .from("plan_images")
           .update({ is_featured: false })
           .eq("id", prevFeatured.id)
+          .then(result => result)
       );
     }
 
-    // push PROMISE to updates
     updates.push(
       supabase
         .from("plan_images")
         .update({ is_featured: true })
         .eq("id", imageId)
+        .then(result => result)
     );
 
     // Await all updates
