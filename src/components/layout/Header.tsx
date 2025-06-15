@@ -1,4 +1,3 @@
-
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Palette, Pencil } from 'lucide-react';
@@ -17,7 +16,6 @@ export const Header = ({ userEmail }: HeaderProps) => {
   };
 
   const isProjectsActive = location.pathname.startsWith('/projects') || location.pathname === '/';
-  const isPlannerActive = location.pathname.startsWith('/planner');
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -49,14 +47,6 @@ export const Header = ({ userEmail }: HeaderProps) => {
                 >
                   <Pencil className="h-4 w-4" />
                   <span className="hidden sm:inline">Projects</span>
-                </Button>
-                <Button
-                  variant={isPlannerActive ? "default" : "outline"}
-                  onClick={() => navigate('/planner')}
-                  className="flex items-center gap-2"
-                >
-                  <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">Plans</span>
                 </Button>
               </nav>
             )}
