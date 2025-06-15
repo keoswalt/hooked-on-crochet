@@ -19,12 +19,21 @@ import { Textarea } from "@/components/ui/textarea";
 import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
 import PlanImagesGrid from "@/components/planner/PlanImagesGrid";
 import EmptyState from "@/components/ui/EmptyState";
+import { useNavigationContext } from "@/context/NavigationContext";
+import { useNavigate, useParams } from "react-router-dom";
+
 type Plan = Database['public']['Tables']['plans']['Row'];
 
 export const PlannerDetailPage = ({
   user
-}: { user: User }) => {
+}: { user: any }) => {
+  const { setPreviousPage } = useNavigationContext();
+  const navigate = useNavigate();
   const { plannerId } = useParams();
+  // You'll likely have planName from your plan detail data
+  // Imagine 'planName' is available here
+  const planName = "Plan"; // Replace with actual plan name
+
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
   const [editableName, setEditableName] = useState("");
@@ -186,6 +195,11 @@ export const PlannerDetailPage = ({
     setImagesLoading(false);
   };
 
+  const handleProjectCardClick = (projectId: string) => {
+    setPreviousPage({ label: planName, path: `/planner/${plannerId}` });
+    navigate(`/projects/${projectId}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
@@ -228,7 +242,7 @@ export const PlannerDetailPage = ({
       <PlannerSwatchesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* PROJECTS SECTION */}
-      <PlannerProjectsSection plannerId={plannerId as string} user={user} />
+      <PlannerProjectsSection plannerId={plannerId as string} user={user} onCardClick={handleProjectCardClick} />
     </div>
   );
 };

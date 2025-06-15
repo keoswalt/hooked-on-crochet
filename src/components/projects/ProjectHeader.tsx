@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -127,15 +126,10 @@ export const ProjectHeader = ({
     }
   };
 
+  // Remove the back button and put nothing here, as the breadcrumb is now in ProjectDetailPage
   return (
     <>
-      <div className="flex items-center space-x-4">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
-        </Button>
-      </div>
-
+      {/* Breadcrumb now at page level */}
       <Card>
         <CardHeader>
           <div className="flex flex-col space-y-4">

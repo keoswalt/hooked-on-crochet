@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProjectListView } from '@/components/projects/ProjectListView';
@@ -9,6 +8,7 @@ import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
+import { useNavigationContext } from "@/context/NavigationContext";
 
 type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
@@ -20,6 +20,7 @@ interface ProjectListPageProps {
 
 export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   const navigate = useNavigate();
+  const { setPreviousPage } = useNavigationContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -106,6 +107,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   };
 
   const handleCardClick = (project: Project) => {
+    setPreviousPage({ label: "Projects", path: "/projects" });
     navigate(`/projects/${project.id}`);
   };
 
