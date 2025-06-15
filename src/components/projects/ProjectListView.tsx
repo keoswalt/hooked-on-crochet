@@ -93,28 +93,25 @@ export const ProjectListView = ({
     setTagsRefreshTrigger(prev => prev + 1);
   };
 
+  // HEADER REMOVED: leave search + importer to ProjectListPage
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">My Crochet Projects</h1>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <ProjectSearch 
-            searchTerm={searchTerm}
-            onSearchChange={onSearchChange}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <ProjectSearch 
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+        />
+        <div className="flex gap-2">
+          <ProjectImporter 
+            onImport={onImportProject}
+            loading={operationsLoading}
           />
-          <div className="flex gap-2">
-            <ProjectImporter 
-              onImport={onImportProject}
-              loading={operationsLoading}
-            />
-            <Button onClick={onCreateProject} className="whitespace-nowrap">
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </div>
+          <Button onClick={onCreateProject} className="whitespace-nowrap">
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
         </div>
       </div>
-
       <ProjectGrid
         projects={filteredProjects}
         searchTerm={searchTerm}
@@ -131,3 +128,4 @@ export const ProjectListView = ({
     </div>
   );
 };
+

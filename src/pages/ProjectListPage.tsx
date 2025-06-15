@@ -1,14 +1,26 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProjectListView } from '@/components/projects/ProjectListView';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 import { useNavigationContext } from "@/context/NavigationContext";
+
+// Add breadcrumb imports
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
@@ -117,6 +129,38 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink 
+              onClick={() => navigate('/planner')}
+              className="cursor-pointer hover:text-foreground"
+            >
+              Planner
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Projects</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
+          <p className="text-gray-600 mt-2">Keep track of all your crochet projects</p>
+        </div>
+        <div className="flex gap-2 mt-4 sm:mt-0">
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
+        </div>
+      </div>
+      
       <ProjectListView
         projects={projects}
         searchTerm={searchTerm}
@@ -171,3 +215,4 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
     </div>
   );
 };
+
