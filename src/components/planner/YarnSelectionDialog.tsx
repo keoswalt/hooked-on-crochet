@@ -1,11 +1,11 @@
 
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { YarnCard } from "@/components/stash/YarnCard";
 import { YarnFilters } from "@/components/stash/YarnFilters";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import YarnPreviewCard from "./YarnPreviewCard";
 import type { Database } from "@/integrations/supabase/types";
 
 type YarnStash = Database["public"]["Tables"]["yarn_stash"]["Row"];
@@ -29,18 +29,20 @@ export default function YarnSelectionDialog({
   const [selected, setSelected] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Reset selection and filters on open
   useEffect(() => {
     if (open) setSelected([]);
   }, [open]);
 
-  // Exclude already attached (can revisit if you wish "re-attach" prevention)
+  // Exclude already attached
   const displayedYarns = filteredYarns.filter(y => !attachedYarnIds.includes(y.id));
 
   const handleToggleSelect = (id: string) => {
-    setSelected(sel =>
-      sel.includes(id) ? sel.filter(sid => sid !== id) : [...sel, id]
-    );
+    setSelected(sel => sel.includes(id) ? sel.filter(sid => sid !== id) : [...sel, id]);
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    handleToggleSelect(id);
   };
 
   const handleSave = () => {
@@ -73,22 +75,20 @@ export default function YarnSelectionDialog({
               {displayedYarns.map((yarn) => {
                 const checked = selected.includes(yarn.id);
                 return (
-                  <div
+                  <YarnPreviewCard
                     key={yarn.id}
-                    className={`relative rounded-lg ring-2 transition-shadow ${checked ? "ring-primary ring-2" : "ring-transparent"} bg-white shadow hover:shadow-md`}
-                    tabIndex={0}
-                    onClick={() => handleToggleSelect(yarn.id)}
+                    yarn={yarn}
+                    checked={checked}
+                    onSelect={() => handleToggleSelect(yarn.id)}
                   >
                     <Checkbox
                       checked={checked}
                       onCheckedChange={() => handleToggleSelect(yarn.id)}
                       className="absolute top-2 left-2 bg-white z-10"
                       tabIndex={-1}
+                      onClick={e => handleCheckboxClick(e, yarn.id)}
                     />
-                    <div className="pt-6 pb-2 px-2 pointer-events-none">
-                      <YarnCard yarn={yarn} onEdit={()=>{}} onDelete={()=>{}} />
-                    </div>
-                  </div>
+                  </YarnPreviewCard>
                 );
               })}
             </div>
