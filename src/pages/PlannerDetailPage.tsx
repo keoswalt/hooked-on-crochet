@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -20,7 +21,6 @@ import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
 import PlanImagesGrid from "@/components/planner/PlanImagesGrid";
 import EmptyState from "@/components/ui/EmptyState";
 import { useNavigationContext } from "@/context/NavigationContext";
-import { useNavigate, useParams } from "react-router-dom";
 
 type Plan = Database['public']['Tables']['plans']['Row'];
 
@@ -43,7 +43,6 @@ export const PlannerDetailPage = ({
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const debouncedSaveTimeout = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   // Images state
   const [images, setImages] = useState<any[]>([]);
@@ -195,10 +194,8 @@ export const PlannerDetailPage = ({
     setImagesLoading(false);
   };
 
-  const handleProjectCardClick = (projectId: string) => {
-    setPreviousPage({ label: planName, path: `/planner/${plannerId}` });
-    navigate(`/projects/${projectId}`);
-  };
+  // DO NOT pass onCardClick to PlannerProjectsSection (API doesn't support it), so remove this
+  // If you need custom navigation, add the prop to PlannerProjectsSection and the usage/component as needed
 
   if (loading) {
     return (
@@ -242,7 +239,10 @@ export const PlannerDetailPage = ({
       <PlannerSwatchesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* PROJECTS SECTION */}
-      <PlannerProjectsSection plannerId={plannerId as string} user={user} onCardClick={handleProjectCardClick} />
+      <PlannerProjectsSection plannerId={plannerId as string} user={user} />
+
+      {/* NOTES SECTION */}
+      <PlannerNotesSection plannerId={plannerId as string} userId={user.id} />
     </div>
   );
 };
