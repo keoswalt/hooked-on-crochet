@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -232,7 +230,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                 <Card key={swatch.id}>
                   <CardContent className="p-4">
                     <p className="font-medium">{swatch.title}</p>
-                    <p className="text-sm text-gray-600">{swatch.description}</p>
                     {swatch.hook_size && (
                       <p className="text-xs text-gray-500 mt-1">Hook: {swatch.hook_size}</p>
                     )}
@@ -288,4 +285,3 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     </div>
   );
 };
-
