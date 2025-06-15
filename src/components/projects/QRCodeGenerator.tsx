@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { QrCode, Download, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ export const QRCodeGenerator = ({ project }: QRCodeGeneratorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
-  const projectUrl = `${window.location.origin}?project=${project.id}`;
+  const projectUrl = `${window.location.origin}/projects/${project.id}`;
 
   useEffect(() => {
     if (isOpen && !qrCodeDataUrl) {
