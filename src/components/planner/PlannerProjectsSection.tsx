@@ -11,9 +11,10 @@ import type { User } from "@supabase/supabase-js";
 interface PlannerProjectsSectionProps {
   plannerId: string;
   user: User;
+  planName?: string;
 }
 
-export default function PlannerProjectsSection({ plannerId, user }: PlannerProjectsSectionProps) {
+export default function PlannerProjectsSection({ plannerId, user, planName }: PlannerProjectsSectionProps) {
   const { attachments, loading, attachProjects, detachProject, refresh } = usePlanProjectAttachments(plannerId, user);
   const [showDialog, setShowDialog] = useState(false);
   const { toast } = useToast();
@@ -55,6 +56,8 @@ export default function PlannerProjectsSection({ plannerId, user }: PlannerProje
                 key={att.id}
                 project={att.project!}
                 onRemove={() => handleRemove(att.project_id)}
+                planName={planName}
+                plannerId={plannerId}
               />
             ))}
           </div>
@@ -70,3 +73,4 @@ export default function PlannerProjectsSection({ plannerId, user }: PlannerProje
     </div>
   );
 }
+

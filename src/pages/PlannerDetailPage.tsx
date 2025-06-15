@@ -239,7 +239,11 @@ export const PlannerDetailPage = ({
       <PlannerSwatchesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* PROJECTS SECTION */}
-      <PlannerProjectsSection plannerId={plannerId as string} user={user} />
+      <PlannerProjectsSection
+        plannerId={plannerId as string}
+        user={user}
+        planName={plan.name}
+      />
 
       {/* NOTES SECTION */}
       <PlannerNotesSection

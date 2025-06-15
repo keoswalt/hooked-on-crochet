@@ -6,21 +6,33 @@ import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
+import { useNavigationContext } from "@/context/NavigationContext";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
 interface PlanProjectCardProps {
   project: Project;
   onRemove: () => void;
+  planName?: string;
+  plannerId?: string;
 }
 
-export default function PlanProjectCard({ project, onRemove }: PlanProjectCardProps) {
+export default function PlanProjectCard({ project, onRemove, planName, plannerId }: PlanProjectCardProps) {
   const navigate = useNavigate();
+  const { setPreviousPage } = useNavigationContext();
+
+  const handleCardClick = () => {
+    // If planner context is available, set previous page to the plan
+    if (planName && plannerId) {
+      setPreviousPage({ label: planName, path: `/planner/${plannerId}` });
+    }
+    navigate(`/projects/${project.id}`);
+  };
 
   return (
     <Card 
       className="hover:shadow-lg transition-shadow h-52 flex flex-col relative cursor-pointer"
-      onClick={() => navigate(`/projects/${project.id}`)}
+      onClick={handleCardClick}
       tabIndex={0}
       aria-label={project.name}
     >
@@ -63,3 +75,4 @@ export default function PlanProjectCard({ project, onRemove }: PlanProjectCardPr
     </Card>
   );
 }
+
