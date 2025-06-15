@@ -20,7 +20,7 @@ interface SwatchFiltersProps {
 
 export const SwatchFilters = ({ swatches, onFilter, className }: SwatchFiltersProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [hookSizeFilter, setHookSizeFilter] = useState('');
+  const [hookSizeFilter, setHookSizeFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const SwatchFilters = ({ swatches, onFilter, className }: SwatchFiltersPr
     }
 
     // Apply hook size filter
-    if (hookSizeFilter) {
+    if (hookSizeFilter && hookSizeFilter !== 'all') {
       filtered = filtered.filter(swatch => swatch.hook_size === hookSizeFilter);
     }
 
@@ -83,7 +83,7 @@ export const SwatchFilters = ({ swatches, onFilter, className }: SwatchFiltersPr
             <SelectValue placeholder="Hook Size" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Sizes</SelectItem>
+            <SelectItem value="all">All Sizes</SelectItem>
             {HOOK_SIZES.map((size) => (
               <SelectItem key={size} value={size}>
                 {size}
