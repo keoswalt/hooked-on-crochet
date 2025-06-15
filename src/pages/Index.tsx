@@ -11,6 +11,7 @@ import type { User } from '@supabase/supabase-js';
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const location = useLocation();
   const { projectId } = useParams();
 
@@ -50,7 +51,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <AuthForm />
+        <AuthForm mode={authMode} onModeChange={setAuthMode} />
       </div>
     );
   }
