@@ -34,16 +34,6 @@ export const YarnCard = ({ yarn, onEdit, onDelete }: YarnCardProps) => {
           <CardTitle className="text-lg font-semibold line-clamp-2">
             {yarn.name}
           </CardTitle>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(yarn.id)}
-              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
