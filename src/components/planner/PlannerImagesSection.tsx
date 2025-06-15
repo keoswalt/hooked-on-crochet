@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +35,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
 
   // Add image handler
   const handleImageAdded = async (imageUrl: string) => {
-    // Add new image at the end
+    // Add new image at the end (DO NOT set featured automatically)
     const maxPos = images.length > 0 ? Math.max(...images.map(img => img.position ?? 0)) : 0;
     const { data, error } = await supabase
       .from("plan_images")
@@ -45,6 +44,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         user_id: userId,
         image_url: imageUrl,
         position: maxPos + 1,
+        is_featured: false, // never set via upload
       })
       .select();
     if (!error && data?.[0]) {
@@ -56,7 +56,6 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
   const handleDeleteImage = async (imageId: string) => {
     setImagesLoading(true);
     await supabase.from("plan_images").delete().eq("id", imageId).eq("plan_id", plannerId);
-    // Re-number remaining positions for sequential order
     setImages(prev => {
       const filtered = prev.filter(i => i.id !== imageId);
       // Update positions to be sequential (1-based)
@@ -66,7 +65,49 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     setImagesLoading(false);
   };
 
-  // Sync positions in DB if deleted
+  // FEATURED image toggle: manual only
+  const handleToggleFeatured = async (imageId: string) => {
+    // 1. Find which image is currently featured
+    const prevFeatured = images.find(img => img.is_featured);
+    if (prevFeatured && prevFeatured.id === imageId) return; // already featured
+
+    // 2. Unset all others, set this one
+    const updatedImages = images.map(img => ({
+      ...img,
+      is_featured: img.id === imageId,
+    }));
+    setImages(updatedImages); // optimistically update
+
+    // 3. Update DB
+    const upserts = updatedImages.map(img => ({
+      id: img.id,
+      is_featured: img.is_featured,
+      plan_id: img.plan_id,
+      user_id: img.user_id,
+      image_url: img.image_url,
+      position: img.position,
+      uploaded_at: img.uploaded_at,
+    }));
+
+    const { error } = await supabase
+      .from("plan_images")
+      .upsert(upserts, { onConflict: "id" });
+
+    if (error) {
+      toast({
+        title: "Failed to set featured image",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Featured image updated!",
+        description: "This image is now the featured image.",
+      });
+    }
+  };
+
+  // Sync positions in DB if deleted (keep logic, but NO featured update!)
   useEffect(() => {
     async function syncPositions() {
       if (!images.length) return;
@@ -78,6 +119,8 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         plan_id: img.plan_id,
         user_id: img.user_id,
         image_url: img.image_url,
+        is_featured: img.is_featured,
+        uploaded_at: img.uploaded_at,
       }));
       await supabase.from("plan_images").upsert(updates, { onConflict: "id" });
     }
@@ -85,7 +128,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     // eslint-disable-next-line
   }, [images.length]);
 
-  // Drag and drop reorder logic (pass planId and userId)
+  // Drag and drop reorder logic (pure position—not is_featured)
   const { reorderImages, reordering } = usePlanImagesReorder(
     images,
     setImages,
@@ -106,6 +149,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         onDeleteImage={handleDeleteImage}
         onReorder={reorderImages}
         reordering={reordering}
+        onToggleFeatured={handleToggleFeatured}
       />
       <PlanImageUploadDialog
         open={showImagesUpload}

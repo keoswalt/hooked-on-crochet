@@ -1,9 +1,9 @@
 
-import { useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageViewer } from "@/components/images/ImageViewer";
 import { Loader2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
 import {
   DragDropContext,
   Draggable,
@@ -24,6 +24,7 @@ interface PlanImagesGridProps {
   onDeleteImage: (imageId: string) => void;
   onReorder?: (sourceIdx: number, destIdx: number) => void;
   reordering?: boolean;
+  onToggleFeatured?: (imageId: string) => void;
 }
 export const PlanImagesGrid = ({
   images,
@@ -31,6 +32,7 @@ export const PlanImagesGrid = ({
   onDeleteImage,
   onReorder,
   reordering = false,
+  onToggleFeatured,
 }: PlanImagesGridProps) => {
   if (loading) {
     return (
@@ -81,6 +83,31 @@ export const PlanImagesGrid = ({
                   onDelete={() => onDeleteImage(img.id)}
                 />
               </AspectRatio>
+              {onToggleFeatured && (
+                <button
+                  type="button"
+                  title={
+                    img.is_featured
+                      ? "Featured image"
+                      : "Set as featured image"
+                  }
+                  className={`absolute z-20 right-2 top-2 transition-colors p-1 rounded-full bg-white/90 shadow ${
+                    img.is_featured
+                      ? "text-yellow-500"
+                      : "text-gray-300 hover:text-yellow-500"
+                  }`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onToggleFeatured(img.id);
+                  }}
+                >
+                  <Star
+                    fill={img.is_featured ? "currentColor" : "none"}
+                    strokeWidth={1.5}
+                    className="w-6 h-6"
+                  />
+                </button>
+              )}
             </div>
           );
         }}
@@ -112,6 +139,32 @@ export const PlanImagesGrid = ({
                     >
                       <GripVertical className="w-5 h-5 text-gray-400 opacity-80" />
                     </div>
+                    {/* Star button */}
+                    {onToggleFeatured && (
+                      <button
+                        type="button"
+                        title={
+                          img.is_featured
+                            ? "Featured image"
+                            : "Set as featured image"
+                        }
+                        className={`absolute z-20 right-2 top-2 transition-colors p-1 rounded-full bg-white/90 shadow ${
+                          img.is_featured
+                            ? "text-yellow-500"
+                            : "text-gray-300 hover:text-yellow-500"
+                        }`}
+                        onClick={e => {
+                          e.stopPropagation();
+                          onToggleFeatured(img.id);
+                        }}
+                      >
+                        <Star
+                          fill={img.is_featured ? "currentColor" : "none"}
+                          strokeWidth={1.5}
+                          className="w-6 h-6"
+                        />
+                      </button>
+                    )}
                     <AspectRatio ratio={1} className="w-full">
                       <ImageViewer
                         imageUrl={img.image_url}
@@ -120,8 +173,6 @@ export const PlanImagesGrid = ({
                         onDelete={() => onDeleteImage(img.id)}
                       />
                     </AspectRatio>
-                    {/* Featured badge logic is now based on position, 
-                        but you requested NOT to show it here, so omitted */}
                   </div>
                 )}
               </Draggable>
