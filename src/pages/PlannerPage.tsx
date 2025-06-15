@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -198,7 +197,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Yarn</h2>
             <Button variant="outline" size="sm" onClick={() => navigate('/stash')}>
-              <Package className="h-4 w-4 mr-2" />
               Manage Stash
             </Button>
           </div>
