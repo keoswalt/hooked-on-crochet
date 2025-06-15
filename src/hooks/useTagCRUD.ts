@@ -72,9 +72,9 @@ export const useTagCRUD = (userId: string) => {
     try {
       setLoading(true);
       
-      // First delete all project_tags associations
+      // First delete all pattern_tags associations
       await supabase
-        .from('project_tags')
+        .from('pattern_tags')
         .delete()
         .eq('tag_id', tagId);
 

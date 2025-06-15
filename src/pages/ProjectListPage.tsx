@@ -37,7 +37,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
     featured_image_url: null,
   });
 
-  const { projects, loading, fetchProjects } = useProjectState(user);
+  const { patterns, loading, fetchPatterns } = useProjectState(user);
   const {
     loading: operationsLoading,
     handleSaveProject,
@@ -45,7 +45,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
     handleDuplicateProject,
     handleToggleFavorite,
     handleImportProject,
-  } = useProjectOperations(user, fetchProjects);
+  } = useProjectOperations(user, fetchPatterns);
 
   // Reset form data when editing project changes
   useEffect(() => {
@@ -69,7 +69,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   }, [editingProject]);
 
   const handleToggleFavoriteWrapper = async (id: string, isFavorite: boolean) => {
-    const project = projects.find(p => p.id === id);
+    const project = patterns.find(p => p.id === id);
     if (project) {
       await handleToggleFavorite(project);
     }
@@ -116,7 +116,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <ProjectListView
-        projects={projects}
+        projects={patterns}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onEditProject={(project) => {
@@ -146,7 +146,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
               onFormDataChange={setFormData}
               userId={user.id}
               showButtons={false}
-              onRefreshProjects={fetchProjects}
+              onRefreshProjects={fetchPatterns}
             />
           </div>
 
