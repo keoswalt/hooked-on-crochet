@@ -5,8 +5,8 @@ import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useProjectState } from '@/hooks/useProjectState';
-import { useProjectOperations } from '@/hooks/useProjectOperations';
+import { usePatternState } from '@/hooks/usePatternState';
+import { usePatternOperations } from '@/hooks/usePatternOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
@@ -36,17 +36,17 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     featured_image_url: null,
   });
 
-  const { patterns, selectedPattern, setSelectedPattern, loading, fetchPatterns } = useProjectState(user);
+  const { patterns, selectedPattern, setSelectedPattern, loading, fetchPatterns } = usePatternState(user);
   const {
     loading: operationsLoading,
-    handleSaveProject,
-    handleDeleteProject,
-    handleDuplicateProject,
+    handleSavePattern,
+    handleDeletePattern,
+    handleDuplicatePattern,
     handleToggleFavorite,
-    handleExportProject,
+    handleExportPattern,
     handleExportPDF,
-    handleImportProject,
-  } = useProjectOperations(user, fetchPatterns);
+    handleImportPattern,
+  } = usePatternOperations(user, fetchPatterns);
 
   // Reset form data when editing project changes
   useEffect(() => {
@@ -71,7 +71,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
 
   const handleDeleteSelectedProject = async () => {
     if (selectedPattern) {
-      await handleDeleteProject(selectedPattern.id);
+      await handleDeletePattern(selectedPattern.id);
       setSelectedPattern(null);
     }
   };
@@ -84,7 +84,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   };
 
   const handleDuplicateWrapper = async (project: Pattern) => {
-    await handleDuplicateProject(project);
+    await handleDuplicatePattern(project);
   };
 
   const handleFormSubmit = async () => {
@@ -100,7 +100,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         status: editingProject?.status || null,
       };
 
-      const savedProject = await handleSaveProject(projectData, editingProject);
+      const savedProject = await handleSavePattern(projectData, editingProject);
       if (savedProject) {
         setShowForm(false);
         setEditingProject(null);
@@ -128,12 +128,12 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
             setEditingProject(project);
             setShowForm(true);
           }}
-          onDeleteProject={handleDeleteProject}
+          onDeleteProject={handleDeletePattern}
           onDuplicateProject={handleDuplicateWrapper}
           onToggleFavorite={handleToggleFavoriteWrapper}
           onCardClick={setSelectedPattern}
           onCreateProject={() => setShowForm(true)}
-          onImportProject={handleImportProject}
+          onImportProject={handleImportPattern}
           operationsLoading={operationsLoading}
           userId={user.id}
         />
@@ -142,7 +142,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
           project={selectedPattern}
           onBack={() => setSelectedPattern(null)}
           onProjectDelete={handleDeleteSelectedProject}
-          onProjectExport={() => handleExportProject(selectedPattern)}
+          onProjectExport={() => handleExportPattern(selectedPattern)}
           onProjectExportPDF={() => handleExportPDF(selectedPattern)}
           onEditProject={(project) => {
             setEditingProject(project);
