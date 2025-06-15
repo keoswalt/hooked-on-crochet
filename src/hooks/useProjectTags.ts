@@ -1,52 +1,96 @@
 
 import { useState, useEffect } from 'react';
-import { usePatternTagOperations } from '@/hooks/usePatternTagOperations';
-import { useTagQueries } from '@/hooks/useTagQueries';
+import { useTagOperations } from './useTagOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 type Tag = Database['public']['Tables']['tags']['Row'];
 
-export const useProjectTags = (patternId: string, userId: string) => {
+export const useProjectTags = (projectId: string, userId: string) => {
   const [projectTags, setProjectTags] = useState<Tag[]>([]);
-  const { addTagToPattern, removeTagFromPattern } = usePatternTagOperations();
-  const { fetchPatternTags } = useTagQueries(userId);
+  const [loading, setLoading] = useState(true);
+  
+  const { fetchProjectTags, removeTagFromProject } = useTagOperations(userId);
 
-  const fetchProjectTags = async () => {
-    if (!patternId) return;
-    const tags = await fetchPatternTags(patternId);
-    setProjectTags(tags);
-  };
-
-  const handleRemoveTag = async (tagId: string) => {
-    const success = await removeTagFromPattern(patternId, tagId);
-    if (success) {
-      await fetchProjectTags();
+  const loadProjectTags = async () => {
+    // Don't make API calls with invalid UUIDs
+    if (!projectId || projectId === '') {
+      setProjectTags([]);
+      setLoading(false);
+      return;
     }
-    return success;
-  };
 
-  const addTagToProject = async (tagId: string) => {
-    const success = await addTagToPattern(patternId, tagId);
-    if (success) {
-      await fetchProjectTags();
+    try {
+      setLoading(true);
+      const tags = await fetchProjectTags(projectId);
+      setProjectTags(tags);
+    } catch (error) {
+      console.error('Error loading project tags:', error);
+      setProjectTags([]);
+    } finally {
+      setLoading(false);
     }
-    return success;
-  };
-
-  const refreshTags = async () => {
-    await fetchProjectTags();
   };
 
   useEffect(() => {
-    fetchProjectTags();
-  }, [patternId, userId]);
+    loadProjectTags();
+  }, [projectId, userId]);
+
+  // Listen for tag update events automatically
+  useEffect(() => {
+    const handleTagsUpdated = (event: CustomEvent) => {
+      console.log('useProjectTags received tagsUpdated event', event.detail);
+      // Refresh if no projectId specified or if it matches our project
+      if (!event.detail?.projectId || event.detail.projectId === projectId) {
+        if (projectId && projectId !== '') {
+          loadProjectTags();
+        }
+      }
+    };
+
+    const handleProjectTagsUpdated = (event: CustomEvent) => {
+      console.log('useProjectTags received projectTagsUpdated event', event.detail);
+      // Refresh if no projectId specified or if it matches our project
+      if (!event.detail?.projectId || event.detail.projectId === projectId) {
+        if (projectId && projectId !== '') {
+          loadProjectTags();
+        }
+      }
+    };
+
+    window.addEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+    window.addEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('tagsUpdated', handleTagsUpdated as EventListener);
+      window.removeEventListener('projectTagsUpdated', handleProjectTagsUpdated as EventListener);
+    };
+  }, [projectId]);
+
+  const handleRemoveTag = async (tagId: string) => {
+    if (!projectId || projectId === '') return;
+    
+    const success = await removeTagFromProject(projectId, tagId);
+    if (success) {
+      setProjectTags(prev => prev.filter(tag => tag.id !== tagId));
+      
+      // Dispatch events to notify other components about tag removal
+      window.dispatchEvent(new CustomEvent('tagsUpdated', { 
+        detail: { projectId } 
+      }));
+      window.dispatchEvent(new CustomEvent('projectTagsUpdated', { 
+        detail: { projectId } 
+      }));
+    }
+  };
+
+  const refreshTags = () => {
+    loadProjectTags();
+  };
 
   return {
     projectTags,
+    loading,
     handleRemoveTag,
     refreshTags,
-    addTagToProject,
-    removeTagFromProject: handleRemoveTag,
-    fetchProjectTags,
   };
 };

@@ -1,64 +1,48 @@
 
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export const useProjectTagOperations = () => {
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
-  const addTagToProject = async (patternId: string, tagId: string) => {
+  const addTagToProject = async (projectId: string, tagId: string): Promise<boolean> => {
     try {
+      setLoading(true);
       const { error } = await supabase
-        .from('pattern_tags')
-        .insert({ 
-          pattern_id: patternId, 
-          tag_id: tagId 
-        });
+        .from('project_tags')
+        .insert({ project_id: projectId, tag_id: tagId });
 
       if (error) throw error;
-      
-      toast({
-        title: "Tag added",
-        description: "Tag has been added to the project.",
-      });
-      
       return true;
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Error adding tag to project:', error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeTagFromProject = async (patternId: string, tagId: string) => {
+  const removeTagFromProject = async (projectId: string, tagId: string): Promise<boolean> => {
     try {
+      setLoading(true);
       const { error } = await supabase
-        .from('pattern_tags')
+        .from('project_tags')
         .delete()
-        .eq('pattern_id', patternId)
+        .eq('project_id', projectId)
         .eq('tag_id', tagId);
 
       if (error) throw error;
-      
-      toast({
-        title: "Tag removed",
-        description: "Tag has been removed from the project.",
-      });
-      
       return true;
     } catch (error: any) {
-      toast({
-        title: "Error", 
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Error removing tag from project:', error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   return {
+    loading,
     addTagToProject,
     removeTagFromProject,
   };

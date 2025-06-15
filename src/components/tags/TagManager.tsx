@@ -8,8 +8,8 @@ type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface TagManagerProps {
   userId: string;
-  patternId: string;
-  patternTags: Tag[];
+  projectId: string;
+  projectTags: Tag[];
   onTagsChange: () => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -17,8 +17,8 @@ interface TagManagerProps {
 
 export const TagManager = ({
   userId,
-  patternId,
-  patternTags,
+  projectId,
+  projectTags,
   onTagsChange,
   isOpen,
   onOpenChange,
@@ -34,7 +34,7 @@ export const TagManager = ({
     createTag,
     updateTag,
     deleteTag,
-    addTagToPattern,
+    addTagToProject,
     getTagUsageCount,
   } = useTagOperations(userId);
 
@@ -55,7 +55,7 @@ export const TagManager = ({
     if (searchTerm.trim()) {
       const newTag = await createTag(searchTerm.trim());
       if (newTag) {
-        await addTagToPattern(patternId, newTag.id);
+        await addTagToProject(projectId, newTag.id);
         setSearchTerm('');
         onTagsChange();
         loadUserTags();
@@ -66,7 +66,7 @@ export const TagManager = ({
   };
 
   const handleAddTag = async (tagId: string) => {
-    const success = await addTagToPattern(patternId, tagId);
+    const success = await addTagToProject(projectId, tagId);
     if (success) {
       onTagsChange();
       // Close the menu after successfully adding the tag
@@ -117,7 +117,7 @@ export const TagManager = ({
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       userTags={userTags}
-      projectTags={patternTags}
+      projectTags={projectTags}
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       onCreateTag={handleCreateTag}

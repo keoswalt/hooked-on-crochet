@@ -1,7 +1,7 @@
 
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectDetailActionsProps {
   project: Project;

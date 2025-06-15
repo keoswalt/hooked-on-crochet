@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
@@ -5,12 +6,12 @@ import { ProjectDetail } from './ProjectDetail';
 import { ProjectForm } from './ProjectForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { usePatternState } from '@/hooks/usePatternState';
-import { usePatternOperations } from '@/hooks/usePatternOperations';
+import { useProjectState } from '@/hooks/useProjectState';
+import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Pattern = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
@@ -21,7 +22,7 @@ interface ProjectsPageProps {
 export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Pattern | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     hook_size: HookSize | '';
@@ -36,17 +37,17 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     featured_image_url: null,
   });
 
-  const { patterns, selectedPattern, setSelectedPattern, loading, fetchPatterns } = usePatternState(user);
+  const { projects, selectedProject, setSelectedProject, loading, fetchProjects } = useProjectState(user);
   const {
     loading: operationsLoading,
-    handleSavePattern,
-    handleDeletePattern,
-    handleDuplicatePattern,
+    handleSaveProject,
+    handleDeleteProject,
+    handleDuplicateProject,
     handleToggleFavorite,
-    handleExportPattern,
+    handleExportProject,
     handleExportPDF,
-    handleImportPattern,
-  } = usePatternOperations(user, fetchPatterns);
+    handleImportProject,
+  } = useProjectOperations(user, fetchProjects);
 
   // Reset form data when editing project changes
   useEffect(() => {
@@ -70,21 +71,21 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   }, [editingProject]);
 
   const handleDeleteSelectedProject = async () => {
-    if (selectedPattern) {
-      await handleDeletePattern(selectedPattern.id);
-      setSelectedPattern(null);
+    if (selectedProject) {
+      await handleDeleteProject(selectedProject.id);
+      setSelectedProject(null);
     }
   };
 
   const handleToggleFavoriteWrapper = async (id: string, isFavorite: boolean) => {
-    const project = patterns.find(p => p.id === id);
+    const project = projects.find(p => p.id === id);
     if (project) {
       await handleToggleFavorite(project);
     }
   };
 
-  const handleDuplicateWrapper = async (project: Pattern) => {
-    await handleDuplicatePattern(project);
+  const handleDuplicateWrapper = async (project: Project) => {
+    await handleDuplicateProject(project);
   };
 
   const handleFormSubmit = async () => {
@@ -100,7 +101,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         status: editingProject?.status || null,
       };
 
-      const savedProject = await handleSavePattern(projectData, editingProject);
+      const savedProject = await handleSaveProject(projectData, editingProject);
       if (savedProject) {
         setShowForm(false);
         setEditingProject(null);
@@ -114,42 +115,42 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   };
 
   const handleProjectUpdate = async () => {
-    await fetchPatterns();
+    await fetchProjects();
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {!selectedPattern ? (
+      {!selectedProject ? (
         <ProjectListView
-          projects={patterns}
+          projects={projects}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onEditProject={(project) => {
             setEditingProject(project);
             setShowForm(true);
           }}
-          onDeleteProject={handleDeletePattern}
+          onDeleteProject={handleDeleteProject}
           onDuplicateProject={handleDuplicateWrapper}
           onToggleFavorite={handleToggleFavoriteWrapper}
-          onCardClick={setSelectedPattern}
+          onCardClick={setSelectedProject}
           onCreateProject={() => setShowForm(true)}
-          onImportProject={handleImportPattern}
+          onImportProject={handleImportProject}
           operationsLoading={operationsLoading}
           userId={user.id}
         />
       ) : (
         <ProjectDetail
-          project={selectedPattern}
-          onBack={() => setSelectedPattern(null)}
+          project={selectedProject}
+          onBack={() => setSelectedProject(null)}
           onProjectDelete={handleDeleteSelectedProject}
-          onProjectExport={() => handleExportPattern(selectedPattern)}
-          onProjectExportPDF={() => handleExportPDF(selectedPattern)}
+          onProjectExport={() => handleExportProject(selectedProject)}
+          onProjectExportPDF={() => handleExportPDF(selectedProject)}
           onEditProject={(project) => {
             setEditingProject(project);
             setShowForm(true);
           }}
           onProjectUpdate={handleProjectUpdate}
-          onDuplicate={() => handleDuplicateWrapper(selectedPattern)}
+          onDuplicate={() => handleDuplicateWrapper(selectedProject)}
           userId={user.id}
         />
       )}
@@ -167,7 +168,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
               onFormDataChange={setFormData}
               userId={user.id}
               showButtons={false}
-              onRefreshProjects={fetchPatterns}
+              onRefreshProjects={fetchProjects}
             />
           </div>
 

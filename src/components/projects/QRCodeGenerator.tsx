@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { QrCode, Download, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,10 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 import QRCode from 'qrcode';
 import type { Database } from '@/integrations/supabase/types';
 
-type Pattern = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface QRCodeGeneratorProps {
-  project: Pattern;
+  project: Project;
 }
 
 export const QRCodeGenerator = ({ project }: QRCodeGeneratorProps) => {
@@ -24,7 +23,7 @@ export const QRCodeGenerator = ({ project }: QRCodeGeneratorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
-  const projectUrl = `${window.location.origin}/patterns/${project.id}`;
+  const projectUrl = `${window.location.origin}/projects/${project.id}`;
 
   useEffect(() => {
     if (isOpen && !qrCodeDataUrl) {

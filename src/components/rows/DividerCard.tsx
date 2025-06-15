@@ -5,16 +5,16 @@ import { Input } from '@/components/ui/input';
 import { GripVertical, Copy, Trash2 } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
-type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 interface DividerCardProps {
-  row: PatternRow;
+  row: ProjectRow;
   mode: 'edit' | 'make';
   localLabel: string;
   onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onLabelFocus: () => void;
   onLabelBlur: () => void;
-  onDuplicate: (row: PatternRow) => void;
+  onDuplicate: (row: ProjectRow) => void;
   onDeleteClick: () => void;
   cardStyling: string;
 }

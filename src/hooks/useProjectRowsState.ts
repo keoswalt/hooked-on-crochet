@@ -1,26 +1,38 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
-type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
-interface ConfirmDialog {
-  open: boolean;
-  title: string;
-  description: string;
-  onConfirm: () => void;
-}
+const HIDE_COMPLETED_STORAGE_KEY = 'project-rows:hide-completed';
+
+const getInitialHideCompleted = () => {
+  try {
+    const stored = localStorage.getItem(HIDE_COMPLETED_STORAGE_KEY);
+    return stored === null ? true : stored === 'true';
+  } catch (e) {
+    // In case localStorage is not available
+    return true;
+  }
+};
 
 export const useProjectRowsState = () => {
-  const [rows, setRows] = useState<PatternRow[]>([]);
+  const [rows, setRows] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hideCompleted, setHideCompleted] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>({
-    open: false,
-    title: '',
-    description: '',
-    onConfirm: () => {},
-  });
+  const [hideCompleted, setHideCompleted] = useState(getInitialHideCompleted);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    onConfirm: () => void;
+  }>({ open: false, onConfirm: () => {} });
+
+  // Save hideCompleted preference to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(HIDE_COMPLETED_STORAGE_KEY, hideCompleted.toString());
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }, [hideCompleted]);
 
   return {
     rows,

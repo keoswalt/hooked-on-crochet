@@ -4,41 +4,41 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Pattern = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 export const useProjectState = (user: User) => {
-  const [patterns, setPatterns] = useState<Pattern[]>([]);
-  const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPatterns = async () => {
+  const fetchProjects = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('patterns')
+        .from('projects')
         .select('*')
         .eq('user_id', user.id)
         .order('is_favorite', { ascending: false })
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setPatterns(data || []);
+      setProjects(data || []);
     } catch (error: any) {
-      console.error('Error fetching patterns:', error);
+      console.error('Error fetching projects:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPatterns();
+    fetchProjects();
   }, [user.id]);
 
   return {
-    patterns,
-    selectedPattern,
-    setSelectedPattern,
+    projects,
+    selectedProject,
+    setSelectedProject,
     loading,
-    fetchPatterns,
+    fetchProjects,
   };
 };

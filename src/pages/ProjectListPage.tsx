@@ -10,7 +10,7 @@ import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
@@ -37,7 +37,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
     featured_image_url: null,
   });
 
-  const { patterns, loading, fetchPatterns } = useProjectState(user);
+  const { projects, loading, fetchProjects } = useProjectState(user);
   const {
     loading: operationsLoading,
     handleSaveProject,
@@ -45,7 +45,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
     handleDuplicateProject,
     handleToggleFavorite,
     handleImportProject,
-  } = useProjectOperations(user, fetchPatterns);
+  } = useProjectOperations(user, fetchProjects);
 
   // Reset form data when editing project changes
   useEffect(() => {
@@ -69,7 +69,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   }, [editingProject]);
 
   const handleToggleFavoriteWrapper = async (id: string, isFavorite: boolean) => {
-    const project = patterns.find(p => p.id === id);
+    const project = projects.find(p => p.id === id);
     if (project) {
       await handleToggleFavorite(project);
     }
@@ -116,7 +116,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <ProjectListView
-        projects={patterns}
+        projects={projects}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onEditProject={(project) => {
@@ -146,7 +146,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
               onFormDataChange={setFormData}
               userId={user.id}
               showButtons={false}
-              onRefreshProjects={fetchPatterns}
+              onRefreshProjects={fetchProjects}
             />
           </div>
 

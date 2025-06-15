@@ -9,7 +9,7 @@ import { useTagOperations } from '@/hooks/useTagOperations';
 import { useEffect, useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface ProjectListViewProps {
@@ -43,7 +43,7 @@ export const ProjectListView = ({
 }: ProjectListViewProps) => {
   const [projectTags, setProjectTags] = useState<Record<string, Tag[]>>({});
   const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
-  const { fetchPatternTags } = useTagOperations(userId);
+  const { fetchProjectTags } = useTagOperations(userId);
 
   // Load tags for all projects
   useEffect(() => {
@@ -51,7 +51,7 @@ export const ProjectListView = ({
       const tagsMap: Record<string, Tag[]> = {};
       
       for (const project of projects) {
-        const tags = await fetchPatternTags(project.id);
+        const tags = await fetchProjectTags(project.id);
         tagsMap[project.id] = tags;
       }
       
@@ -61,7 +61,7 @@ export const ProjectListView = ({
     if (projects.length > 0) {
       loadAllProjectTags();
     }
-  }, [projects, fetchPatternTags, tagsRefreshTrigger]);
+  }, [projects, fetchProjectTags, tagsRefreshTrigger]);
 
   // Filter projects based on search term (projects are already sorted by database)
   const filteredProjects = useMemo(() => {

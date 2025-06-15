@@ -7,7 +7,7 @@ import { TagDisplay } from '@/components/tags/TagDisplay';
 import { TagManager } from '@/components/tags/TagManager';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 type Tag = Database['public']['Tables']['tags']['Row'];
 
 interface ProjectTagsSectionProps {
@@ -34,9 +34,8 @@ export const ProjectTagsSection = ({
       <Label>Tags</Label>
       <div className="flex items-center gap-2 flex-wrap">
         <TagDisplay 
-          entityId={project.id}
-          entityType="pattern"
-          userId={userId}
+          tags={projectTags} 
+          onRemoveTag={onRemoveTag}
         />
         <div className="relative">
           <Button
@@ -54,8 +53,8 @@ export const ProjectTagsSection = ({
             <div className="absolute top-full left-0 mt-1 z-50">
               <TagManager
                 userId={userId}
-                patternId={project.id}
-                patternTags={projectTags}
+                projectId={project.id}
+                projectTags={projectTags}
                 onTagsChange={onTagsChange}
                 isOpen={showTagManager}
                 onOpenChange={setShowTagManager}

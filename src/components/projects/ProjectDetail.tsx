@@ -9,7 +9,7 @@ import { useProjectDetailRowHandlers } from './ProjectDetailRowHandlers';
 import { useProjectDetailActions } from './ProjectDetailActions';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectDetailProps {
   project: Project;
@@ -143,8 +143,6 @@ export const ProjectDetail = ({
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title || "Mark Row as Incomplete?"}
-        description={confirmDialog.description || "Marking this row as incomplete will also mark all subsequent rows as incomplete and reset their progress. Are you sure you want to continue?"}
       />
     </div>
   );

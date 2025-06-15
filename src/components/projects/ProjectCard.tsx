@@ -10,7 +10,7 @@ import { useProjectTags } from '@/hooks/useProjectTags';
 import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 interface ProjectCardProps {
   project: Project;
@@ -76,10 +76,9 @@ export const ProjectCard = ({
           {projectTags.length > 0 && (
             <div className="mb-1">
               <TagDisplay 
-                entityId={project.id}
-                entityType="pattern"
-                userId={userId}
-                readonly={true}
+                tags={projectTags} 
+                showRemoveButton={false}
+                size="sm"
               />
             </div>
           )}

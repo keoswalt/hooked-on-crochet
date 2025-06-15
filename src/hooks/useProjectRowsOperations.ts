@@ -1,68 +1,86 @@
 
-import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRowOperations } from './useRowOperations';
+import { useImageOperations } from './useImageOperations';
 import type { Database } from '@/integrations/supabase/types';
 
-type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
-
-interface ConfirmDialog {
-  open: boolean;
-  title: string;
-  description: string;
-  onConfirm: () => void;
-}
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 export const useProjectRowsOperations = (
   projectId: string,
-  rows: PatternRow[],
-  setRows: (rows: PatternRow[]) => void,
-  setConfirmDialog: (dialog: ConfirmDialog) => void,
+  rows: ProjectRow[],
+  setRows: (rows: ProjectRow[]) => void,
+  setConfirmDialog: (dialog: { open: boolean; onConfirm: () => void }) => void,
   fetchRows: () => Promise<void>
 ) => {
   const { toast } = useToast();
+  const { addRow: addRowOperation, addNote: addNoteOperation, addDivider: addDividerOperation, duplicateRow: duplicateRowOperation, updateRowImage: updateRowImageOperation } = useRowOperations();
+  const { deleteImage } = useImageOperations();
 
-  const handleAddRow = useCallback(async (insertAfterPosition?: number) => {
+  const addRow = async (insertAfterPosition?: number) => {
     try {
-      let position: number;
-      let counter: number;
-
+      const data = await addRowOperation(projectId, rows.length, insertAfterPosition);
+      
       if (insertAfterPosition !== undefined) {
-        // Insert after specific position
-        position = insertAfterPosition + 0.5;
-        // Calculate counter based on position in the list
-        const rowsAtOrBeforePosition = rows.filter(r => 
-          r.type === 'row' && (r.position || 0) <= insertAfterPosition
-        ).length;
-        counter = rowsAtOrBeforePosition + 1;
-      } else {
-        // Add at the end
-        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
-        position = maxPosition + 1;
-        counter = rows.filter(r => r.type === 'row').length + 1;
-      }
-
-      const { data, error } = await supabase
-        .from('pattern_rows')
-        .insert({
-          pattern_id: projectId,
-          type: 'row',
-          instructions: '',
-          label: '',
-          counter: counter,
-          position: position,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // If we inserted in the middle, reorder positions
-      if (insertAfterPosition !== undefined) {
-        await reorderPositions();
+        // Refresh the entire list to get updated positions
+        await fetchRows();
       } else {
         setRows([...rows, data]);
       }
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
+  const addNote = async (insertAfterPosition?: number) => {
+    try {
+      const data = await addNoteOperation(projectId, rows.length, insertAfterPosition);
+      
+      if (insertAfterPosition !== undefined) {
+        // Refresh the entire list to get updated positions
+        await fetchRows();
+      } else {
+        setRows([...rows, data]);
+      }
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
+  const addDivider = async (insertAfterPosition?: number) => {
+    try {
+      const data = await addDividerOperation(projectId, rows.length, insertAfterPosition);
+      
+      if (insertAfterPosition !== undefined) {
+        // Refresh the entire list to get updated positions
+        await fetchRows();
+      } else {
+        setRows([...rows, data]);
+      }
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
+  const duplicateRow = async (rowToDuplicate: ProjectRow) => {
+    try {
+      const data = await duplicateRowOperation(rowToDuplicate, rows.length);
+      setRows([...rows, data]);
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
+
+  const updateCounter = async (id: string, newCounter: number) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ counter: newCounter })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, counter: newCounter } : row));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -70,38 +88,17 @@ export const useProjectRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [projectId, rows, setRows, toast]);
+  };
 
-  const handleAddNote = useCallback(async (insertAfterPosition?: number) => {
+  const updateInstructions = async (id: string, instructions: string) => {
     try {
-      let position: number;
-
-      if (insertAfterPosition !== undefined) {
-        position = insertAfterPosition + 0.5;
-      } else {
-        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
-        position = maxPosition + 1;
-      }
-
-      const { data, error } = await supabase
-        .from('pattern_rows')
-        .insert({
-          pattern_id: projectId,
-          type: 'note',
-          instructions: '',
-          position: position,
-        })
-        .select()
-        .single();
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ instructions })
+        .eq('id', id);
 
       if (error) throw error;
-
-      // If we inserted in the middle, reorder positions
-      if (insertAfterPosition !== undefined) {
-        await reorderPositions();
-      } else {
-        setRows([...rows, data]);
-      }
+      setRows(rows.map(row => row.id === id ? { ...row, instructions } : row));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -109,38 +106,17 @@ export const useProjectRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [projectId, rows, setRows, toast]);
+  };
 
-  const handleAddDivider = useCallback(async (insertAfterPosition?: number) => {
+  const updateLabel = async (id: string, label: string) => {
     try {
-      let position: number;
-
-      if (insertAfterPosition !== undefined) {
-        position = insertAfterPosition + 0.5;
-      } else {
-        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
-        position = maxPosition + 1;
-      }
-
-      const { data, error } = await supabase
-        .from('pattern_rows')
-        .insert({
-          pattern_id: projectId,
-          type: 'divider',
-          instructions: '--- Divider ---',
-          position: position,
-        })
-        .select()
-        .single();
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ label })
+        .eq('id', id);
 
       if (error) throw error;
-
-      // If we inserted in the middle, reorder positions
-      if (insertAfterPosition !== undefined) {
-        await reorderPositions();
-      } else {
-        setRows([...rows, data]);
-      }
+      setRows(rows.map(row => row.id === id ? { ...row, label } : row));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -148,24 +124,166 @@ export const useProjectRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [projectId, rows, setRows, toast]);
+  };
 
-  const reorderPositions = useCallback(async () => {
+  const updateTotalStitches = async (id: string, totalStitches: string) => {
     try {
-      const sortedRows = [...rows].sort((a, b) => (a.position || 0) - (b.position || 0));
-      const updates = sortedRows.map((row, index) => ({
-        id: row.id,
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ total_stitches: totalStitches })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, total_stitches: totalStitches } : row));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateMakeModeCounter = async (id: string, newCounter: number) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ make_mode_counter: newCounter })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, make_mode_counter: newCounter } : row));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateMakeModeStatus = async (id: string, status: string) => {
+    try {
+      const currentRow = rows.find(row => row.id === id);
+      if (!currentRow) return;
+
+      if (status === 'complete') {
+        // Mark current row as complete
+        await supabase
+          .from('project_rows')
+          .update({ make_mode_status: status })
+          .eq('id', id);
+
+        // Find next row or note (skip dividers) and mark as in_progress
+        const currentIndex = rows.findIndex(row => row.id === id);
+        const nextRowOrNote = rows.slice(currentIndex + 1).find(row => row.type === 'row' || row.type === 'note');
+        
+        if (nextRowOrNote) {
+          await supabase
+            .from('project_rows')
+            .update({ make_mode_status: 'in_progress' })
+            .eq('id', nextRowOrNote.id);
+        }
+      } else if (currentRow.make_mode_status === 'complete' && status === 'in_progress') {
+        // Show confirmation dialog for unchecking completed row
+        setConfirmDialog({
+          open: true,
+          onConfirm: async () => {
+            const currentIndex = rows.findIndex(row => row.id === id);
+            const subsequentRows = rows.slice(currentIndex + 1);
+            
+            // Update current row - reset counter when unchecking
+            await supabase
+              .from('project_rows')
+              .update({ 
+                make_mode_status: status,
+                make_mode_counter: 0  // Reset counter when marking as incomplete
+              })
+              .eq('id', id);
+
+            // Update subsequent rows (only rows and notes, not dividers)
+            for (const row of subsequentRows) {
+              if (row.type === 'row' || row.type === 'note') {
+                await supabase
+                  .from('project_rows')
+                  .update({ 
+                    make_mode_status: 'not_started',
+                    make_mode_counter: 0 
+                  })
+                  .eq('id', row.id);
+              }
+            }
+            
+            fetchRows(); // Refresh to get updated state
+          }
+        });
+        return; // Don't proceed until user confirms
+      } else {
+        await supabase
+          .from('project_rows')
+          .update({ make_mode_status: status })
+          .eq('id', id);
+      }
+
+      fetchRows(); // Refresh to get updated state
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleLock = async (id: string, isLocked: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('project_rows')
+        .update({ is_locked: isLocked })
+        .eq('id', id);
+
+      if (error) throw error;
+      setRows(rows.map(row => row.id === id ? { ...row, is_locked: isLocked } : row));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteRow = async (id: string) => {
+    try {
+      // Get the row to check for image
+      const rowToDelete = rows.find(row => row.id === id);
+      
+      // Delete the image from storage if it exists
+      if (rowToDelete?.image_url) {
+        await deleteImage(rowToDelete.image_url);
+      }
+
+      const { error } = await supabase
+        .from('project_rows')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      const updatedRows = rows.filter(row => row.id !== id);
+      const reorderedRows = updatedRows.map((row, index) => ({
+        ...row,
         position: index + 1
       }));
-
-      for (const update of updates) {
+      
+      for (const row of reorderedRows) {
         await supabase
-          .from('pattern_rows')
-          .update({ position: update.position })
-          .eq('id', update.id);
+          .from('project_rows')
+          .update({ position: row.position })
+          .eq('id', row.id);
       }
-
-      await fetchRows();
+      
+      setRows(reorderedRows);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -173,157 +291,90 @@ export const useProjectRowsOperations = (
         variant: "destructive",
       });
     }
-  }, [rows, fetchRows, toast]);
+  };
 
-  const handleUpdateRow = useCallback(async (rowId: string, updates: Partial<PatternRow>) => {
-    try {
-      const { error } = await supabase
-        .from('pattern_rows')
-        .update(updates)
-        .eq('id', rowId);
+  const reorderRows = async (sourceIndex: number, destinationIndex: number) => {
+    if (sourceIndex === destinationIndex) return;
 
-      if (error) throw error;
+    const reorderedRows = [...rows];
+    const [removed] = reorderedRows.splice(sourceIndex, 1);
+    reorderedRows.splice(destinationIndex, 0, removed);
 
-      setRows(rows.map(row => 
-        row.id === rowId ? { ...row, ...updates } : row
-      ));
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  }, [rows, setRows, toast]);
+    const updatedRows = reorderedRows.map((row, index) => ({
+      ...row,
+      position: index + 1
+    }));
 
-  const handleDeleteRow = useCallback((rowId: string) => {
-    const row = rows.find(r => r.id === rowId);
-    if (!row) return;
-
-    setConfirmDialog({
-      open: true,
-      title: `Delete ${row.type}`,
-      description: `Are you sure you want to delete this ${row.type}? This action cannot be undone.`,
-      onConfirm: async () => {
-        try {
-          const { error } = await supabase
-            .from('pattern_rows')
-            .delete()
-            .eq('id', rowId);
-
-          if (error) throw error;
-
-          setRows(rows.filter(r => r.id !== rowId));
-          
-          toast({
-            title: "Deleted",
-            description: `${row.type} has been deleted.`,
-          });
-        } catch (error: any) {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      }
-    });
-  }, [rows, setRows, setConfirmDialog, toast]);
-
-  const handleMoveRow = useCallback(async (rowId: string, direction: 'up' | 'down') => {
-    const sortedRows = [...rows].sort((a, b) => (a.position || 0) - (b.position || 0));
-    const currentIndex = sortedRows.findIndex(r => r.id === rowId);
-    
-    if (currentIndex === -1) return;
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === sortedRows.length - 1) return;
-
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const currentRow = sortedRows[currentIndex];
-    const targetRow = sortedRows[newIndex];
+    setRows(updatedRows);
 
     try {
-      const { error } = await supabase
-        .from('pattern_rows')
-        .update({ position: targetRow.position })
-        .eq('id', currentRow.id);
+      // Update positions in database
+      for (const row of updatedRows) {
+        await supabase
+          .from('project_rows')
+          .update({ position: row.position })
+          .eq('id', row.id);
+      }
+      
+      // Reset make mode progress when rows are reordered
+      // First, reset all rows to not_started and counter to 0
+      await supabase
+        .from('project_rows')
+        .update({ 
+          make_mode_status: 'not_started',
+          make_mode_counter: 0 
+        })
+        .eq('project_id', projectId);
 
-      if (error) throw error;
-
-      const { error: error2 } = await supabase
-        .from('pattern_rows')
-        .update({ position: currentRow.position })
-        .eq('id', targetRow.id);
-
-      if (error2) throw error2;
-
-      await fetchRows();
+      // Then set the first row/note (by position) to in_progress
+      const firstRowOrNote = updatedRows.find(row => row.type === 'row' || row.type === 'note');
+      if (firstRowOrNote) {
+        await supabase
+          .from('project_rows')
+          .update({ make_mode_status: 'in_progress' })
+          .eq('id', firstRowOrNote.id);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Row order updated successfully. Make mode progress has been reset.",
+      });
+      
+      // Refresh data to get updated make mode status
+      fetchRows();
     } catch (error: any) {
+      fetchRows();
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  }, [rows, fetchRows, toast]);
+  };
 
-  const handleResetProgress = useCallback(() => {
-    setConfirmDialog({
-      open: true,
-      title: "Reset Progress",
-      description: "Are you sure you want to reset all progress? This will mark all rows as not started.",
-      onConfirm: async () => {
-        try {
-          const { error } = await supabase
-            .from('pattern_rows')
-            .update({ 
-              make_mode_status: 'not_started',
-              make_mode_counter: 0 
-            })
-            .eq('pattern_id', projectId);
-
-          if (error) throw error;
-
-          await fetchRows();
-          
-          toast({
-            title: "Progress Reset",
-            description: "All progress has been reset.",
-          });
-        } catch (error: any) {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      }
-    });
-  }, [projectId, fetchRows, setConfirmDialog, toast]);
-
-  const handleCompleteRow = useCallback(async (rowId: string) => {
-    await handleUpdateRow(rowId, { make_mode_status: 'completed' });
-  }, [handleUpdateRow]);
-
-  const handleUncompleteRow = useCallback(async (rowId: string) => {
-    await handleUpdateRow(rowId, { make_mode_status: 'not_started' });
-  }, [handleUpdateRow]);
-
-  const handleMarkInProgress = useCallback(async (rowId: string) => {
-    await handleUpdateRow(rowId, { make_mode_status: 'in_progress' });
-  }, [handleUpdateRow]);
+  const updateRowImage = async (id: string, imageUrl: string | null) => {
+    try {
+      await updateRowImageOperation(id, imageUrl);
+      setRows(rows.map(row => row.id === id ? { ...row, image_url: imageUrl } : row));
+    } catch (error) {
+      // Error already handled in useRowOperations
+    }
+  };
 
   return {
-    handleAddRow,
-    handleAddNote,
-    handleAddDivider,
-    handleUpdateRow,
-    handleDeleteRow,
-    handleMoveRow,
-    handleResetProgress,
-    handleCompleteRow,
-    handleUncompleteRow,
-    handleMarkInProgress,
-    reorderPositions,
+    addRow,
+    addNote,
+    addDivider,
+    updateCounter,
+    updateInstructions,
+    updateLabel,
+    updateTotalStitches,
+    updateMakeModeCounter,
+    updateMakeModeStatus,
+    toggleLock,
+    duplicateRow,
+    deleteRow,
+    reorderRows,
+    updateRowImage,
   };
 };

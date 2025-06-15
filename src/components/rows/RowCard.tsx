@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -10,10 +9,10 @@ import { RowCardHeader } from './RowCardHeader';
 import { RowCardContent } from './RowCardContent';
 import type { Database } from '@/integrations/supabase/types';
 
-type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
+type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 interface RowCardProps {
-  row: PatternRow;
+  row: ProjectRow;
   mode: 'edit' | 'make';
   rowNumber?: number;
   userId: string;
@@ -24,7 +23,7 @@ interface RowCardProps {
   onUpdateMakeModeCounter: (id: string, newCounter: number) => void;
   onUpdateMakeModeStatus: (id: string, status: string) => void;
   onToggleLock: (id: string, isLocked: boolean) => void;
-  onDuplicate: (row: PatternRow) => void;
+  onDuplicate: (row: ProjectRow) => void;
   onDelete: (id: string) => void;
   onUpdateRowImage: (id: string, imageUrl: string | null) => void;
 }
@@ -223,29 +222,17 @@ export const RowCard = ({
   // Render divider
   if (row.type === 'divider') {
     return (
-      <>
-        <DividerCard
-          row={row}
-          mode={mode}
-          localLabel={localLabel}
-          onLabelChange={handleLabelChange}
-          onLabelFocus={handleLabelFocus}
-          onLabelBlur={handleLabelBlur}
-          onDuplicate={onDuplicate}
-          onDeleteClick={handleDeleteClick}
-          cardStyling={getCardStyling()}
-        />
-        
-        <ConfirmationDialog
-          open={showDeleteConfirm}
-          onOpenChange={setShowDeleteConfirm}
-          title="Delete divider?"
-          description="This will permanently delete this divider. This action cannot be undone."
-          onConfirm={handleDeleteConfirm}
-          confirmText="Delete"
-          cancelText="Cancel"
-        />
-      </>
+      <DividerCard
+        row={row}
+        mode={mode}
+        localLabel={localLabel}
+        onLabelChange={handleLabelChange}
+        onLabelFocus={handleLabelFocus}
+        onLabelBlur={handleLabelBlur}
+        onDuplicate={onDuplicate}
+        onDeleteClick={handleDeleteClick}
+        cardStyling={getCardStyling()}
+      />
     );
   }
 

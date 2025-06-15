@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Project = Database['public']['Tables']['patterns']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
@@ -61,7 +61,7 @@ export const ProjectDetailPage = ({ user }: ProjectDetailPageProps) => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('patterns')
+        .from('projects')
         .select('*')
         .eq('id', projectId)
         .eq('user_id', user.id)
