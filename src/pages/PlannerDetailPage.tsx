@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { InfiniteCanvas } from '@/components/planner/InfiniteCanvas';
+import { CanvasBoard } from '@/components/planner/CanvasBoard';
 import { BottomDrawer } from '@/components/planner/BottomDrawer';
 import { DebugPanel } from '@/components/planner/DebugPanel';
 import type { User } from '@supabase/supabase-js';
@@ -83,14 +82,15 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
         </div>
       </div>
 
-      {/* Main content area with proper flex layout */}
+      {/* Main content area */}
       <div className="flex-1 flex flex-col relative">
-        {/* Canvas Area - Takes remaining height, positioned above drawer */}
+        {/* Canvas Area - now using new CanvasBoard */}
         <div className="flex-1 relative z-10">
-          <InfiniteCanvas userId={user.id} planId={plan.id} />
+          {/* Replace InfiniteCanvas with new CanvasBoard */}
+          <CanvasBoard />
         </div>
 
-        {/* Bottom Drawer - positioned at bottom but doesn't overlay canvas */}
+        {/* Bottom Drawer - remains unchanged */}
         <div className="flex-shrink-0 z-30 relative">
           <BottomDrawer userId={user.id} planId={plan.id} />
         </div>
