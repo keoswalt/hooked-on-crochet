@@ -350,8 +350,20 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                         <div className="text-gray-300 text-xs text-center w-full">No image</div>
                       )}
                     </div>
-                    {/* Delete button - overlay top-right on image for mobile and desktop */}
-                    <div className="absolute top-2 right-2">
+                  </div>
+                  {/* Card Content Section */}
+                  <div
+                    className="w-full flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
+                    onClick={() => navigate(`/planner/${plan.id}`)}
+                  >
+                    {/* Title row with delete button */}
+                    <div className="flex items-start justify-between gap-x-2">
+                      <CardHeader className="p-0 mb-2 flex-1 min-w-0">
+                        <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
+                        {plan.description && (
+                          <CardDescription className="truncate">{plan.description}</CardDescription>
+                        )}
+                      </CardHeader>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -359,24 +371,13 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                           e.stopPropagation();
                           setPlanToDelete(plan);
                         }}
-                        className={`h-8 w-8 p-0 hover:bg-gray-100 
-                          opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity`}
+                        className="h-8 w-8 p-0 shrink-0 ml-2"
+                        tabIndex={0}
+                        aria-label="Delete plan"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                  {/* Card Content Section (stacked row below image on mobile, right on desktop) */}
-                  <div
-                    className="w-full flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
-                    onClick={() => navigate(`/planner/${plan.id}`)}
-                  >
-                    <CardHeader className="p-0 mb-2">
-                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
-                      {plan.description && (
-                        <CardDescription className="truncate">{plan.description}</CardDescription>
-                      )}
-                    </CardHeader>
                   </div>
                 </Card>
               ))}
