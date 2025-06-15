@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,7 @@ import ProjectNotFoundScreen from "@/components/projects/ProjectNotFoundScreen";
 import ProjectLoadingScreen from "@/components/projects/ProjectLoadingScreen";
 import type { User } from "@supabase/supabase-js";
 import { ProjectBreadcrumb } from "@/components/projects/ProjectBreadcrumb";
--import { useNavigationContext, NavigationProvider } from "@/context/NavigationContext";
-+import { useNavigationContext } from "@/context/NavigationContext";
+import { useNavigationContext } from "@/context/NavigationContext";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,5 +120,4 @@ export const ProjectDetailPage = ({ user }: ProjectDetailPageProps) => {
   );
 };
 
--export default ProjectDetailPageWithProvider;
-+export default ProjectDetailPage;
+export default ProjectDetailPage;
