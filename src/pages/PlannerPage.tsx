@@ -1,7 +1,9 @@
 
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Plus, Palette, Package } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -190,13 +192,17 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
               {yarnStash.map((yarn) => (
                 <Card key={yarn.id}>
                   <CardContent className="p-4">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">{yarn.name}</p>
                         <p className="text-sm text-gray-600">{yarn.brand} - {yarn.color}</p>
                       </div>
-                      <div className="text-right text-sm text-gray-500">
-                        {yarn.weight ? getYarnWeightLabel(yarn.weight) : 'No weight'}
+                      <div className="text-right">
+                        {yarn.weight ? (
+                          <Badge variant="secondary">{getYarnWeightLabel(yarn.weight)}</Badge>
+                        ) : (
+                          <Badge variant="secondary">No weight</Badge>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -282,3 +288,4 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     </div>
   );
 };
+
