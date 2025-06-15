@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 type Pattern = Database['public']['Tables']['patterns']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectData {
   name: string;
@@ -17,7 +18,7 @@ interface ProjectData {
   featured_image_url: string | null;
   is_favorite: boolean;
   last_mode: string;
-  status: string | null;
+  status: ProjectStatus | null;
 }
 
 export const useProjectOperations = (user: User, onRefresh: () => void) => {

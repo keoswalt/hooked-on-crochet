@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectListView } from './ProjectListView';
@@ -11,7 +10,7 @@ import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Pattern = Database['public']['Tables']['patterns']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
@@ -22,7 +21,7 @@ interface ProjectsPageProps {
 export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Pattern | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     hook_size: HookSize | '';
@@ -37,7 +36,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     featured_image_url: null,
   });
 
-  const { projects, selectedProject, setSelectedProject, loading, fetchProjects } = useProjectState(user);
+  const { patterns, selectedPattern, setSelectedPattern, loading, fetchPatterns } = useProjectState(user);
   const {
     loading: operationsLoading,
     handleSaveProject,
@@ -47,7 +46,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
     handleExportProject,
     handleExportPDF,
     handleImportProject,
-  } = useProjectOperations(user, fetchProjects);
+  } = useProjectOperations(user, fetchPatterns);
 
   // Reset form data when editing project changes
   useEffect(() => {
@@ -71,20 +70,20 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   }, [editingProject]);
 
   const handleDeleteSelectedProject = async () => {
-    if (selectedProject) {
-      await handleDeleteProject(selectedProject.id);
-      setSelectedProject(null);
+    if (selectedPattern) {
+      await handleDeleteProject(selectedPattern.id);
+      setSelectedPattern(null);
     }
   };
 
   const handleToggleFavoriteWrapper = async (id: string, isFavorite: boolean) => {
-    const project = projects.find(p => p.id === id);
+    const project = patterns.find(p => p.id === id);
     if (project) {
       await handleToggleFavorite(project);
     }
   };
 
-  const handleDuplicateWrapper = async (project: Project) => {
+  const handleDuplicateWrapper = async (project: Pattern) => {
     await handleDuplicateProject(project);
   };
 
@@ -115,14 +114,14 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
   };
 
   const handleProjectUpdate = async () => {
-    await fetchProjects();
+    await fetchPatterns();
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {!selectedProject ? (
+      {!selectedPattern ? (
         <ProjectListView
-          projects={projects}
+          projects={patterns}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onEditProject={(project) => {
@@ -132,7 +131,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
           onDeleteProject={handleDeleteProject}
           onDuplicateProject={handleDuplicateWrapper}
           onToggleFavorite={handleToggleFavoriteWrapper}
-          onCardClick={setSelectedProject}
+          onCardClick={setSelectedPattern}
           onCreateProject={() => setShowForm(true)}
           onImportProject={handleImportProject}
           operationsLoading={operationsLoading}
@@ -140,17 +139,17 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
         />
       ) : (
         <ProjectDetail
-          project={selectedProject}
-          onBack={() => setSelectedProject(null)}
+          project={selectedPattern}
+          onBack={() => setSelectedPattern(null)}
           onProjectDelete={handleDeleteSelectedProject}
-          onProjectExport={() => handleExportProject(selectedProject)}
-          onProjectExportPDF={() => handleExportPDF(selectedProject)}
+          onProjectExport={() => handleExportProject(selectedPattern)}
+          onProjectExportPDF={() => handleExportPDF(selectedPattern)}
           onEditProject={(project) => {
             setEditingProject(project);
             setShowForm(true);
           }}
           onProjectUpdate={handleProjectUpdate}
-          onDuplicate={() => handleDuplicateWrapper(selectedProject)}
+          onDuplicate={() => handleDuplicateWrapper(selectedPattern)}
           userId={user.id}
         />
       )}
@@ -168,7 +167,7 @@ export const ProjectsPage = ({ user }: ProjectsPageProps) => {
               onFormDataChange={setFormData}
               userId={user.id}
               showButtons={false}
-              onRefreshProjects={fetchProjects}
+              onRefreshProjects={fetchPatterns}
             />
           </div>
 
