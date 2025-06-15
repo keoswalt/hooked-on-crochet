@@ -6,6 +6,8 @@ import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
 import { ProjectListPage } from './ProjectListPage';
 import { ProjectDetailPage } from './ProjectDetailPage';
+import { PlannerPage } from './PlannerPage';
+import { PlannerDetailPage } from './PlannerDetailPage';
 import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
@@ -13,7 +15,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const location = useLocation();
-  const { projectId } = useParams();
+  const { projectId, plannerId } = useParams();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,15 +34,21 @@ const Index = () => {
 
   const getCurrentPage = () => {
     if (location.pathname === '/') {
-      return 'list';
+      return 'projects-list';
     }
     if (location.pathname === '/projects') {
-      return 'list';
+      return 'projects-list';
     }
     if (location.pathname.startsWith('/projects/') && projectId) {
-      return 'detail';
+      return 'projects-detail';
     }
-    return 'list';
+    if (location.pathname === '/planner') {
+      return 'planner-list';
+    }
+    if (location.pathname.startsWith('/planner/') && plannerId) {
+      return 'planner-detail';
+    }
+    return 'projects-list';
   };
 
   if (loading) {
@@ -61,10 +69,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header userEmail={user.email} />
-      {currentPage === 'list' ? (
+      {currentPage === 'projects-list' && (
         <ProjectListPage user={user} />
-      ) : (
+      )}
+      {currentPage === 'projects-detail' && (
         <ProjectDetailPage user={user} />
+      )}
+      {currentPage === 'planner-list' && (
+        <PlannerPage user={user} />
+      )}
+      {currentPage === 'planner-detail' && (
+        <PlannerDetailPage user={user} />
       )}
     </div>
   );

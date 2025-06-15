@@ -9,6 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      canvas_elements: {
+        Row: {
+          created_at: string
+          element_type: string
+          height: number | null
+          id: string
+          planner_project_id: string
+          position_x: number
+          position_y: number
+          properties: Json | null
+          rotation: number | null
+          updated_at: string
+          width: number | null
+          z_index: number | null
+        }
+        Insert: {
+          created_at?: string
+          element_type: string
+          height?: number | null
+          id?: string
+          planner_project_id: string
+          position_x?: number
+          position_y?: number
+          properties?: Json | null
+          rotation?: number | null
+          updated_at?: string
+          width?: number | null
+          z_index?: number | null
+        }
+        Update: {
+          created_at?: string
+          element_type?: string
+          height?: number | null
+          id?: string
+          planner_project_id?: string
+          position_x?: number
+          position_y?: number
+          properties?: Json | null
+          rotation?: number | null
+          updated_at?: string
+          width?: number | null
+          z_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_elements_planner_project_id_fkey"
+            columns: ["planner_project_id"]
+            isOneToOne: false
+            referencedRelation: "planner_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_projects: {
+        Row: {
+          canvas_data: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canvas_data?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canvas_data?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       project_rows: {
         Row: {
           counter: number
@@ -149,6 +232,83 @@ export type Database = {
         }
         Relationships: []
       }
+      swatch_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_primary: boolean | null
+          swatch_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_primary?: boolean | null
+          swatch_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean | null
+          swatch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swatch_images_swatch_id_fkey"
+            columns: ["swatch_id"]
+            isOneToOne: false
+            referencedRelation: "swatches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      swatches: {
+        Row: {
+          created_at: string
+          description: string | null
+          hook_size: string | null
+          id: string
+          notes: string | null
+          rows_per_inch: number | null
+          stitches_per_inch: number | null
+          title: string
+          updated_at: string
+          user_id: string
+          yarn_used: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hook_size?: string | null
+          id?: string
+          notes?: string | null
+          rows_per_inch?: number | null
+          stitches_per_inch?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+          yarn_used?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hook_size?: string | null
+          id?: string
+          notes?: string | null
+          rows_per_inch?: number | null
+          stitches_per_inch?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          yarn_used?: string | null
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           created_at: string
@@ -167,6 +327,60 @@ export type Database = {
           id?: string
           name?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      yarn_stash: {
+        Row: {
+          brand: string | null
+          color: string | null
+          cost: number | null
+          created_at: string
+          id: string
+          image_url: string | null
+          material: string | null
+          name: string
+          notes: string | null
+          purchase_date: string | null
+          remaining_yardage: number | null
+          updated_at: string
+          user_id: string
+          weight: string | null
+          yardage: number | null
+        }
+        Insert: {
+          brand?: string | null
+          color?: string | null
+          cost?: number | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          material?: string | null
+          name: string
+          notes?: string | null
+          purchase_date?: string | null
+          remaining_yardage?: number | null
+          updated_at?: string
+          user_id: string
+          weight?: string | null
+          yardage?: number | null
+        }
+        Update: {
+          brand?: string | null
+          color?: string | null
+          cost?: number | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          material?: string | null
+          name?: string
+          notes?: string | null
+          purchase_date?: string | null
+          remaining_yardage?: number | null
+          updated_at?: string
+          user_id?: string
+          weight?: string | null
+          yardage?: number | null
         }
         Relationships: []
       }
