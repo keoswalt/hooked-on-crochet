@@ -547,7 +547,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         onConfirm={handleDeletePlan}
         title="Delete Plan"
         description="Are you sure you want to delete this plan? This action cannot be undone and will permanently delete the plan and all associated canvas elements."
-        confirmText="Delete Plan"
       />
 
       {/* New Yarn Dialog */}

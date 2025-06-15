@@ -23,7 +23,7 @@ export const DeleteConfirmationDialog = ({
       title={title}
       description={description}
       onConfirm={onConfirm}
-      confirmText="Delete Project"
+      confirmText="Delete Plan"
       cancelText="Cancel"
     />
   );
