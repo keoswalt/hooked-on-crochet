@@ -115,7 +115,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     );
 
     // Update DB
-    // Change: Remove .then(result => result), push real Promises
+    // Fix: use .select() at the end of each query builder to get a Promise
     const updates: Promise<any>[] = [];
 
     if (prevFeatured && prevFeatured.id !== imageId) {
@@ -124,6 +124,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
           .from("plan_images")
           .update({ is_featured: false })
           .eq("id", prevFeatured.id)
+          .select()
       );
     }
 
@@ -132,6 +133,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         .from("plan_images")
         .update({ is_featured: true })
         .eq("id", imageId)
+        .select()
     );
 
     // Await all updates
