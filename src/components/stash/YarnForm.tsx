@@ -170,22 +170,6 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
         </div>
 
         <div>
-          <Label htmlFor="weight">Weight</Label>
-          <Select value={formData.weight} onValueChange={(value) => handleChange('weight', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select yarn weight" />
-            </SelectTrigger>
-            <SelectContent>
-              {YARN_WEIGHTS.map((weight) => (
-                <SelectItem key={weight.value} value={weight.value}>
-                  {weight.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
           <Label htmlFor="material">Material</Label>
           <Input
             id="material"
@@ -216,6 +200,23 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             placeholder="Enter remaining yards"
           />
         </div>
+      </div>
+
+      {/* Full width yarn weight field */}
+      <div>
+        <Label htmlFor="weight">Weight</Label>
+        <Select value={formData.weight} onValueChange={(value) => handleChange('weight', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select yarn weight" />
+          </SelectTrigger>
+          <SelectContent>
+            {YARN_WEIGHTS.map((weight) => (
+              <SelectItem key={weight.value} value={weight.value}>
+                {weight.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Image Upload Section */}
