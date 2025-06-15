@@ -146,18 +146,18 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
             isEditing: true,
           },
         ]);
-        setSelectedId(newId);
+        handleSelect(newId, selectedTool!); // FIXED: use handleSelect
         setEditingTextId(newId);
         e.stopPropagation();
       }
     } else if (selectedTool === "move") {
       // Deselect any selection if clicking empty canvas
       if (e.target === e.currentTarget) {
-        setSelectedId(null);
+        deselect(); // FIXED: use deselect
       }
     } else {
       // For other tools, deselect
-      setSelectedId(null);
+      deselect(); // FIXED: use deselect
     }
   };
 
@@ -167,7 +167,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
       // If a text is being edited, finish the edit
       finishTextEdit(editingTextId);
     } else if (selectedTool === "move") {
-      setSelectedId(null);
+      deselect(); // FIXED: use deselect
     }
   };
 
@@ -188,7 +188,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
         .filter((el) => el.id !== id || el.content.trim() !== ""),
     );
     setEditingTextId(null);
-    setSelectedId(null);
+    deselect(); // FIXED: use deselect
   };
 
   // Called by EditableTextItem to set content
@@ -212,7 +212,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
         ),
       );
       setEditingTextId(id);
-      setSelectedId(id);
+      handleSelect(id, selectedTool!); // FIXED: use handleSelect
     }
   };
 
