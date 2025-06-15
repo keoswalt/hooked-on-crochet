@@ -11,6 +11,7 @@ import { useState } from 'react';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectCardProps {
   project: Project;
@@ -22,6 +23,23 @@ interface ProjectCardProps {
   userId: string;
   onTagsUpdate?: () => void;
 }
+
+const getStatusBackgroundColor = (status: ProjectStatus | null) => {
+  if (!status) return 'bg-white';
+  
+  switch (status) {
+    case 'Writing':
+      return 'bg-red-50';
+    case 'Ready':
+      return 'bg-blue-50';
+    case 'Making':
+      return 'bg-yellow-50';
+    case 'Made':
+      return 'bg-green-50';
+    default:
+      return 'bg-white';
+  }
+};
 
 export const ProjectCard = ({ 
   project, 
@@ -60,9 +78,11 @@ export const ProjectCard = ({
     onCardClick();
   };
 
+  const statusBgColor = getStatusBackgroundColor(project.status);
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-96 flex flex-col cursor-pointer" onClick={handleCardClick}>
+      <Card className={`hover:shadow-lg transition-shadow h-96 flex flex-col cursor-pointer ${statusBgColor}`} onClick={handleCardClick}>
         <CardHeader className="p-4 flex-shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <button onClick={handleFavoriteClick} className="flex-shrink-0">
@@ -70,7 +90,7 @@ export const ProjectCard = ({
                 className={`h-4 w-4 ${project.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`} 
               />
             </button>
-            <CardTitle className="text-lg truncate flex-1">{project.name}</CardTitle>
+            <CardTitle className="text-lg truncate flex-1 text-gray-900">{project.name}</CardTitle>
           </div>
 
           {projectTags.length > 0 && (
@@ -83,11 +103,11 @@ export const ProjectCard = ({
             </div>
           )}
 
-          <CardDescription className="text-xs w-full mb-1 mt-4">
+          <CardDescription className="text-xs w-full mb-1 mt-4 text-gray-700">
             Hook: {project.hook_size} • Yarn Weight: {project.yarn_weight}
           </CardDescription>
           
-          <CardDescription className="text-xs text-gray-500 w-full">
+          <CardDescription className="text-xs text-gray-600 w-full">
             Last modified: {formatLastModified(project.updated_at)}
           </CardDescription>
         </CardHeader>
