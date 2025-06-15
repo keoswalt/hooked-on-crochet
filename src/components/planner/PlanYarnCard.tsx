@@ -26,8 +26,8 @@ export default function PlanYarnCard({ yarn, onRemove, onEdit }: PlanYarnCardPro
       />
       <Button
         size="icon"
-        variant="destructive"
-        className="absolute top-2 right-2"
+        variant="ghost"
+        className="absolute top-2 right-2 text-red-600 hover:text-red-700"
         onClick={() => setShowRemoveConfirm(true)}
         title="Remove from plan"
       >
