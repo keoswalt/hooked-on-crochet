@@ -206,7 +206,7 @@ export const PlannerDetailPage = ({
   if (!plan) return null;
 
   return (
-    <div className="w-full px-2 md:px-6 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <PlannerBreadcrumb planName={plan.name || "..."} />
 
