@@ -62,6 +62,160 @@ export type Database = {
           },
         ]
       }
+      plan_images: {
+        Row: {
+          id: string
+          image_url: string
+          is_featured: boolean | null
+          plan_id: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          image_url: string
+          is_featured?: boolean | null
+          plan_id: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          image_url?: string
+          is_featured?: boolean | null
+          plan_id?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_images_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_resources: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          plan_id: string
+          resource_type: string | null
+          title: string | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          plan_id: string
+          resource_type?: string | null
+          title?: string | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          plan_id?: string
+          resource_type?: string | null
+          title?: string | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_resources_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_swatch_attachments: {
+        Row: {
+          attached_at: string | null
+          id: string
+          plan_id: string
+          swatch_id: string
+          user_id: string
+        }
+        Insert: {
+          attached_at?: string | null
+          id?: string
+          plan_id: string
+          swatch_id: string
+          user_id: string
+        }
+        Update: {
+          attached_at?: string | null
+          id?: string
+          plan_id?: string
+          swatch_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_swatch_attachments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_swatch_attachments_swatch_id_fkey"
+            columns: ["swatch_id"]
+            isOneToOne: false
+            referencedRelation: "swatches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_yarn_attachments: {
+        Row: {
+          attached_at: string | null
+          id: string
+          plan_id: string
+          user_id: string
+          yarn_id: string
+        }
+        Insert: {
+          attached_at?: string | null
+          id?: string
+          plan_id: string
+          user_id: string
+          yarn_id: string
+        }
+        Update: {
+          attached_at?: string | null
+          id?: string
+          plan_id?: string
+          user_id?: string
+          yarn_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_yarn_attachments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_yarn_attachments_yarn_id_fkey"
+            columns: ["yarn_id"]
+            isOneToOne: false
+            referencedRelation: "yarn_stash"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           canvas_data: Json | null
