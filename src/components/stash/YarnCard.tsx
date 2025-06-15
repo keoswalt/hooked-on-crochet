@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Package } from 'lucide-react';
+import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -85,7 +86,7 @@ export const YarnCard = ({ yarn, onEdit, onDelete }: YarnCardProps) => {
           {yarn.weight && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Weight:</span>
-              <Badge variant="secondary">{yarn.weight}</Badge>
+              <Badge variant="secondary">{getYarnWeightLabel(yarn.weight)}</Badge>
             </div>
           )}
 
@@ -104,12 +105,6 @@ export const YarnCard = ({ yarn, onEdit, onDelete }: YarnCardProps) => {
                 Stock: {stockLevel.label} ({Math.round(remainingPercentage)}%)
               </p>
             </div>
-          )}
-
-          {yarn.cost && (
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Cost:</span> ${yarn.cost}
-            </p>
           )}
         </div>
       </CardContent>

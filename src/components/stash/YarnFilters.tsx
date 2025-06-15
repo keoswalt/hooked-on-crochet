@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getYarnWeightLabel } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -61,8 +62,6 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'remaining_yardage':
           return (b.remaining_yardage || 0) - (a.remaining_yardage || 0);
-        case 'cost':
-          return (b.cost || 0) - (a.cost || 0);
         default:
           return 0;
       }
@@ -104,7 +103,6 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
               <SelectItem value="brand">Brand (A-Z)</SelectItem>
               <SelectItem value="created_at">Newest First</SelectItem>
               <SelectItem value="remaining_yardage">Most Remaining</SelectItem>
-              <SelectItem value="cost">Highest Cost</SelectItem>
             </SelectContent>
           </Select>
 
@@ -150,7 +148,7 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
                 <SelectItem value="all">All weights</SelectItem>
                 {weights.map((weight) => (
                   <SelectItem key={weight} value={weight!}>
-                    {weight}
+                    {getYarnWeightLabel(weight)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -182,7 +180,7 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
           )}
           {selectedWeight && selectedWeight !== 'all' && (
             <Badge variant="secondary" className="gap-1">
-              Weight: {selectedWeight}
+              Weight: {getYarnWeightLabel(selectedWeight)}
               <X 
                 className="h-3 w-3 cursor-pointer" 
                 onClick={() => setSelectedWeight('all')}

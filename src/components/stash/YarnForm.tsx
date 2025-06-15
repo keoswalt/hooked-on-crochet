@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { YARN_WEIGHTS } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -18,17 +20,6 @@ interface YarnFormProps {
   onCancel: () => void;
 }
 
-const YARN_WEIGHTS = [
-  'Lace',
-  'Light Fingering',
-  'Fingering',
-  'Sport',
-  'DK',
-  'Worsted',
-  'Chunky',
-  'Super Chunky',
-];
-
 export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
   const [formData, setFormData] = useState({
     name: yarn?.name || '',
@@ -38,11 +29,11 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
     material: yarn?.material || '',
     yardage: yarn?.yardage?.toString() || '',
     remaining_yardage: yarn?.remaining_yardage?.toString() || '',
-    cost: yarn?.cost?.toString() || '',
-    purchase_date: yarn?.purchase_date || '',
     image_url: yarn?.image_url || '',
     notes: yarn?.notes || '',
   });
+  const [imageOption, setImageOption] = useState<'url' | 'upload'>('url');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -61,6 +52,26 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
     setLoading(true);
 
     try {
+      let imageUrl = formData.image_url;
+
+      // Handle file upload if user selected upload option and has a file
+      if (imageOption === 'upload' && selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${userId}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('yarn-images')
+          .upload(fileName, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('yarn-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
       const yarnData = {
         name: formData.name,
         brand: formData.brand || null,
@@ -69,9 +80,7 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
         material: formData.material || null,
         yardage: formData.yardage ? parseInt(formData.yardage) : null,
         remaining_yardage: formData.remaining_yardage ? parseInt(formData.remaining_yardage) : null,
-        cost: formData.cost ? parseFloat(formData.cost) : null,
-        purchase_date: formData.purchase_date || null,
-        image_url: formData.image_url || null,
+        image_url: imageUrl || null,
         notes: formData.notes || null,
         user_id: userId,
       };
@@ -120,6 +129,11 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setSelectedFile(file || null);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,8 +176,8 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             </SelectTrigger>
             <SelectContent>
               {YARN_WEIGHTS.map((weight) => (
-                <SelectItem key={weight} value={weight}>
-                  {weight}
+                <SelectItem key={weight.value} value={weight.value}>
+                  {weight.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -201,38 +215,35 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             placeholder="Enter remaining yards"
           />
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="cost">Cost ($)</Label>
-          <Input
-            id="cost"
-            type="number"
-            step="0.01"
-            value={formData.cost}
-            onChange={(e) => handleChange('cost', e.target.value)}
-            placeholder="Enter cost"
-          />
-        </div>
+      {/* Image Upload Section */}
+      <div className="space-y-3">
+        <Label>Yarn Image</Label>
+        <RadioGroup value={imageOption} onValueChange={(value: 'url' | 'upload') => setImageOption(value)}>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="url" id="url" />
+            <Label htmlFor="url">Image URL</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="upload" id="upload" />
+            <Label htmlFor="upload">Upload Image</Label>
+          </div>
+        </RadioGroup>
 
-        <div>
-          <Label htmlFor="purchase_date">Purchase Date</Label>
+        {imageOption === 'url' ? (
           <Input
-            id="purchase_date"
-            type="date"
-            value={formData.purchase_date}
-            onChange={(e) => handleChange('purchase_date', e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="image_url">Image URL</Label>
-          <Input
-            id="image_url"
+            placeholder="Enter image URL"
             value={formData.image_url}
             onChange={(e) => handleChange('image_url', e.target.value)}
-            placeholder="Enter image URL"
           />
-        </div>
+        ) : (
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+        )}
       </div>
 
       <div>

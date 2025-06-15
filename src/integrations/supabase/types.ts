@@ -334,52 +334,46 @@ export type Database = {
         Row: {
           brand: string | null
           color: string | null
-          cost: number | null
           created_at: string
           id: string
           image_url: string | null
           material: string | null
           name: string
           notes: string | null
-          purchase_date: string | null
           remaining_yardage: number | null
           updated_at: string
           user_id: string
-          weight: string | null
+          weight: Database["public"]["Enums"]["yarn_weight"] | null
           yardage: number | null
         }
         Insert: {
           brand?: string | null
           color?: string | null
-          cost?: number | null
           created_at?: string
           id?: string
           image_url?: string | null
           material?: string | null
           name: string
           notes?: string | null
-          purchase_date?: string | null
           remaining_yardage?: number | null
           updated_at?: string
           user_id: string
-          weight?: string | null
+          weight?: Database["public"]["Enums"]["yarn_weight"] | null
           yardage?: number | null
         }
         Update: {
           brand?: string | null
           color?: string | null
-          cost?: number | null
           created_at?: string
           id?: string
           image_url?: string | null
           material?: string | null
           name?: string
           notes?: string | null
-          purchase_date?: string | null
           remaining_yardage?: number | null
           updated_at?: string
           user_id?: string
-          weight?: string | null
+          weight?: Database["public"]["Enums"]["yarn_weight"] | null
           yardage?: number | null
         }
         Relationships: []
