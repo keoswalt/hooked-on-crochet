@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import PlannerSection from "./PlannerSection";
 import EmptyState from "@/components/ui/EmptyState";
@@ -99,11 +100,14 @@ const PlannerYarnSection = ({ plannerId, userId }: PlannerYarnSectionProps) => {
       {/* Yarn Edit Dialog */}
       {editYarn && (
         <Dialog open={editYarnOpen} onOpenChange={setEditYarnOpen}>
-          <DialogContent className="max-w-xl flex flex-col p-0">
+          <DialogContent
+            className="max-w-xl flex flex-col p-0 max-h-[100svh] sm:max-h-[90vh] overflow-y-auto"
+            style={{ overscrollBehavior: "contain" }}
+          >
             <DialogHeader className="bg-gray-50 px-6 py-4 border-b border-gray-200">
               <DialogTitle>Edit Yarn</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="flex-1 min-h-0 px-6 py-4">
               <YarnForm
                 userId={userId}
                 yarn={editYarn}
