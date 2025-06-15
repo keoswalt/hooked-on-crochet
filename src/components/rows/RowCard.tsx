@@ -230,7 +230,7 @@ export const RowCard = ({
         onLabelFocus={handleLabelFocus}
         onLabelBlur={handleLabelBlur}
         onDuplicate={onDuplicate}
-        onDeleteClick={handleDeleteClick}
+        onDelete={onDelete}
         cardStyling={getCardStyling()}
       />
     );
