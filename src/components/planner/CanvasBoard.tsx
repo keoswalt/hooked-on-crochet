@@ -1,42 +1,29 @@
 import React, { useRef, useState } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
-import { RotateCcw } from "lucide-react"; // use for reset icon
 import { Button } from "@/components/ui/button";
 import type { ToolType } from "./ToolsToolbar";
 import { EditableTextItem } from "./EditableTextItem";
-
-interface CanvasElement {
-  id: string;
-  x: number;
-  y: number;
-  type: string;
-  content: string;
-  // Added for text edit state
-  isEditing?: boolean;
-}
-
-interface CanvasBoardProps {
-  selectedTool?: ToolType;
-}
+import { CanvasElement, CanvasElements, CanvasBoardProps } from "./canvasTypes";
+import { useCanvasPanZoom } from "./useCanvasPanZoom";
+import { useCanvasSelection } from "./useCanvasSelection";
+import { CanvasZoomPanel } from "./CanvasZoomPanel";
 
 export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
-  const boardRef = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<CanvasElement[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const boardRef = React.useRef<HTMLDivElement>(null);
+  const [items, setItems] = React.useState<CanvasElements>([]);
+  // Move pan/zoom logic to hook
+  const {
+    pan, zoom, setPan, setZoom, isPanning, handleMouseDown, handleWheel
+  } = useCanvasPanZoom({ boardRef });
 
-  // Pan & zoom state
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  // Selection state logic to hook
+  const { selectedId, handleSelect, deselect } = useCanvasSelection();
 
-  // Tracking which text is editing
-  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  // Text editing
+  const [editingTextId, setEditingTextId] = React.useState<string | null>(null);
 
-  // For panning
-  const [isPanning, setIsPanning] = useState(false);
-  const panOrigin = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
-  // --- FIX: Add this line to declare the double-click flag ---
+  // Double click guard
   const justDoubleClicked = React.useRef(false);
 
   // Add text element on drop
@@ -76,76 +63,13 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
     e.dataTransfer.dropEffect = "copy";
   };
 
-  // panning handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Only left button and background (not on any item)
-    if (e.button !== 0) return;
-    // Prevent panning if mousedown was on an element
-    if ((e.target as Element) !== boardRef.current) return;
-    // Pan allowed with move tool
-    if (selectedTool !== "move") return;
-    setIsPanning(true);
-    panOrigin.current = {
-      x: e.clientX - pan.x,
-      y: e.clientY - pan.y,
-    };
-  };
-
-  React.useEffect(() => {
-    if (!isPanning) return;
-
-    const handleMove = (e: MouseEvent) => {
-      setPan({
-        x: e.clientX - panOrigin.current.x,
-        y: e.clientY - panOrigin.current.y,
-      });
-    };
-
-    const handleUp = () => setIsPanning(false);
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mouseup", handleUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mouseup", handleUp);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPanning]);
-
-  // Zoom handler (scale around mouse if possible)
-  const handleWheel = (e: React.WheelEvent) => {
-    if (!(e.ctrlKey || e.metaKey)) return; // Only if Ctrl or Cmd pressed
-    e.preventDefault();
-    const boardRect = boardRef.current?.getBoundingClientRect();
-    if (!boardRect) return;
-    const mouseX = e.clientX - boardRect.left;
-    const mouseY = e.clientY - boardRect.top;
-    const prevZoom = zoom;
-    // Slow down zoom step: ±3% per wheel event
-    let newZoom = zoom * (e.deltaY < 0 ? 1.03 : 0.97);
-    newZoom = Math.max(0.2, Math.min(3, newZoom));
-    // Adjust pan so the zoom centers around the mouse
-    setPan(prev => ({
-      x: mouseX - ((mouseX - prev.x) * (newZoom / prevZoom)),
-      y: mouseY - ((mouseY - prev.y) * (newZoom / prevZoom)),
-    }));
-    setZoom(newZoom);
-  };
-
   const handleMove = (id: string, x: number, y: number) => {
     setItems(items => items.map(item =>
       item.id === id ? { ...item, x, y } : item
     ));
   };
 
-  const handleSelect = (id: string) => {
-    // Only selectable with move tool!
-    if (selectedTool === "move") {
-      setSelectedId(id);
-    }
-  };
-
-  // Helper: Center view based on current elements
+  // Center view based on current elements
   const centerElementsInView = () => {
     if (!boardRef.current || items.length === 0) {
       // No items: center at origin
@@ -187,9 +111,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
   };
 
   // Reset zoom and center
-  const handleResetZoom = () => {
-    centerElementsInView();
-  };
+  const handleResetZoom = () => centerElementsInView();
 
   // Background is tabIndex for accessibility and focus handlers
   const handleCanvasClick = (e: React.MouseEvent) => {
@@ -312,26 +234,13 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
       tabIndex={0}
       onClick={handleCanvasClick}
       onPointerDown={handleBackgroundPointerDown}
-      onMouseDown={handleMouseDown}
+      onMouseDown={e => handleMouseDown(e, selectedTool)}
       onWheel={handleWheel}
       aria-label="Canvas Board"
     >
       {/* Zoom UI */}
-      <div className="absolute top-2 right-2 z-20 flex items-center gap-2 shadow-sm bg-white/90 rounded px-3 py-1 border">
-        <span className="text-sm font-medium">
-          Zoom: {(zoom * 100).toFixed(0)}%
-        </span>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="ml-1"
-          title="Reset Zoom & Center"
-          onClick={handleResetZoom}
-          type="button"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-      </div>
+      <CanvasZoomPanel zoom={zoom} onReset={handleResetZoom} />
+
       <div
         style={{
           transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})`,
@@ -341,11 +250,10 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
           position: "absolute",
           left: 0,
           top: 0,
-          pointerEvents: "none", // Only items should capture pointer events
+          pointerEvents: "none",
         }}
       >
         {items.map((item) => {
-          // Text element, editing state
           if (item.type === "text" && item.isEditing) {
             return (
               <div
@@ -377,13 +285,12 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
                   : <span>[{item.type}]</span>
               }
               onMove={
-                // Only allow dragging in move mode!
                 selectedTool === "move"
                   ? handleMove
                   : () => {}
               }
               isSelected={selectedId === item.id}
-              onSelect={handleSelect}
+              onSelect={id => handleSelect(id, selectedTool!)}
               canvasPanZoom={{ pan, zoom }}
               onDoubleClick={() => handleItemDoubleClick(item.id, item.type)}
             />
