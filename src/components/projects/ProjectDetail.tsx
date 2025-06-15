@@ -1,4 +1,3 @@
-
 import { ProjectHeader } from './ProjectHeader';
 import { RowsList } from '@/components/rows/RowsList';
 import { ModeHeader } from './ModeHeader';
@@ -8,6 +7,8 @@ import { useProjectDetailState } from './ProjectDetailState';
 import { useProjectDetailRowHandlers } from './ProjectDetailRowHandlers';
 import { useProjectDetailActions } from './ProjectDetailActions';
 import type { Database } from '@/integrations/supabase/types';
+import { ProjectPlansSection } from "@/components/projects/ProjectPlansSection";
+import type { User } from "@supabase/supabase-js";
 
 type Project = Database['public']['Tables']['projects']['Row'];
 
@@ -23,17 +24,26 @@ interface ProjectDetailProps {
   userId: string;
 }
 
-export const ProjectDetail = ({ 
-  project: initialProject, 
-  onBack, 
-  onProjectDelete, 
+export const ProjectDetail = ({
+  project: initialProject,
+  onBack,
+  onProjectDelete,
   onProjectExport,
   onProjectExportPDF,
   onEditProject,
   onProjectUpdate,
   onDuplicate,
-  userId
+  userId,
 }: ProjectDetailProps) => {
+  // Load context
+  // eslint-disable-next-line
+  const user = { id: userId } as User;
+  // Try to get current page info for breadcrumbs
+  const currentPage = {
+    label: initialProject.name,
+    path: `/projects/${initialProject.id}`,
+  };
+
   const {
     project,
     mode,
@@ -98,6 +108,9 @@ export const ProjectDetail = ({
         onProjectUpdate={handleProjectUpdate}
         userId={userId}
       />
+
+      {/* Plans attached to this project, if any */}
+      <ProjectPlansSection project={project} user={user} currentPage={currentPage} />
 
       <ModeHeader
         mode={mode}
