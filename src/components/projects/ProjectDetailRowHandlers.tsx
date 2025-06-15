@@ -1,5 +1,5 @@
+
 import { useProjectRows } from '@/hooks/useProjectRows';
-import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
 
 export const useProjectDetailRowHandlers = (projectId: string, mode: 'edit' | 'make') => {

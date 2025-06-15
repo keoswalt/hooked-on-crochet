@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -12,8 +13,8 @@ export const useRowOperations = () => {
       let newPosition: number;
       
       if (insertAfterPosition !== undefined) {
-        // Insert after the specified position
-        newPosition = insertAfterPosition + 1;
+        // Insert after the specified position - ensure insertAfterPosition is a number
+        newPosition = Number(insertAfterPosition) + 1;
         
         // First, get all rows that need to be shifted
         const { data: rowsToUpdate, error: fetchError } = await supabase
@@ -39,8 +40,8 @@ export const useRowOperations = () => {
           if (updateError?.error) throw updateError.error;
         }
       } else {
-        // Add at the end
-        newPosition = rowsLength + 1;
+        // Add at the end - ensure rowsLength is a number
+        newPosition = Number(rowsLength) + 1;
       }
 
       const { data, error } = await supabase
@@ -79,8 +80,8 @@ export const useRowOperations = () => {
       let newPosition: number;
       
       if (insertAfterPosition !== undefined) {
-        // Insert after the specified position
-        newPosition = insertAfterPosition + 1;
+        // Insert after the specified position - ensure insertAfterPosition is a number
+        newPosition = Number(insertAfterPosition) + 1;
         
         // First, get all rows that need to be shifted
         const { data: rowsToUpdate, error: fetchError } = await supabase
@@ -106,8 +107,8 @@ export const useRowOperations = () => {
           if (updateError?.error) throw updateError.error;
         }
       } else {
-        // Add at the end
-        newPosition = rowsLength + 1;
+        // Add at the end - ensure rowsLength is a number
+        newPosition = Number(rowsLength) + 1;
       }
 
       const { data, error } = await supabase
@@ -146,8 +147,8 @@ export const useRowOperations = () => {
       let newPosition: number;
       
       if (insertAfterPosition !== undefined) {
-        // Insert after the specified position
-        newPosition = insertAfterPosition + 1;
+        // Insert after the specified position - ensure insertAfterPosition is a number
+        newPosition = Number(insertAfterPosition) + 1;
         
         // First, get all rows that need to be shifted
         const { data: rowsToUpdate, error: fetchError } = await supabase
@@ -173,8 +174,8 @@ export const useRowOperations = () => {
           if (updateError?.error) throw updateError.error;
         }
       } else {
-        // Add at the end
-        newPosition = rowsLength + 1;
+        // Add at the end - ensure rowsLength is a number
+        newPosition = Number(rowsLength) + 1;
       }
 
       const { data, error } = await supabase
@@ -210,7 +211,8 @@ export const useRowOperations = () => {
 
   const duplicateRow = async (rowToDuplicate: ProjectRow, rowsLength: number) => {
     try {
-      const newPosition = rowsLength + 1;
+      // Ensure rowsLength is a number
+      const newPosition = Number(rowsLength) + 1;
       const { data, error } = await supabase
         .from('project_rows')
         .insert({
