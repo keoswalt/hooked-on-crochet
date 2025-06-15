@@ -1,7 +1,9 @@
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -15,37 +17,88 @@ import { YarnCard } from '@/components/stash/YarnCard';
 import { YarnForm } from '@/components/stash/YarnForm';
 import { YarnFilters } from '@/components/stash/YarnFilters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useYarnOperations } from '@/hooks/useYarnOperations';
-import { useYarnDialogs } from '@/hooks/useYarnDialogs';
-import { useYarnFiltering } from '@/hooks/useYarnFiltering';
 import type { User } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+
+type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 
 interface StashPageProps {
   user: User;
 }
 
 export const StashPage = ({ user }: StashPageProps) => {
+  const [yarns, setYarns] = useState<YarnStash[]>([]);
+  const [filteredYarns, setFilteredYarns] = useState<YarnStash[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
+  const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const { yarns, loading, fetchYarns, handleDeleteYarn } = useYarnOperations(user.id);
-  const { 
-    showAddDialog, 
-    editingYarn, 
-    handleYarnSaved, 
-    handleEditYarn, 
-    openAddDialog, 
-    closeAddDialog, 
-    closeEditDialog 
-  } = useYarnDialogs();
-  const { filteredYarns, setFilteredYarns } = useYarnFiltering(yarns);
 
   useEffect(() => {
     fetchYarns();
-  }, [fetchYarns]);
+  }, [user.id]);
 
-  const handleYarnSavedWithRefresh = () => {
-    handleYarnSaved();
+  useEffect(() => {
+    setFilteredYarns(yarns);
+  }, [yarns]);
+
+  const fetchYarns = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('yarn_stash')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setYarns(data || []);
+    } catch (error: any) {
+      console.error('Error fetching yarns:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load yarn stash",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleYarnSaved = () => {
     fetchYarns();
+    setShowAddDialog(false);
+    setEditingYarn(null);
+  };
+
+  const handleEditYarn = (yarn: YarnStash) => {
+    setEditingYarn(yarn);
+  };
+
+  const handleDeleteYarn = async (yarnId: string) => {
+    try {
+      const { error } = await supabase
+        .from('yarn_stash')
+        .delete()
+        .eq('id', yarnId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Yarn deleted successfully",
+      });
+
+      fetchYarns();
+    } catch (error: any) {
+      console.error('Error deleting yarn:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete yarn",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -82,7 +135,7 @@ export const StashPage = ({ user }: StashPageProps) => {
           <h1 className="text-3xl font-bold text-gray-900">Yarn Stash</h1>
           <p className="text-gray-600 mt-2">Manage your yarn collection</p>
         </div>
-        <Button onClick={openAddDialog}>
+        <Button onClick={() => setShowAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Yarn
         </Button>
@@ -102,7 +155,7 @@ export const StashPage = ({ user }: StashPageProps) => {
             {yarns.length === 0 ? "No yarn in your stash yet" : "No yarn matches your filters"}
           </div>
           {yarns.length === 0 && (
-            <Button onClick={openAddDialog}>
+            <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Yarn
             </Button>
@@ -122,21 +175,21 @@ export const StashPage = ({ user }: StashPageProps) => {
       )}
 
       {/* Add Yarn Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={closeAddDialog}>
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Yarn</DialogTitle>
           </DialogHeader>
           <YarnForm
             userId={user.id}
-            onSave={handleYarnSavedWithRefresh}
-            onCancel={closeAddDialog}
+            onSave={handleYarnSaved}
+            onCancel={() => setShowAddDialog(false)}
           />
         </DialogContent>
       </Dialog>
 
       {/* Edit Yarn Dialog */}
-      <Dialog open={!!editingYarn} onOpenChange={closeEditDialog}>
+      <Dialog open={!!editingYarn} onOpenChange={() => setEditingYarn(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Yarn</DialogTitle>
@@ -145,8 +198,8 @@ export const StashPage = ({ user }: StashPageProps) => {
             <YarnForm
               userId={user.id}
               yarn={editingYarn}
-              onSave={handleYarnSavedWithRefresh}
-              onCancel={closeEditDialog}
+              onSave={handleYarnSaved}
+              onCancel={() => setEditingYarn(null)}
             />
           )}
         </DialogContent>

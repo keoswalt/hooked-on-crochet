@@ -1,7 +1,9 @@
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -15,37 +17,160 @@ import { SwatchCard } from '@/components/swatches/SwatchCard';
 import { SwatchForm } from '@/components/swatches/SwatchForm';
 import { SwatchFilters } from '@/components/swatches/SwatchFilters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useSwatchOperations } from '@/hooks/useSwatchOperations';
-import { useSwatchDialogs } from '@/hooks/useSwatchDialogs';
-import { useSwatchFiltering } from '@/hooks/useSwatchFiltering';
 import type { User } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+
+type Swatch = Database['public']['Tables']['swatches']['Row'];
 
 interface SwatchesPageProps {
   user: User;
 }
 
 export const SwatchesPage = ({ user }: SwatchesPageProps) => {
+  const [swatches, setSwatches] = useState<Swatch[]>([]);
+  const [filteredSwatches, setFilteredSwatches] = useState<Swatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
+  const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const { swatches, loading, fetchSwatches, handleCloneSwatch, handleDeleteSwatch } = useSwatchOperations(user.id);
-  const { 
-    showAddDialog, 
-    editingSwatch, 
-    handleSwatchSaved, 
-    handleEditSwatch, 
-    openAddDialog, 
-    closeAddDialog, 
-    closeEditDialog 
-  } = useSwatchDialogs();
-  const { filteredSwatches, setFilteredSwatches } = useSwatchFiltering(swatches);
 
   useEffect(() => {
     fetchSwatches();
-  }, [fetchSwatches]);
+  }, [user.id]);
 
-  const handleSwatchSavedWithRefresh = () => {
-    handleSwatchSaved();
+  useEffect(() => {
+    setFilteredSwatches(swatches);
+  }, [swatches]);
+
+  const fetchSwatches = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('swatches')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSwatches(data || []);
+    } catch (error: any) {
+      console.error('Error fetching swatches:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load swatches",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSwatchSaved = () => {
     fetchSwatches();
+    setShowAddDialog(false);
+    setEditingSwatch(null);
+  };
+
+  const handleEditSwatch = (swatch: Swatch) => {
+    setEditingSwatch(swatch);
+  };
+
+  const handleCloneSwatch = async (swatch: Swatch) => {
+    try {
+      const clonedSwatchData = {
+        title: `${swatch.title} (Copy)`,
+        description: swatch.description,
+        hook_size: swatch.hook_size,
+        yarn_used: swatch.yarn_used,
+        stitches_per_inch: swatch.stitches_per_inch,
+        rows_per_inch: swatch.rows_per_inch,
+        notes: swatch.notes,
+        user_id: user.id,
+      };
+
+      const { data: newSwatch, error: swatchError } = await supabase
+        .from('swatches')
+        .insert(clonedSwatchData)
+        .select()
+        .single();
+
+      if (swatchError) throw swatchError;
+
+      // Clone associated images
+      const { data: originalImages, error: imagesError } = await supabase
+        .from('swatch_images')
+        .select('image_url, caption, is_primary')
+        .eq('swatch_id', swatch.id);
+
+      if (originalImages && originalImages.length > 0) {
+        const imageClones = originalImages.map(img => ({
+          swatch_id: newSwatch.id,
+          image_url: img.image_url,
+          caption: img.caption,
+          is_primary: img.is_primary,
+        }));
+
+        const { error: imageCloneError } = await supabase
+          .from('swatch_images')
+          .insert(imageClones);
+
+        if (imageCloneError) {
+          console.error('Error cloning swatch images:', imageCloneError);
+          // Don't throw here - swatch clone succeeded even if images failed
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Swatch cloned successfully",
+      });
+
+      fetchSwatches();
+    } catch (error: any) {
+      console.error('Error cloning swatch:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clone swatch",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSwatch = async (swatchId: string) => {
+    try {
+      // First delete any associated images
+      const { error: imagesError } = await supabase
+        .from('swatch_images')
+        .delete()
+        .eq('swatch_id', swatchId);
+
+      if (imagesError) {
+        console.error('Error deleting swatch images:', imagesError);
+      }
+
+      // Then delete the swatch
+      const { error } = await supabase
+        .from('swatches')
+        .delete()
+        .eq('id', swatchId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Swatch deleted successfully",
+      });
+
+      fetchSwatches();
+    } catch (error: any) {
+      console.error('Error deleting swatch:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete swatch",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -82,7 +207,7 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
           <h1 className="text-3xl font-bold text-gray-900">Swatches</h1>
           <p className="text-gray-600 mt-2">Manage your gauge swatches and samples</p>
         </div>
-        <Button onClick={openAddDialog}>
+        <Button onClick={() => setShowAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Swatch
         </Button>
@@ -102,7 +227,7 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
             {swatches.length === 0 ? "No swatches created yet" : "No swatches match your filters"}
           </div>
           {swatches.length === 0 && (
-            <Button onClick={openAddDialog}>
+            <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Swatch
             </Button>
@@ -123,21 +248,21 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
       )}
 
       {/* Add Swatch Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={closeAddDialog}>
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Swatch</DialogTitle>
           </DialogHeader>
           <SwatchForm
             userId={user.id}
-            onSave={handleSwatchSavedWithRefresh}
-            onCancel={closeAddDialog}
+            onSave={handleSwatchSaved}
+            onCancel={() => setShowAddDialog(false)}
           />
         </DialogContent>
       </Dialog>
 
       {/* Edit Swatch Dialog */}
-      <Dialog open={!!editingSwatch} onOpenChange={closeEditDialog}>
+      <Dialog open={!!editingSwatch} onOpenChange={() => setEditingSwatch(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Swatch</DialogTitle>
@@ -146,8 +271,8 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
             <SwatchForm
               userId={user.id}
               swatch={editingSwatch}
-              onSave={handleSwatchSavedWithRefresh}
-              onCancel={closeEditDialog}
+              onSave={handleSwatchSaved}
+              onCancel={() => setEditingSwatch(null)}
             />
           )}
         </DialogContent>
