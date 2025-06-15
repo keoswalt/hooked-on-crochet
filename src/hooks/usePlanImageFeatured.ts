@@ -23,7 +23,7 @@ export function usePlanImageFeatured(images: PlanImage[], setImages: SetImages) 
         .from("plan_images")
         .update({ is_featured: false })
         .eq("id", imageId)
-        .select('*'); // returns a promise
+        .select('*');
       if (error) {
         toast({
           title: "Error",
@@ -53,25 +53,26 @@ export function usePlanImageFeatured(images: PlanImage[], setImages: SetImages) 
       )
     );
 
+    // Fix: Await the Supabase update and push actual promises to updates array
     const updates: Promise<any>[] = [];
 
     if (prevFeatured && prevFeatured.id !== imageId) {
-      updates.push(
-        supabase
-          .from("plan_images")
-          .update({ is_featured: false })
-          .eq("id", prevFeatured.id)
-          .select('*')
-      );
+      const unfeaturePromise = supabase
+        .from("plan_images")
+        .update({ is_featured: false })
+        .eq("id", prevFeatured.id)
+        .select('*')
+        .then(r => r); // Make it a real promise
+      updates.push(unfeaturePromise);
     }
 
-    updates.push(
-      supabase
-        .from("plan_images")
-        .update({ is_featured: true })
-        .eq("id", imageId)
-        .select('*')
-    );
+    const featurePromise = supabase
+      .from("plan_images")
+      .update({ is_featured: true })
+      .eq("id", imageId)
+      .select('*')
+      .then(r => r);
+    updates.push(featurePromise);
 
     const results = await Promise.all(updates);
     const error = results.find(r => r?.error)?.error;

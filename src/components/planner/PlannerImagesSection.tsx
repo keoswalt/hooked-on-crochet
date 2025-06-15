@@ -7,18 +7,19 @@ import { usePlanImages } from "@/hooks/usePlanImages";
 import { usePlanImagesReorder } from "@/hooks/usePlanImagesReorder";
 import { usePlanImageFeatured } from "@/hooks/usePlanImageFeatured";
 
-interface PlannerImagesSectionProps {
+const PlannerImagesSection = ({
+  plannerId,
+  userId,
+}: {
   plannerId: string;
   userId: string;
-}
-
-const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) => {
+}) => {
   const {
     images,
     setImages,
     imagesLoading,
     addImage,
-    deleteImage
+    deleteImage,
   } = usePlanImages(plannerId, userId);
 
   const [showImagesUpload, setShowImagesUpload] = useState(false);
@@ -58,5 +59,4 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     </PlannerSection>
   );
 };
-
 export default PlannerImagesSection;

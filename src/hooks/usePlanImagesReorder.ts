@@ -2,21 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-// Add planId and userId as required parameters for proper upsert
-type PlanImageReorderType = {
-  id: string;
-  position: number;
-  plan_id: string;
-  image_url: string;
-  user_id: string;
-  uploaded_at?: string | null;
-  is_featured?: boolean | null;
-};
+import type { PlanImage } from "./usePlanImages";
 
 export function usePlanImagesReorder(
-  images: PlanImageReorderType[],
-  setImages: (imgs: PlanImageReorderType[]) => void,
+  images: PlanImage[],
+  setImages: React.Dispatch<React.SetStateAction<PlanImage[]>>,
   planId: string,
   userId: string
 ) {
@@ -36,10 +26,9 @@ export function usePlanImagesReorder(
     const updates = newImages.map((img, idx) => ({
       id: img.id,
       position: idx + 1,
-      plan_id: img.plan_id || planId,
+      plan_id: img.plan_id,
       image_url: img.image_url,
-      user_id: img.user_id || userId,
-      // Only copy if actually present
+      user_id: img.user_id,
       ...(img.uploaded_at !== undefined ? { uploaded_at: img.uploaded_at } : {}),
       ...(img.is_featured !== undefined ? { is_featured: img.is_featured } : {}),
     }));

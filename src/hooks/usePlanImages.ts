@@ -1,17 +1,16 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-// Make position required
+// PlanImage used everywhere for plan images (ALL FIELDS required, inc. plan_id, user_id)
 export interface PlanImage {
   id: string;
   image_url: string;
-  is_featured?: boolean;
+  is_featured: boolean;
   uploaded_at?: string;
-  position: number; // required now!
-  plan_id?: string;
-  user_id?: string;
+  position: number;
+  plan_id: string;
+  user_id: string;
 }
 
 export function usePlanImages(planId: string, userId: string) {
@@ -28,7 +27,7 @@ export function usePlanImages(planId: string, userId: string) {
       .eq("plan_id", planId)
       .order("position", { ascending: true })
       .limit(100);
-    if (!error && data) setImages(data);
+    if (!error && data) setImages(data as PlanImage[]);
     setImagesLoading(false);
   }, [planId]);
 
@@ -50,7 +49,7 @@ export function usePlanImages(planId: string, userId: string) {
       })
       .select();
     if (!error && data?.[0]) {
-      setImages(images => [...images, data[0]]);
+      setImages(images => [...images, data[0] as PlanImage]);
     }
   };
 
@@ -61,8 +60,7 @@ export function usePlanImages(planId: string, userId: string) {
     setImages(prev => {
       const filtered = prev.filter(i => i.id !== imageId);
       // Update positions to be sequential (1-based)
-      return filtered
-        .map((img, idx) => ({ ...img, position: idx + 1 }));
+      return filtered.map((img, idx) => ({ ...img, position: idx + 1 }));
     });
     setImagesLoading(false);
   };
