@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InfiniteCanvas } from '@/components/planner/InfiniteCanvas';
-import { PlannerSidebar } from '@/components/planner/PlannerSidebar';
+import { BottomDrawer } from '@/components/planner/BottomDrawer';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -63,9 +63,9 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button variant="outline" onClick={() => navigate('/planner')}>
@@ -82,13 +82,13 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex h-[calc(100vh-120px)]">
-        <PlannerSidebar userId={user.id} planId={plan.id} />
-        <div className="flex-1">
-          <InfiniteCanvas userId={user.id} planId={plan.id} />
-        </div>
+      {/* Canvas Area - Full width, with bottom padding for drawer */}
+      <div className="flex-1 relative pb-20">
+        <InfiniteCanvas userId={user.id} planId={plan.id} />
       </div>
+
+      {/* Bottom Drawer */}
+      <BottomDrawer userId={user.id} planId={plan.id} />
     </div>
   );
 };

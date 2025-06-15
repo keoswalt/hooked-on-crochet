@@ -2,7 +2,8 @@
 import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Move, RotateCw } from 'lucide-react';
+import { X, RotateCw } from 'lucide-react';
+import { ElementResizer } from './ElementResizer';
 import type { Database } from '@/integrations/supabase/types';
 
 type CanvasElementType = Database['public']['Tables']['canvas_elements']['Row'];
@@ -54,30 +55,41 @@ export const CanvasElement = ({
     setIsDragging(false);
   };
 
+  const handleResize = (width: number, height: number) => {
+    onUpdate(element.id, { width, height });
+  };
+
+  const getAspectRatio = () => {
+    if (element.element_type === 'image') {
+      return (element.width || 200) / (element.height || 100);
+    }
+    return undefined;
+  };
+
   const renderElementContent = () => {
     const properties = element.properties as any;
 
     switch (element.element_type) {
       case 'text':
         return (
-          <div className="p-3">
-            <p className="text-sm">{properties.content || 'Text Element'}</p>
+          <div className="p-3 h-full">
+            <p className="text-sm break-words">{properties.content || 'Text Element'}</p>
           </div>
         );
 
       case 'yarn':
         return (
-          <div className="p-3 flex items-center space-x-3">
+          <div className="p-3 flex items-center space-x-3 h-full">
             {properties.image_url && (
               <img
                 src={properties.image_url}
                 alt={properties.name}
-                className="w-10 h-10 rounded object-cover"
+                className="w-12 h-12 rounded object-cover flex-shrink-0"
               />
             )}
-            <div>
-              <p className="text-sm font-medium">{properties.name}</p>
-              <p className="text-xs text-gray-600">{properties.brand} - {properties.color}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium truncate">{properties.name}</p>
+              <p className="text-xs text-gray-600 truncate">{properties.brand} - {properties.color}</p>
               <p className="text-xs text-gray-500">{properties.remaining_yardage} yds</p>
             </div>
           </div>
@@ -85,20 +97,27 @@ export const CanvasElement = ({
 
       case 'swatch':
         return (
-          <div className="p-3">
-            <p className="text-sm font-medium">{properties.title}</p>
+          <div className="p-3 h-full">
+            <p className="text-sm font-medium mb-1">{properties.title}</p>
             {properties.description && (
-              <p className="text-xs text-gray-600 mt-1">{properties.description}</p>
+              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{properties.description}</p>
             )}
             {properties.hook_size && (
-              <p className="text-xs text-gray-500 mt-1">Hook: {properties.hook_size}</p>
+              <p className="text-xs text-gray-500">Hook: {properties.hook_size}</p>
+            )}
+            {(properties.stitches_per_inch || properties.rows_per_inch) && (
+              <p className="text-xs text-gray-500 mt-1">
+                {properties.stitches_per_inch && `${properties.stitches_per_inch} st/in`}
+                {properties.stitches_per_inch && properties.rows_per_inch && ' × '}
+                {properties.rows_per_inch && `${properties.rows_per_inch} rows/in`}
+              </p>
             )}
           </div>
         );
 
       case 'image':
         return (
-          <div className="p-3">
+          <div className="p-2 h-full">
             {properties.url ? (
               <img
                 src={properties.url}
@@ -106,7 +125,7 @@ export const CanvasElement = ({
                 className="w-full h-full object-cover rounded"
               />
             ) : (
-              <div className="w-full h-20 bg-gray-100 rounded flex items-center justify-center">
+              <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center">
                 <p className="text-xs text-gray-500">No image</p>
               </div>
             )}
@@ -115,12 +134,13 @@ export const CanvasElement = ({
 
       case 'link':
         return (
-          <div className="p-3">
+          <div className="p-3 h-full flex items-center">
             <a
               href={properties.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-blue-600 hover:underline truncate"
+              onClick={(e) => e.stopPropagation()}
             >
               {properties.title || properties.url || 'Link'}
             </a>
@@ -129,12 +149,20 @@ export const CanvasElement = ({
 
       default:
         return (
-          <div className="p-3">
+          <div className="p-3 h-full">
             <p className="text-sm">Unknown element type</p>
           </div>
         );
     }
   };
+
+  const elementContent = (
+    <Card className="w-full h-full bg-white shadow-sm border">
+      <CardContent className="p-0 h-full">
+        {renderElementContent()}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div
@@ -143,8 +171,6 @@ export const CanvasElement = ({
       style={{
         left: element.position_x,
         top: element.position_y,
-        width: element.width || 200,
-        height: element.height || 100,
         transform: `rotate(${element.rotation || 0}deg)`,
         zIndex: element.z_index || 0,
       }}
@@ -152,11 +178,20 @@ export const CanvasElement = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <Card className="w-full h-full bg-white shadow-sm border">
-        <CardContent className="p-0 h-full">
-          {renderElementContent()}
-        </CardContent>
-      </Card>
+      {isSelected ? (
+        <ElementResizer
+          width={element.width || 200}
+          height={element.height || 100}
+          onResize={handleResize}
+          aspectRatio={getAspectRatio()}
+        >
+          {elementContent}
+        </ElementResizer>
+      ) : (
+        <div style={{ width: element.width || 200, height: element.height || 100 }}>
+          {elementContent}
+        </div>
+      )}
 
       {/* Selection controls */}
       {isSelected && (
