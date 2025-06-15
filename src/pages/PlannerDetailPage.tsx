@@ -218,7 +218,7 @@ export const PlannerDetailPage = ({
       <PlannerImagesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* RESOURCES SECTION */}
-      <PlannerResourcesSection />
+      <PlannerResourcesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* YARN SECTION */}
       <PlannerYarnSection />
