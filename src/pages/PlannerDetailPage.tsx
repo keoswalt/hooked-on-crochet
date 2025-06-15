@@ -104,7 +104,7 @@ export const PlannerDetailPage = ({ user }: { user: User }) => {
             onChange={e => setEditableName(e.target.value)}
             disabled={saving}
             maxLength={100}
-            className="text-3xl font-bold px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
+            className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
             placeholder="Plan Name"
           />
           <Textarea
