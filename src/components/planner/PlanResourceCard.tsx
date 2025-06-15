@@ -1,9 +1,9 @@
-
 import { ExternalLink, Trash2, Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
+import ResourceDeleteConfirmDialog from "./ResourceDeleteConfirmDialog";
+import React, { useState } from "react";
 
 interface PlanResourceCardProps {
   title: string;
@@ -38,6 +38,8 @@ export default function PlanResourceCard({
   onDelete,
   onEdit,
 }: PlanResourceCardProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   // Handler to open the resource link in a new tab
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent link opening when clicking a button or within the icon row
@@ -116,17 +118,27 @@ export default function PlanResourceCard({
           )}
           {/* Delete button */}
           {onDelete && (
-            <Button
-              size="icon"
-              variant="ghost"
-              aria-label="Delete resource"
-              onClick={e => {
-                e.stopPropagation();
-                onDelete();
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            <>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Delete resource"
+                onClick={e => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+              <ResourceDeleteConfirmDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={() => {
+                  setShowDeleteDialog(false);
+                  if (onDelete) onDelete();
+                }}
+              />
+            </>
           )}
         </div>
       </div>
