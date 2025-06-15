@@ -8,6 +8,12 @@ import type { Database } from "@/integrations/supabase/types";
 import type { User } from "@supabase/supabase-js";
 import PlannerTitleSection from "@/components/planner/PlannerTitleSection";
 import PlannerSection from "@/components/planner/PlannerSection";
+import PlannerBreadcrumb from "@/components/planner/PlannerBreadcrumb";
+import PlannerImagesSection from "@/components/planner/PlannerImagesSection";
+import PlannerResourcesSection from "@/components/planner/PlannerResourcesSection";
+import PlannerYarnSection from "@/components/planner/PlannerYarnSection";
+import PlannerSwatchesSection from "@/components/planner/PlannerSwatchesSection";
+import PlannerNotesSection from "@/components/planner/PlannerNotesSection";
 import { Textarea } from "@/components/ui/textarea";
 import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
 import PlanImagesGrid from "@/components/planner/PlanImagesGrid";
@@ -191,19 +197,7 @@ export const PlannerDetailPage = ({
   return (
     <div className="w-full px-2 md:px-6 py-8">
       {/* Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/planner">Planner</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{plan.name || "..."}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <PlannerBreadcrumb planName={plan.name || "..."} />
 
       {/* Page Header and Edit Fields */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 mb-8">
@@ -221,69 +215,19 @@ export const PlannerDetailPage = ({
       </div>
 
       {/* IMAGES SECTION */}
-      <PlannerSection
-        title="Images"
-        buttonText="Add Image"
-        buttonDisabled={false}
-        onAdd={() => setShowImagesUpload(true)}
-      >
-        <PlanImagesGrid
-          images={images}
-          loading={imagesLoading}
-          onDeleteImage={handleDeleteImage}
-        />
-        <PlanImageUploadDialog
-          open={showImagesUpload}
-          onOpenChange={setShowImagesUpload}
-          userId={user.id}
-          planId={plannerId as string}
-          onImageAdded={handleImageAdded}
-        />
-      </PlannerSection>
+      <PlannerImagesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* RESOURCES SECTION */}
-      <PlannerSection
-        title="Resources"
-        buttonText="Add Resource"
-        buttonDisabled
-      >
-        <EmptyState>
-          Feature coming soon: add and view resources.
-        </EmptyState>
-      </PlannerSection>
+      <PlannerResourcesSection />
 
       {/* YARN SECTION */}
-      <PlannerSection
-        title="Yarn"
-        buttonText="Add Yarn"
-        buttonDisabled
-      >
-        <EmptyState>
-          Feature coming soon: attach yarn from your stash.
-        </EmptyState>
-      </PlannerSection>
+      <PlannerYarnSection />
 
       {/* SWATCHES SECTION */}
-      <PlannerSection
-        title="Swatches"
-        buttonText="Add Swatch"
-        buttonDisabled
-      >
-        <EmptyState>
-          Feature coming soon: attach swatches.
-        </EmptyState>
-      </PlannerSection>
+      <PlannerSwatchesSection />
 
       {/* NOTES SECTION */}
-      <PlannerSection
-        title="Notes"
-        buttonText="Add Note"
-        buttonDisabled
-      >
-        <EmptyState>
-          Jot down notes about your plan here.
-        </EmptyState>
-      </PlannerSection>
+      <PlannerNotesSection />
     </div>
   );
 };
