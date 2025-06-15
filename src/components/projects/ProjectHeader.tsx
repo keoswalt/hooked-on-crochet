@@ -1,3 +1,4 @@
+
 import { Card, CardHeader } from '@/components/ui/card';
 import { ProjectActions } from './ProjectActions';
 import { ProjectStatusChip } from './ProjectStatusChip';
@@ -124,7 +125,6 @@ export const ProjectHeader = ({
     }
   };
 
-  // Remove the back button and put nothing here, as the breadcrumb is now in ProjectDetailPage
   return (
     <Card>
       <CardHeader>
@@ -132,8 +132,10 @@ export const ProjectHeader = ({
         <div className="flex flex-col md:flex-row gap-6">
           {/* Featured Image Section */}
           {project.featured_image_url && (
-            <div className="md:w-64 w-full flex-shrink-0 flex items-start justify-center">
-              <AspectRatio ratio={1 / 1} className="w-full max-w-[256px]">
+            <div className="w-full md:w-64 flex-shrink-0 flex items-start justify-center">
+              <AspectRatio
+                ratio={1 / 1}
+                className="w-full md:max-w-[256px]">
                 <ImageViewer
                   imageUrl={project.featured_image_url}
                   alt={`${project.name} featured image`}
