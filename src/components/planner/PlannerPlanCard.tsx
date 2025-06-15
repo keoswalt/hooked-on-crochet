@@ -1,5 +1,5 @@
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
@@ -18,11 +18,11 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
   return (
     <Card
       key={plan.id}
-      className="hover:shadow-lg transition-shadow relative group flex flex-col md:flex-row items-stretch h-full"
+      className="hover:shadow-lg transition-shadow relative group flex flex-col items-stretch h-full"
     >
       {/* Image Section */}
-      <div className="w-full md:w-48 md:h-48 flex items-center justify-center p-4 shrink-0 relative">
-        <div className="w-full h-48 md:w-48 md:h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+      <div className="w-full h-48 flex items-center justify-center p-4 shrink-0 relative">
+        <div className="w-full h-40 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
           {plan.featured_image_url ? (
             <img
               src={plan.featured_image_url}
@@ -66,4 +66,3 @@ export function PlannerPlanCard({ plan, onClick, onDelete }: PlannerPlanCardProp
     </Card>
   );
 }
-
