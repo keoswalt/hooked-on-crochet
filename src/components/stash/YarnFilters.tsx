@@ -18,8 +18,8 @@ interface YarnFiltersProps {
 
 export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
-  const [selectedWeight, setSelectedWeight] = useState<string>('');
+  const [selectedBrand, setSelectedBrand] = useState<string>('all');
+  const [selectedWeight, setSelectedWeight] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
 
   // Get unique brands and weights from yarns
@@ -41,12 +41,12 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
     }
 
     // Brand filter
-    if (selectedBrand) {
+    if (selectedBrand && selectedBrand !== 'all') {
       filtered = filtered.filter(yarn => yarn.brand === selectedBrand);
     }
 
     // Weight filter
-    if (selectedWeight) {
+    if (selectedWeight && selectedWeight !== 'all') {
       filtered = filtered.filter(yarn => yarn.weight === selectedWeight);
     }
 
@@ -73,12 +73,12 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedBrand('');
-    setSelectedWeight('');
+    setSelectedBrand('all');
+    setSelectedWeight('all');
     setSortBy('name');
   };
 
-  const hasActiveFilters = searchTerm || selectedBrand || selectedWeight || sortBy !== 'name';
+  const hasActiveFilters = searchTerm || selectedBrand !== 'all' || selectedWeight !== 'all' || sortBy !== 'name';
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -131,7 +131,7 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
                 <SelectValue placeholder="All brands" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All brands</SelectItem>
+                <SelectItem value="all">All brands</SelectItem>
                 {brands.map((brand) => (
                   <SelectItem key={brand} value={brand!}>
                     {brand}
@@ -147,7 +147,7 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
                 <SelectValue placeholder="All weights" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All weights</SelectItem>
+                <SelectItem value="all">All weights</SelectItem>
                 {weights.map((weight) => (
                   <SelectItem key={weight} value={weight!}>
                     {weight}
@@ -171,21 +171,21 @@ export const YarnFilters = ({ yarns, onFilter, className }: YarnFiltersProps) =>
               />
             </Badge>
           )}
-          {selectedBrand && (
+          {selectedBrand && selectedBrand !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Brand: {selectedBrand}
               <X 
                 className="h-3 w-3 cursor-pointer" 
-                onClick={() => setSelectedBrand('')}
+                onClick={() => setSelectedBrand('all')}
               />
             </Badge>
           )}
-          {selectedWeight && (
+          {selectedWeight && selectedWeight !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Weight: {selectedWeight}
               <X 
                 className="h-3 w-3 cursor-pointer" 
-                onClick={() => setSelectedWeight('')}
+                onClick={() => setSelectedWeight('all')}
               />
             </Badge>
           )}
