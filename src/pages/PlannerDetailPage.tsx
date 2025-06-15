@@ -224,7 +224,7 @@ export const PlannerDetailPage = ({
       <PlannerYarnSection plannerId={plannerId as string} userId={user.id} />
 
       {/* SWATCHES SECTION */}
-      <PlannerSwatchesSection />
+      <PlannerSwatchesSection plannerId={plannerId as string} userId={user.id} />
 
       {/* NOTES SECTION */}
       <PlannerNotesSection />
