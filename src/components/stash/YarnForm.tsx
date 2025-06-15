@@ -12,6 +12,7 @@ import { YARN_WEIGHTS } from '@/utils/yarnWeights';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
+type YarnWeight = Database['public']['Enums']['yarn_weight'];
 
 interface YarnFormProps {
   userId: string;
@@ -76,7 +77,7 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
         name: formData.name,
         brand: formData.brand || null,
         color: formData.color || null,
-        weight: formData.weight || null,
+        weight: formData.weight ? (formData.weight as YarnWeight) : null,
         material: formData.material || null,
         yardage: formData.yardage ? parseInt(formData.yardage) : null,
         remaining_yardage: formData.remaining_yardage ? parseInt(formData.remaining_yardage) : null,
