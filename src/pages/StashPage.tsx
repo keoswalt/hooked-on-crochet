@@ -130,15 +130,17 @@ export const StashPage = ({ user }: StashPageProps) => {
       </Breadcrumb>
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Yarn Stash</h1>
           <p className="text-gray-600 mt-2">Manage your yarn collection</p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Yarn
-        </Button>
+        <div>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Yarn
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

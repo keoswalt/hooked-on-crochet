@@ -202,15 +202,17 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
       </Breadcrumb>
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Swatches</h1>
           <p className="text-gray-600 mt-2">Manage your gauge swatches and samples</p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Swatch
-        </Button>
+        <div>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Swatch
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
