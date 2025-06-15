@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CanvasBoard } from '@/components/planner/CanvasBoard';
-import { DebugPanel } from '@/components/planner/DebugPanel';
 import { ToolsToolbar, ToolType } from '@/components/planner/ToolsToolbar';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
@@ -96,9 +94,6 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
 
       {/* New Tools Toolbar (Sticky to bottom) */}
       <ToolsToolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-
-      {/* Debug Panel */}
-      <DebugPanel planId={plan.id} userId={user.id} />
     </div>
   );
 };
