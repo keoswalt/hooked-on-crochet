@@ -66,7 +66,7 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 z-20 relative">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button variant="outline" onClick={() => navigate('/planner')}>
@@ -83,15 +83,20 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
         </div>
       </div>
 
-      {/* Canvas Area - Full width, with bottom padding for drawer */}
-      <div className="flex-1 relative pb-20">
-        <InfiniteCanvas userId={user.id} planId={plan.id} />
-      </div>
+      {/* Main content area with proper flex layout */}
+      <div className="flex-1 flex flex-col relative">
+        {/* Canvas Area - Takes remaining height, positioned above drawer */}
+        <div className="flex-1 relative z-10">
+          <InfiniteCanvas userId={user.id} planId={plan.id} />
+        </div>
 
-      {/* Bottom Drawer */}
-      <BottomDrawer userId={user.id} planId={plan.id} />
+        {/* Bottom Drawer - positioned at bottom but doesn't overlay canvas */}
+        <div className="flex-shrink-0 z-30 relative">
+          <BottomDrawer userId={user.id} planId={plan.id} />
+        </div>
+      </div>
       
-      {/* Debug Panel */}
+      {/* Debug Panel - highest z-index to stay on top */}
       <DebugPanel planId={plan.id} userId={user.id} />
     </div>
   );

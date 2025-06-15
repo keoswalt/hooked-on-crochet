@@ -13,7 +13,7 @@ export const BottomDrawer = ({ userId, planId }: BottomDrawerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
+    <div className="bg-white border-t border-gray-200 shadow-lg w-full">
       {/* Drawer Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <h3 className="text-sm font-medium text-gray-700">Tools & Elements</h3>

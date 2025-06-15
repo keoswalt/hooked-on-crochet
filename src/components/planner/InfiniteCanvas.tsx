@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -103,6 +104,7 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.target === canvasRef.current && !isProcessingDrop) {
+      console.log('🖱️ Mouse down on canvas - starting pan');
       setIsDragging(true);
       setDragStart({ x: e.clientX - canvasState.panX, y: e.clientY - canvasState.panY });
       setSelectedElementId(null);
@@ -120,8 +122,11 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
   }, [isDragging, dragStart, isProcessingDrop]);
 
   const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+    if (isDragging) {
+      console.log('🖱️ Mouse up - ending pan');
+      setIsDragging(false);
+    }
+  }, [isDragging]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -142,9 +147,9 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     const canvasX = (screenX - rect.left - canvasState.panX) / canvasState.zoom;
     const canvasY = (screenY - rect.top - canvasState.panY) / canvasState.zoom;
     
-    console.log('Coordinate conversion:', {
+    console.log('📍 Coordinate conversion:', {
       screen: { x: screenX, y: screenY },
-      rect: { left: rect.left, top: rect.top },
+      rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
       canvasState: { panX: canvasState.panX, panY: canvasState.panY, zoom: canvasState.zoom },
       canvas: { x: canvasX, y: canvasY }
     });
@@ -152,14 +157,22 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     return { x: canvasX, y: canvasY };
   }, [canvasState]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    console.log('🎯 Drag enter canvas');
     setIsDragOver(true);
   }, []);
 
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    // Don't log every dragover event as it's too noisy
+  }, []);
+
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // Only set dragOver to false if we're leaving the canvas container entirely
     if (!canvasRef.current?.contains(e.relatedTarget as Node)) {
+      console.log('🎯 Drag leave canvas (actually leaving)');
       setIsDragOver(false);
     }
   }, []);
@@ -170,10 +183,11 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
     setIsDragOver(false);
     setIsProcessingDrop(true);
 
+    console.log('=== 🎯 DROP EVENT TRIGGERED ===');
+    console.log('Drop position:', { clientX: e.clientX, clientY: e.clientY });
+    console.log('Canvas ref:', canvasRef.current);
+
     try {
-      console.log('=== Drop Event Debug ===');
-      console.log('Drop event triggered');
-      
       // Step 1: Check authentication first
       const isAuthenticated = await checkAuthState();
       if (!isAuthenticated) {
@@ -191,7 +205,7 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       }
 
       const dragData = JSON.parse(dragDataString);
-      console.log('Drag data:', dragData);
+      console.log('📦 Drag data:', dragData);
       
       const { type, data } = dragData;
       
@@ -204,6 +218,8 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       if (isNaN(canvasCoords.x) || isNaN(canvasCoords.y)) {
         throw new Error('Invalid coordinates calculated');
       }
+      
+      console.log('📍 Final drop coordinates:', canvasCoords);
       
       let elementData: any = {
         element_type: type,
@@ -255,7 +271,7 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
           elementData.properties = data || {};
       }
 
-      console.log('Prepared element data:', elementData);
+      console.log('🔧 Prepared element data:', elementData);
 
       await addElement(elementData);
       
@@ -264,14 +280,13 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
         description: `${type.charAt(0).toUpperCase() + type.slice(1)} element added to canvas`,
       });
       
-      console.log('Element successfully added to canvas');
-      console.log('=======================');
+      console.log('✅ Element successfully added to canvas');
+      console.log('=================================');
     } catch (error: any) {
-      console.error('=== Drop Error ===');
+      console.error('=== ❌ Drop Error ===');
       console.error('Error details:', error);
       console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('=================');
+      console.error('===================');
       
       toast({
         title: "Error",
@@ -423,6 +438,7 @@ export const InfiniteCanvas = ({ userId, planId }: InfiniteCanvasProps) => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onWheel={handleWheel}
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
