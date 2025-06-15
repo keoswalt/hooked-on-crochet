@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { YARN_WEIGHTS } from '@/utils/yarnWeights';
+import { Upload } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -239,11 +241,22 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
             onChange={(e) => handleChange('image_url', e.target.value)}
           />
         ) : (
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="sr-only"
+              id="file-upload"
+            />
+            <label
+              htmlFor="file-upload"
+              className="inline-flex items-center justify-center gap-2 h-10 px-4 py-2 bg-white border border-input rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+            >
+              <Upload className="h-4 w-4" />
+              {selectedFile ? selectedFile.name : 'Choose Image File'}
+            </label>
+          </div>
         )}
       </div>
 
