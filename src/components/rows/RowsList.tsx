@@ -1,3 +1,4 @@
+
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +11,12 @@ type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
 
 interface RowsListProps {
   rows: ProjectRow[];
+  allRows: ProjectRow[]; // All rows for consistent numbering
   mode: 'edit' | 'make';
   userId: string;
   hideCompleted: boolean;
   hiddenCount: number;
+  hasCompletedRows: boolean;
   inProgressIndex: number;
   onToggleHideCompleted: () => void;
   onDragEnd: (result: DropResult) => void;
@@ -34,10 +37,12 @@ interface RowsListProps {
 
 export const RowsList = ({
   rows,
+  allRows,
   mode,
   userId,
   hideCompleted,
   hiddenCount,
+  hasCompletedRows,
   inProgressIndex,
   onToggleHideCompleted,
   onDragEnd,
@@ -55,14 +60,16 @@ export const RowsList = ({
   onAddNote,
   onAddDivider
 }: RowsListProps) => {
-  // Calculate row numbers for actual rows (excluding notes and dividers)
-  const getRowNumber = (currentIndex: number): number | undefined => {
-    const currentRow = rows[currentIndex];
+  // Calculate row numbers based on all rows (not filtered) for consistent numbering
+  const getRowNumber = (currentRow: ProjectRow): number | undefined => {
     if (currentRow.type !== 'row') return undefined;
+    
+    const currentIndex = allRows.findIndex(row => row.id === currentRow.id);
+    if (currentIndex === -1) return undefined;
     
     let rowCount = 0;
     for (let i = 0; i <= currentIndex; i++) {
-      if (rows[i].type === 'row') {
+      if (allRows[i].type === 'row') {
         rowCount++;
       }
     }
@@ -76,7 +83,7 @@ export const RowsList = ({
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
             {rows.map((row, index) => (
               <div key={row.id}>
-                {mode === 'make' && index === inProgressIndex && (
+                {mode === 'make' && index === inProgressIndex && hasCompletedRows && (
                   <div className="mb-3">
                     <Button
                       variant="ghost"
@@ -108,7 +115,7 @@ export const RowsList = ({
                       <RowCard
                         row={row}
                         mode={mode}
-                        rowNumber={getRowNumber(index)}
+                        rowNumber={getRowNumber(row)}
                         userId={userId}
                         onUpdateCounter={onUpdateCounter}
                         onUpdateInstructions={onUpdateInstructions}

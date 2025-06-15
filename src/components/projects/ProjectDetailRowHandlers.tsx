@@ -2,15 +2,17 @@ import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
 
-export const useProjectDetailRowHandlers = (projectId: string) => {
+export const useProjectDetailRowHandlers = (projectId: string, mode: 'edit' | 'make') => {
   const { 
     rows, 
+    allRows,
     loading, 
     confirmDialog,
     setConfirmDialog,
     hideCompleted,
     setHideCompleted,
     hiddenCount,
+    hasCompletedRows,
     inProgressIndex,
     addRow, 
     addNote, 
@@ -26,7 +28,7 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
     deleteRow, 
     reorderRows,
     updateRowImage
-  } = useProjectRows(projectId);
+  } = useProjectRows(projectId, mode);
 
   const handleAddRow = async (insertAfterPosition?: number) => {
     try {
@@ -111,11 +113,13 @@ export const useProjectDetailRowHandlers = (projectId: string) => {
 
   return {
     rows,
+    allRows,
     loading,
     confirmDialog,
     setConfirmDialog,
     hideCompleted,
     hiddenCount,
+    hasCompletedRows,
     inProgressIndex,
     handleToggleHideCompleted,
     handleAddRow,

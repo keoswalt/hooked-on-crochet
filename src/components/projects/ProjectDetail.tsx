@@ -1,3 +1,4 @@
+
 import { ProjectHeader } from './ProjectHeader';
 import { RowsList } from '@/components/rows/RowsList';
 import { ModeHeader } from './ModeHeader';
@@ -44,11 +45,13 @@ export const ProjectDetail = ({
 
   const {
     rows,
+    allRows,
     loading,
     confirmDialog,
     setConfirmDialog,
     hideCompleted,
     hiddenCount,
+    hasCompletedRows,
     inProgressIndex,
     handleToggleHideCompleted,
     handleAddRow,
@@ -65,7 +68,7 @@ export const ProjectDetail = ({
     handleToggleLock,
     handleDragEnd,
     handleUpdateRowImage,
-  } = useProjectDetailRowHandlers(project.id);
+  } = useProjectDetailRowHandlers(project.id, mode);
 
   const {
     handleDeleteProject,
@@ -106,10 +109,12 @@ export const ProjectDetail = ({
 
       <RowsList
         rows={rows}
+        allRows={allRows}
         mode={mode}
         userId={userId}
         hideCompleted={hideCompleted}
         hiddenCount={hiddenCount}
+        hasCompletedRows={hasCompletedRows}
         inProgressIndex={inProgressIndex}
         onToggleHideCompleted={handleToggleHideCompleted}
         onDragEnd={handleDragEnd}

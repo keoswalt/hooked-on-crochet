@@ -19,7 +19,7 @@ const getInitialHideCompleted = () => {
   }
 };
 
-export const useProjectRows = (projectId: string) => {
+export const useProjectRows = (projectId: string, mode: 'edit' | 'make') => {
   const [rows, setRows] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [hideCompleted, setHideCompleted] = useState(getInitialHideCompleted);
@@ -42,19 +42,23 @@ export const useProjectRows = (projectId: string) => {
 
   // Process rows to handle visibility and get in-progress information
   const processedRows = useMemo(() => {
-    const visibleRows = hideCompleted 
+    // Only filter rows in make mode when hideCompleted is true
+    const visibleRows = (mode === 'make' && hideCompleted) 
       ? rows.filter(row => row.make_mode_status !== 'complete')
       : rows;
     
     const inProgressIndex = visibleRows.findIndex(row => row.make_mode_status === 'in_progress');
     const hiddenCount = rows.length - visibleRows.length;
+    const hasCompletedRows = rows.some(row => row.make_mode_status === 'complete');
     
     return {
       rows: visibleRows,
+      allRows: rows, // Keep reference to all rows for numbering
       inProgressIndex,
-      hiddenCount
+      hiddenCount,
+      hasCompletedRows
     };
-  }, [rows, hideCompleted]);
+  }, [rows, hideCompleted, mode]);
 
   const fetchRows = async () => {
     try {
