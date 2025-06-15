@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -243,13 +242,6 @@ export const PlannerDetailPage = ({
         plannerId={plannerId as string}
         user={user}
         planName={plan.name}
-      />
-
-      {/* NOTES SECTION */}
-      <PlannerNotesSection
-        // @ts-expect-error -- notes section may be missing prop types, but these should match usage in other planner sections
-        plannerId={plannerId as string}
-        userId={user.id}
       />
     </div>
   );
