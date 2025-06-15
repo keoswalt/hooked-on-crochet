@@ -13,6 +13,7 @@ import PlannerImagesSection from "@/components/planner/PlannerImagesSection";
 import PlannerResourcesSection from "@/components/planner/PlannerResourcesSection";
 import PlannerYarnSection from "@/components/planner/PlannerYarnSection";
 import PlannerSwatchesSection from "@/components/planner/PlannerSwatchesSection";
+import PlannerProjectsSection from "@/components/planner/PlannerProjectsSection";
 import PlannerNotesSection from "@/components/planner/PlannerNotesSection";
 import { Textarea } from "@/components/ui/textarea";
 import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
@@ -226,8 +227,8 @@ export const PlannerDetailPage = ({
       {/* SWATCHES SECTION */}
       <PlannerSwatchesSection plannerId={plannerId as string} userId={user.id} />
 
-      {/* NOTES SECTION */}
-      <PlannerNotesSection />
+      {/* PROJECTS SECTION */}
+      <PlannerProjectsSection plannerId={plannerId as string} user={user} />
     </div>
   );
 };
