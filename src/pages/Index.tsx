@@ -8,6 +8,7 @@ import { ProjectListPage } from './ProjectListPage';
 import { ProjectDetailPage } from './ProjectDetailPage';
 import { PlannerPage } from './PlannerPage';
 import { PlannerDetailPage } from './PlannerDetailPage';
+import { StashPage } from './StashPage';
 import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
@@ -48,6 +49,9 @@ const Index = () => {
     if (location.pathname.startsWith('/planner/') && plannerId) {
       return 'planner-detail';
     }
+    if (location.pathname === '/stash') {
+      return 'stash';
+    }
     return 'projects-list';
   };
 
@@ -80,6 +84,9 @@ const Index = () => {
       )}
       {currentPage === 'planner-detail' && (
         <PlannerDetailPage user={user} />
+      )}
+      {currentPage === 'stash' && (
+        <StashPage user={user} />
       )}
     </div>
   );
