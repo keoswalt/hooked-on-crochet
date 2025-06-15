@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+
+import React, { useRef, useState, useEffect } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,14 @@ import { CanvasElement, CanvasElements, CanvasBoardProps } from "./canvasTypes";
 import { useCanvasPanZoom } from "./useCanvasPanZoom";
 import { useCanvasSelection } from "./useCanvasSelection";
 import { CanvasZoomPanel } from "./CanvasZoomPanel";
+import { useAutoSave } from "./useAutoSave";
+import { CanvasSaveStatus } from "./CanvasSaveStatus";
+import { supabase } from "@/integrations/supabase/client";
 
-export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
+export const CanvasBoard: React.FC<CanvasBoardProps & { planId?: string }> = ({
+  selectedTool,
+  planId,
+}) => {
   const boardRef = React.useRef<HTMLDivElement>(null);
   const [items, setItems] = React.useState<CanvasElements>([]);
   // Move pan/zoom logic to hook
@@ -22,6 +29,26 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
 
   // Text editing
   const [editingTextId, setEditingTextId] = React.useState<string | null>(null);
+
+  // Load initial canvas on mount
+  useEffect(() => {
+    if (!planId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("plans").select("canvas_data").eq("id", planId).maybeSingle();
+      if (!cancelled && data?.canvas_data) {
+        setItems(data.canvas_data as CanvasElements);
+      }
+    })();
+    return () => { cancelled = true };
+  }, [planId]);
+
+  // Auto-save hook
+  const { status: saveStatus, error: saveError } = useAutoSave({
+    planId: planId || "",
+    elements: items,
+    debounceMs: 1200,
+  });
 
   // Double click guard
   const justDoubleClicked = React.useRef(false);
@@ -146,18 +173,18 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
             isEditing: true,
           },
         ]);
-        handleSelect(newId, selectedTool!); // FIXED: use handleSelect
+        handleSelect(newId, selectedTool!);
         setEditingTextId(newId);
         e.stopPropagation();
       }
     } else if (selectedTool === "move") {
       // Deselect any selection if clicking empty canvas
       if (e.target === e.currentTarget) {
-        deselect(); // FIXED: use deselect
+        deselect();
       }
     } else {
       // For other tools, deselect
-      deselect(); // FIXED: use deselect
+      deselect();
     }
   };
 
@@ -167,7 +194,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
       // If a text is being edited, finish the edit
       finishTextEdit(editingTextId);
     } else if (selectedTool === "move") {
-      deselect(); // FIXED: use deselect
+      deselect();
     }
   };
 
@@ -188,7 +215,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
         .filter((el) => el.id !== id || el.content.trim() !== ""),
     );
     setEditingTextId(null);
-    deselect(); // FIXED: use deselect
+    deselect();
   };
 
   // Called by EditableTextItem to set content
@@ -212,7 +239,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
         ),
       );
       setEditingTextId(id);
-      handleSelect(id, selectedTool!); // FIXED: use handleSelect
+      handleSelect(id, selectedTool!);
     }
   };
 
@@ -240,6 +267,9 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
     >
       {/* Zoom UI */}
       <CanvasZoomPanel zoom={zoom} onReset={handleResetZoom} />
+
+      {/* Save status */}
+      <CanvasSaveStatus status={saveStatus} error={saveError} />
 
       <div
         style={{
