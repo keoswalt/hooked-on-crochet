@@ -329,14 +329,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           </Card>
         ) : (
           <>
-            {/* Plan cards row: IMAGE LEFT, CONTENT RIGHT, Large Square */}
-            <div className="grid grid-cols-1 gap-6 mb-6">
+            {/* Responsive Plans Grid: 1 col mobile, 2 col sm, 3 col lg */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {plans.map((plan) => (
                 <Card
                   key={plan.id}
-                  className="hover:shadow-lg transition-shadow relative group flex flex-row items-stretch"
+                  className="hover:shadow-lg transition-shadow relative group flex flex-row items-stretch w-full"
+                  // Uses w-full so the grid cell controls width
                 >
-                  {/* Image Section (Left Side, now large, square) */}
+                  {/* Image Section (Left Side, large, square) */}
                   <div
                     className="flex items-center justify-center p-4"
                     style={{ minWidth: '192px' }}
@@ -360,9 +361,9 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                     onClick={() => navigate(`/planner/${plan.id}`)}
                   >
                     <CardHeader className="p-0 mb-2">
-                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
+                      <CardTitle className="text-lg break-words">{plan.name}</CardTitle>
                       {plan.description && (
-                        <CardDescription className="truncate">{plan.description}</CardDescription>
+                        <CardDescription className="break-words">{plan.description}</CardDescription>
                       )}
                     </CardHeader>
                   </div>
