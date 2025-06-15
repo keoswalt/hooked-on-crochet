@@ -76,7 +76,7 @@ export default function ProjectSelectionDialog({
       !searchTerm
         ? true
         : proj.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          proj.description?.toLowerCase().includes(searchTerm.toLowerCase())
+          proj.details?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
   return (
