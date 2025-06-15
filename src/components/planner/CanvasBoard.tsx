@@ -82,6 +82,8 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
     if (e.button !== 0) return;
     // Prevent panning if mousedown was on an element
     if ((e.target as Element) !== boardRef.current) return;
+    // Pan allowed with move tool
+    if (selectedTool !== "move") return;
     setIsPanning(true);
     panOrigin.current = {
       x: e.clientX - pan.x,
@@ -137,7 +139,10 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
   };
 
   const handleSelect = (id: string) => {
-    setSelectedId(id);
+    // Only selectable with move tool!
+    if (selectedTool === "move") {
+      setSelectedId(id);
+    }
   };
 
   // Helper: Center view based on current elements
@@ -188,43 +193,49 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
 
   // Background is tabIndex for accessibility and focus handlers
   const handleCanvasClick = (e: React.MouseEvent) => {
-    // Only respond if text tool is selected (shouldn't fire after double-click)
-    if (selectedTool !== "text") {
-      setSelectedId(null);
-      return;
-    }
-    // Double-click hack: don't trigger after doubleclick event
-    if (justDoubleClicked.current) {
-      // Reset the flag here, next click is valid again.
-      justDoubleClicked.current = false;
-      return;
-    }
-    // Only act if clicking directly the background, not another element (like a text box)
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-    if (boardRef.current) {
-      const boardRect = boardRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - boardRect.left;
-      const mouseY = e.clientY - boardRect.top;
-      const x = (mouseX - pan.x) / zoom;
-      const y = (mouseY - pan.y) / zoom;
-      const newId = uuidv4();
+    // Only allow text creation if text tool is selected
+    if (selectedTool === "text") {
+      // Double-click hack: don't trigger after doubleclick event
+      if (justDoubleClicked.current) {
+        // Reset the flag here, next click is valid again.
+        justDoubleClicked.current = false;
+        return;
+      }
+      // Only act if clicking directly the background, not another element (like a text box)
+      if (e.target !== e.currentTarget) {
+        return;
+      }
+      if (boardRef.current) {
+        const boardRect = boardRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - boardRect.left;
+        const mouseY = e.clientY - boardRect.top;
+        const x = (mouseX - pan.x) / zoom;
+        const y = (mouseY - pan.y) / zoom;
+        const newId = uuidv4();
 
-      setItems((prev) => [
-        ...prev,
-        {
-          id: newId,
-          x,
-          y,
-          type: "text",
-          content: "",
-          isEditing: true,
-        },
-      ]);
-      setSelectedId(newId);
-      setEditingTextId(newId);
-      e.stopPropagation();
+        setItems((prev) => [
+          ...prev,
+          {
+            id: newId,
+            x,
+            y,
+            type: "text",
+            content: "",
+            isEditing: true,
+          },
+        ]);
+        setSelectedId(newId);
+        setEditingTextId(newId);
+        e.stopPropagation();
+      }
+    } else if (selectedTool === "move") {
+      // Deselect any selection if clicking empty canvas
+      if (e.target === e.currentTarget) {
+        setSelectedId(null);
+      }
+    } else {
+      // For other tools, deselect
+      setSelectedId(null);
     }
   };
 
@@ -233,7 +244,7 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
     if (editingTextId) {
       // If a text is being edited, finish the edit
       finishTextEdit(editingTextId);
-    } else {
+    } else if (selectedTool === "move") {
       setSelectedId(null);
     }
   };
@@ -352,7 +363,6 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
               </div>
             );
           }
-          // Otherwise, normal display+move element (CanvasItem)
           return (
             <CanvasItem
               key={item.id}
@@ -366,9 +376,14 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
                   )
                   : <span>[{item.type}]</span>
               }
-              onMove={handleMove}
+              onMove={
+                // Only allow dragging in move mode!
+                selectedTool === "move"
+                  ? handleMove
+                  : () => {}
+              }
               isSelected={selectedId === item.id}
-              onSelect={setSelectedId}
+              onSelect={handleSelect}
               canvasPanZoom={{ pan, zoom }}
               onDoubleClick={() => handleItemDoubleClick(item.id, item.type)}
             />

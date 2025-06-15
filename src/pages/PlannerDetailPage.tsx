@@ -22,8 +22,8 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Selected tool state (default: text tool)
-  const [selectedTool, setSelectedTool] = useState<ToolType>("text");
+  // Selected tool state (default: move tool)
+  const [selectedTool, setSelectedTool] = useState<ToolType>("move");
 
   useEffect(() => {
     if (plannerId) {

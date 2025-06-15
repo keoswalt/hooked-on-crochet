@@ -1,9 +1,9 @@
-
 import { useState } from "react";
-import { Type, Image as ImageIcon, Link, Pencil, Package, Palette } from "lucide-react";
+import { Move, Type, Image as ImageIcon, Link, Pencil, Package, Palette } from "lucide-react";
 import { ToolButton } from "./ToolButton";
 
 const TOOLS = [
+  { key: "move", label: "Move", icon: Move },
   { key: "text", label: "Text", icon: Type },
   { key: "image", label: "Image", icon: ImageIcon },
   { key: "link", label: "Link", icon: Link },
