@@ -1,3 +1,4 @@
+
 import { Download, Edit, FileText, Trash2, Copy, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QRCodeGenerator } from './QRCodeGenerator';
@@ -24,7 +25,7 @@ export const ProjectActions = ({
   onDuplicate
 }: ProjectActionsProps) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center flex-wrap gap-2">
       <Button variant="outline" size="sm" onClick={onEdit}>
         <Edit className="h-4 w-4" />
       </Button>
