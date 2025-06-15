@@ -2,6 +2,8 @@
 import React, { useRef, useState } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
+import { RotateCcw } from "lucide-react"; // use for reset icon
+import { Button } from "@/components/ui/button";
 
 interface CanvasElement {
   id: string;
@@ -104,7 +106,8 @@ export const CanvasBoard: React.FC = () => {
     const mouseX = e.clientX - boardRect.left;
     const mouseY = e.clientY - boardRect.top;
     const prevZoom = zoom;
-    let newZoom = zoom * (e.deltaY < 0 ? 1.08 : 0.92);
+    // Slow down zoom step: ±3% per wheel event
+    let newZoom = zoom * (e.deltaY < 0 ? 1.03 : 0.97);
     newZoom = Math.max(0.2, Math.min(3, newZoom));
     // Adjust pan so the zoom centers around the mouse
     setPan(prev => ({
@@ -124,6 +127,13 @@ export const CanvasBoard: React.FC = () => {
     setSelectedId(id);
   };
 
+  // Reset zoom to 1
+  const handleResetZoom = () => {
+    // Center to middle of view based on current pan/zoom
+    setPan({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
   // Background is tabIndex for accessibility and focus handlers
   return (
     <div
@@ -138,6 +148,22 @@ export const CanvasBoard: React.FC = () => {
       onWheel={handleWheel}
       aria-label="Canvas Board"
     >
+      {/* Zoom UI */}
+      <div className="absolute top-2 right-2 z-20 flex items-center gap-2 shadow-sm bg-white/90 rounded px-3 py-1 border">
+        <span className="text-sm font-medium">
+          Zoom: {(zoom * 100).toFixed(0)}%
+        </span>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="ml-1"
+          title="Reset Zoom"
+          onClick={handleResetZoom}
+          type="button"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </Button>
+      </div>
       <div
         style={{
           transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})`,
