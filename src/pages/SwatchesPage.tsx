@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -75,15 +76,39 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
     setEditingSwatch(swatch);
   };
 
-  const handleCloneSwatch = (swatch: Swatch) => {
-    const clonedSwatch = {
-      ...swatch,
-      id: undefined as any, // Will be auto-generated
-      title: `${swatch.title} (Copy)`,
-      created_at: undefined as any,
-      updated_at: undefined as any,
-    };
-    setEditingSwatch(clonedSwatch);
+  const handleCloneSwatch = async (swatch: Swatch) => {
+    try {
+      const clonedSwatchData = {
+        title: `${swatch.title} (Copy)`,
+        description: swatch.description,
+        hook_size: swatch.hook_size,
+        yarn_used: swatch.yarn_used,
+        stitches_per_inch: swatch.stitches_per_inch,
+        rows_per_inch: swatch.rows_per_inch,
+        notes: swatch.notes,
+        user_id: user.id,
+      };
+
+      const { error } = await supabase
+        .from('swatches')
+        .insert(clonedSwatchData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Swatch cloned successfully",
+      });
+
+      fetchSwatches();
+    } catch (error: any) {
+      console.error('Error cloning swatch:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clone swatch",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteSwatch = async (swatchId: string) => {
