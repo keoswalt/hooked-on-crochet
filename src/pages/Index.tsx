@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
 import { ProjectListPage } from './ProjectListPage';
-// Removed: import { ProjectDetailPage } from './ProjectDetailPage';
+import { ProjectDetailPage } from './ProjectDetailPage';
 import { PlannerPage } from './PlannerPage';
 // Removed: import { PlannerDetailPage } from './PlannerDetailPage';
 import { StashPage } from './StashPage';
@@ -99,4 +98,3 @@ const Index = () => {
 };
 
 export default Index;
-
