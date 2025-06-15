@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { getYarnWeightLabel } from '@/utils/yarnWeights';
+import { YarnForm } from '@/components/stash/YarnForm';
+import { SwatchForm } from '@/components/swatches/SwatchForm';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -29,6 +32,8 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
   const [newPlanName, setNewPlanName] = useState('');
   const [newPlanDescription, setNewPlanDescription] = useState('');
+  const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
+  const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -119,6 +124,24 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     }
   };
 
+  const handleEditYarn = (yarn: YarnStash) => {
+    setEditingYarn(yarn);
+  };
+
+  const handleEditSwatch = (swatch: Swatch) => {
+    setEditingSwatch(swatch);
+  };
+
+  const handleYarnSaved = () => {
+    fetchData();
+    setEditingYarn(null);
+  };
+
+  const handleSwatchSaved = () => {
+    fetchData();
+    setEditingSwatch(null);
+  };
+
   if (loading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
@@ -188,7 +211,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           ) : (
             <div className="space-y-3">
               {yarnStash.map((yarn) => (
-                <Card key={yarn.id}>
+                <Card key={yarn.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEditYarn(yarn)}>
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <div>
@@ -227,7 +250,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           ) : (
             <div className="space-y-3">
               {swatches.map((swatch) => (
-                <Card key={swatch.id}>
+                <Card key={swatch.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEditSwatch(swatch)}>
                   <CardContent className="p-4">
                     <p className="font-medium">{swatch.title}</p>
                     {swatch.hook_size && (
@@ -280,6 +303,40 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
               Create Plan
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Yarn Dialog */}
+      <Dialog open={!!editingYarn} onOpenChange={() => setEditingYarn(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Yarn</DialogTitle>
+          </DialogHeader>
+          {editingYarn && (
+            <YarnForm
+              userId={user.id}
+              yarn={editingYarn}
+              onSave={handleYarnSaved}
+              onCancel={() => setEditingYarn(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Swatch Dialog */}
+      <Dialog open={!!editingSwatch} onOpenChange={() => setEditingSwatch(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Swatch</DialogTitle>
+          </DialogHeader>
+          {editingSwatch && (
+            <SwatchForm
+              userId={user.id}
+              swatch={editingSwatch}
+              onSave={handleSwatchSaved}
+              onCancel={() => setEditingSwatch(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
