@@ -35,10 +35,12 @@ export default function YarnPreviewCard({ yarn, checked, onSelect, children }: Y
       aria-checked={checked}
       role="checkbox"
     >
-      {/* Checkbox slot (handled outside for accessibility as visual only) */}
-      {children}
+      {/* Checkbox slot, now full pointer events */}
+      {children && (
+        <div className="pointer-events-auto">{children}</div>
+      )}
 
-      <div className="pt-6 pb-2 px-2 pointer-events-none">
+      <div className="pt-6 pb-2 px-2">
         {yarn.image_url ? (
           <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-gray-100">
             <img
@@ -67,7 +69,6 @@ export default function YarnPreviewCard({ yarn, checked, onSelect, children }: Y
           )}
           {yarn.weight && (
             <div className="flex flex-col w-full pt-1">
-              {/* BADGE now wraps to a new line */}
               <span className="text-xs font-medium mb-0.5">Weight:</span>
               <Badge variant="secondary" className="max-w-fit break-words whitespace-normal">{yarn.weight}</Badge>
             </div>

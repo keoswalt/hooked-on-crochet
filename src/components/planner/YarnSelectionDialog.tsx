@@ -80,8 +80,9 @@ export default function YarnSelectionDialog({
                       onCheckedChange={() => handleToggleSelect(yarn.id)}
                       aria-checked={checked}
                       aria-label={`Select yarn ${yarn.name}`}
-                      className="absolute top-2 left-2 bg-white z-10"
+                      className="absolute top-2 left-2 bg-white z-10 pointer-events-auto"
                       tabIndex={0}
+                      onClick={e => e.stopPropagation()}
                     />
                   </YarnPreviewCard>
                 );
