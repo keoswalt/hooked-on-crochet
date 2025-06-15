@@ -1,13 +1,14 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Palette, Package } from 'lucide-react';
+import { Plus, Palette, Package, Search, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { getYarnWeightLabel } from '@/utils/yarnWeights';
@@ -24,11 +25,17 @@ interface PlannerPageProps {
   user: User;
 }
 
+const PLANS_PER_PAGE = 9;
+
 export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [yarnStash, setYarnStash] = useState<YarnStash[]>([]);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPlans, setTotalPlans] = useState(0);
   const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
   const [showNewYarnDialog, setShowNewYarnDialog] = useState(false);
   const [showNewSwatchDialog, setShowNewSwatchDialog] = useState(false);
@@ -39,23 +46,42 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const totalPages = Math.ceil(totalPlans / PLANS_PER_PAGE);
+
+  // Debounced search function
+  const debounceSearch = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout;
+      return (query: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          setCurrentPage(1); // Reset to first page on new search
+          fetchPlans(query, 1);
+        }, 300);
+      };
+    })(),
+    []
+  );
+
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, [user.id]);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (searchQuery) {
+      debounceSearch(searchQuery);
+    } else {
+      setCurrentPage(1);
+      fetchPlans('', 1);
+    }
+  }, [searchQuery, debounceSearch]);
+
+  const fetchInitialData = async () => {
     try {
       setLoading(true);
       
-      // Fetch plans
-      const { data: planData, error: plansError } = await supabase
-        .from('plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false });
-
-      if (plansError) throw plansError;
-      setPlans(planData || []);
+      // Fetch initial plans data
+      await fetchPlans('', 1);
 
       // Fetch yarn stash (limit to recent entries for overview)
       const { data: yarn, error: yarnError } = await supabase
@@ -88,6 +114,55 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPlans = async (query: string, page: number) => {
+    try {
+      setPlansLoading(true);
+      
+      const offset = (page - 1) * PLANS_PER_PAGE;
+      
+      // Build the query
+      let plansQuery = supabase
+        .from('plans')
+        .select('*')
+        .eq('user_id', user.id);
+
+      let countQuery = supabase
+        .from('plans')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Add search filter if query exists
+      if (query.trim()) {
+        const searchFilter = `name.ilike.%${query}%,description.ilike.%${query}%`;
+        plansQuery = plansQuery.or(searchFilter);
+        countQuery = countQuery.or(searchFilter);
+      }
+
+      // Execute count query
+      const { count, error: countError } = await countQuery;
+      if (countError) throw countError;
+      setTotalPlans(count || 0);
+
+      // Execute plans query with pagination
+      const { data: planData, error: plansError } = await plansQuery
+        .order('updated_at', { ascending: false })
+        .range(offset, offset + PLANS_PER_PAGE - 1);
+
+      if (plansError) throw plansError;
+      setPlans(planData || []);
+
+    } catch (error: any) {
+      console.error('Error fetching plans:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load plans",
+        variant: "destructive",
+      });
+    } finally {
+      setPlansLoading(false);
     }
   };
 
@@ -135,23 +210,32 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   };
 
   const handleYarnSaved = () => {
-    fetchData();
+    fetchInitialData();
     setEditingYarn(null);
   };
 
   const handleSwatchSaved = () => {
-    fetchData();
+    fetchInitialData();
     setEditingSwatch(null);
   };
 
   const handleNewYarnSaved = () => {
-    fetchData();
+    fetchInitialData();
     setShowNewYarnDialog(false);
   };
 
   const handleNewSwatchSaved = () => {
-    fetchData();
+    fetchInitialData();
     setShowNewSwatchDialog(false);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchPlans(searchQuery, page);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   if (loading) {
@@ -175,31 +259,107 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       {/* Plans Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Your Plans</h2>
-        {plans.length === 0 ? (
+        
+        {/* Search Input */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search plans..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSearch}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Plans Grid */}
+        {plansLoading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600">Loading plans...</p>
+          </div>
+        ) : plans.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
               <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No plans yet. Create your first one!</p>
+              {searchQuery ? (
+                <div>
+                  <p className="text-gray-600 mb-2">No plans found matching "{searchQuery}"</p>
+                  <Button variant="outline" onClick={clearSearch}>
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-gray-600">No plans yet. Create your first one!</p>
+              )}
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => (
-              <Card key={plan.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${plan.id}`)}>
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  {plan.description && (
-                    <CardDescription>{plan.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-500">
-                    Last modified: {new Date(plan.updated_at).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {plans.map((plan) => (
+                <Card key={plan.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/planner/${plan.id}`)}>
+                  <CardHeader>
+                    <CardTitle>{plan.name}</CardTitle>
+                    {plan.description && (
+                      <CardDescription>{plan.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500">
+                      Last modified: {new Date(plan.updated_at).toLocaleDateString()}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * PLANS_PER_PAGE) + 1}-{Math.min(currentPage * PLANS_PER_PAGE, totalPlans)} of {totalPlans} plans
+                </p>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
       </div>
 
