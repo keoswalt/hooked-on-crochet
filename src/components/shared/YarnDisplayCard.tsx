@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Package } from "lucide-react";
@@ -72,8 +71,7 @@ export const YarnDisplayCard = ({
             </span>
           )}
           {yarn.weight && (
-            // Updated layout to single centered line, with chip wrapping if necessary
-            <div className="flex flex-wrap items-center justify-center gap-2 w-full pt-1">
+            <div className="flex flex-wrap items-center gap-2 w-full pt-1">
               <span className="text-xs font-medium mb-0.5">Weight:</span>
               <Badge variant="secondary" className="max-w-full break-words whitespace-normal">
                 {getYarnWeightLabel(yarn.weight)}
@@ -88,4 +86,3 @@ export const YarnDisplayCard = ({
 };
 
 export default YarnDisplayCard;
-
