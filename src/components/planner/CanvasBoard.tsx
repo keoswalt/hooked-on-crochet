@@ -126,11 +126,50 @@ export const CanvasBoard: React.FC = () => {
     setSelectedId(id);
   };
 
-  // Reset zoom to 1
+  // Helper: Center view based on current elements
+  const centerElementsInView = () => {
+    if (!boardRef.current || items.length === 0) {
+      // No items: center at origin
+      setPan({ x: 0, y: 0 });
+      setZoom(1);
+      return;
+    }
+    // Compute bounding box of all items
+    const padding = 40; // px padding around elements
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const item of items) {
+      // All items are size 120x40 minimum, plus 12px padding
+      const width = 120 + 24, height = 40 + 24;
+      minX = Math.min(minX, item.x - 12);
+      maxX = Math.max(maxX, item.x - 12 + width);
+      minY = Math.min(minY, item.y - 12);
+      maxY = Math.max(maxY, item.y - 12 + height);
+    }
+    const elWidth = maxX - minX;
+    const elHeight = maxY - minY;
+
+    const boardRect = boardRef.current.getBoundingClientRect();
+    const { width: viewW, height: viewH } = boardRect;
+
+    // Determine zoom so everything fits, max 1.0
+    const zoomX = (viewW - padding * 2) / elWidth;
+    const zoomY = (viewH - padding * 2) / elHeight;
+    const newZoom = Math.min(1, Math.max(0.2, Math.min(zoomX, zoomY)));
+
+    // Center the bounding box in the canvas at newZoom
+    const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+    const viewCenterX = viewW / 2, viewCenterY = viewH / 2;
+
+    setPan({
+      x: viewCenterX - centerX * newZoom,
+      y: viewCenterY - centerY * newZoom,
+    });
+    setZoom(newZoom);
+  };
+
+  // Reset zoom and center
   const handleResetZoom = () => {
-    // Center to middle of view based on current pan/zoom
-    setPan({ x: 0, y: 0 });
-    setZoom(1);
+    centerElementsInView();
   };
 
   // Background is tabIndex for accessibility and focus handlers
@@ -156,7 +195,7 @@ export const CanvasBoard: React.FC = () => {
           size="icon"
           variant="ghost"
           className="ml-1"
-          title="Reset Zoom"
+          title="Reset Zoom & Center"
           onClick={handleResetZoom}
           type="button"
         >
@@ -185,7 +224,7 @@ export const CanvasBoard: React.FC = () => {
             onMove={handleMove}
             isSelected={selectedId === item.id}
             onSelect={handleSelect}
-            canvasPanZoom={{ pan, zoom }} // pass pan/zoom for correct drag move math
+            canvasPanZoom={{ pan, zoom }}
           />
         )}
       </div>
