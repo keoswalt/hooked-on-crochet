@@ -2,14 +2,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { YARN_WEIGHTS } from '@/utils/yarnWeights';
-import { Upload } from 'lucide-react';
+import { YarnBasicFields } from './YarnBasicFields';
+import { YarnDetailsFields } from './YarnDetailsFields';
+import { YarnImageUpload } from './YarnImageUpload';
+import { YarnNotesField } from './YarnNotesField';
 import type { Database } from '@/integrations/supabase/types';
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -34,7 +31,6 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
     image_url: yarn?.image_url || '',
     notes: yarn?.notes || '',
   });
-  const [imageOption, setImageOption] = useState<'url' | 'upload'>('url');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -57,7 +53,7 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
       let imageUrl = formData.image_url;
 
       // Handle file upload if user selected upload option and has a file
-      if (imageOption === 'upload' && selectedFile) {
+      if (selectedFile) {
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${userId}/${Date.now()}.${fileExt}`;
         
@@ -131,145 +127,46 @@ export const YarnForm = ({ userId, yarn, onSave, onCancel }: YarnFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setSelectedFile(file || null);
+  const handleImageUrlChange = (url: string) => {
+    setFormData(prev => ({ ...prev, image_url: url }));
+  };
+
+  const handleNotesChange = (notes: string) => {
+    setFormData(prev => ({ ...prev, notes }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Full width yarn name field */}
-      <div>
-        <Label htmlFor="name">Yarn Name *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-          placeholder="Enter yarn name"
-          required
-        />
-      </div>
+      <YarnBasicFields 
+        formData={{
+          name: formData.name,
+          brand: formData.brand,
+          color: formData.color,
+        }}
+        onChange={handleChange}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="brand">Brand</Label>
-          <Input
-            id="brand"
-            value={formData.brand}
-            onChange={(e) => handleChange('brand', e.target.value)}
-            placeholder="Enter brand name"
-          />
-        </div>
+      <YarnDetailsFields 
+        formData={{
+          weight: formData.weight,
+          material: formData.material,
+          yardage: formData.yardage,
+          remaining_yardage: formData.remaining_yardage,
+        }}
+        onChange={handleChange}
+      />
 
-        <div>
-          <Label htmlFor="color">Color</Label>
-          <Input
-            id="color"
-            value={formData.color}
-            onChange={(e) => handleChange('color', e.target.value)}
-            placeholder="Enter color"
-          />
-        </div>
+      <YarnImageUpload 
+        imageUrl={formData.image_url}
+        onImageUrlChange={handleImageUrlChange}
+        onFileChange={setSelectedFile}
+        selectedFile={selectedFile}
+      />
 
-        <div>
-          <Label htmlFor="weight">Weight</Label>
-          <Select value={formData.weight} onValueChange={(value) => handleChange('weight', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select yarn weight" />
-            </SelectTrigger>
-            <SelectContent>
-              {YARN_WEIGHTS.map((weight) => (
-                <SelectItem key={weight.value} value={weight.value}>
-                  {weight.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="material">Material</Label>
-          <Input
-            id="material"
-            value={formData.material}
-            onChange={(e) => handleChange('material', e.target.value)}
-            placeholder="e.g., 100% Cotton"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="yardage">Total Yardage</Label>
-          <Input
-            id="yardage"
-            type="number"
-            value={formData.yardage}
-            onChange={(e) => handleChange('yardage', e.target.value)}
-            placeholder="Enter total yards"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="remaining_yardage">Remaining Yardage</Label>
-          <Input
-            id="remaining_yardage"
-            type="number"
-            value={formData.remaining_yardage}
-            onChange={(e) => handleChange('remaining_yardage', e.target.value)}
-            placeholder="Enter remaining yards"
-          />
-        </div>
-      </div>
-
-      {/* Image Upload Section */}
-      <div className="space-y-3">
-        <Label>Yarn Image</Label>
-        <RadioGroup value={imageOption} onValueChange={(value: 'url' | 'upload') => setImageOption(value)}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="url" id="url" />
-            <Label htmlFor="url">Image URL</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="upload" id="upload" />
-            <Label htmlFor="upload">Upload Image</Label>
-          </div>
-        </RadioGroup>
-
-        {imageOption === 'url' ? (
-          <Input
-            placeholder="Enter image URL"
-            value={formData.image_url}
-            onChange={(e) => handleChange('image_url', e.target.value)}
-          />
-        ) : (
-          <div className="relative">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="sr-only"
-              id="file-upload"
-            />
-            <label
-              htmlFor="file-upload"
-              className="inline-flex items-center justify-center gap-2 h-10 px-4 py-2 bg-white border border-input rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
-            >
-              <Upload className="h-4 w-4" />
-              {selectedFile ? selectedFile.name : 'Choose Image File'}
-            </label>
-          </div>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => handleChange('notes', e.target.value)}
-          placeholder="Add any notes about this yarn"
-          rows={3}
-        />
-      </div>
+      <YarnNotesField 
+        notes={formData.notes}
+        onChange={handleNotesChange}
+      />
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
