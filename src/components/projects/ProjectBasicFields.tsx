@@ -1,4 +1,3 @@
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,7 +20,23 @@ interface ProjectBasicFieldsProps {
   onFormDataChange: (data: FormData) => void;
 }
 
-const hookSizes: HookSize[] = ['2mm', '2.2mm', '3mm', '3.5mm', '4mm', '4.5mm', '5mm', '5.5mm', '6mm', '6.5mm', '9mm', '10mm'];
+// FULL LIST OF HOOK SIZES from Supabase enum
+const hookSizes: HookSize[] = [
+  "1.5mm",
+  "1.75mm",
+  "2mm",
+  "2.2mm",
+  "3mm",
+  "3.5mm",
+  "4mm",
+  "4.5mm",
+  "5mm",
+  "5.5mm",
+  "6mm",
+  "6.5mm",
+  "9mm",
+  "10mm"
+];
 
 export const ProjectBasicFields = ({ formData, onFormDataChange }: ProjectBasicFieldsProps) => {
   return (
