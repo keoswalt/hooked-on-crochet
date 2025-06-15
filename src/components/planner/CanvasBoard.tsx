@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
@@ -37,7 +36,25 @@ export const CanvasBoard: React.FC<CanvasBoardProps & { planId?: string }> = ({
     (async () => {
       const { data } = await supabase.from("plans").select("canvas_data").eq("id", planId).maybeSingle();
       if (!cancelled && data?.canvas_data) {
-        setItems(data.canvas_data as CanvasElements);
+        // Ensure array and each item has expected keys
+        let restored: unknown = data.canvas_data;
+        if (
+          Array.isArray(restored) &&
+          restored.every(
+            (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              "id" in item &&
+              "x" in item &&
+              "y" in item &&
+              "type" in item &&
+              "content" in item
+          )
+        ) {
+          setItems(restored as CanvasElements);
+        } else {
+          setItems([]);
+        }
       }
     })();
     return () => { cancelled = true };

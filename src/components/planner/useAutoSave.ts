@@ -34,7 +34,7 @@ export function useAutoSave({ planId, elements, debounceMs = 1200, onSaved }: Us
       try {
         const { error } = await supabase
           .from("plans")
-          .update({ canvas_data: elements })
+          .update({ canvas_data: elements as unknown }) // Explicitly cast as unknown, which matches Json type
           .eq("id", planId);
 
         if (error) {
@@ -70,3 +70,4 @@ export function useAutoSave({ planId, elements, debounceMs = 1200, onSaved }: Us
 
   return { status, error };
 }
+
