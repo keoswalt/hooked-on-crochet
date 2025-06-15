@@ -329,15 +329,31 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* HORIZONTAL FLEX PLAN CARDS */}
+            <div className="grid grid-cols-1 gap-6 mb-6">
               {plans.map((plan) => (
-                <Card key={plan.id} className="hover:shadow-lg transition-shadow relative group">
-                  <div 
-                    className="cursor-pointer"
+                <Card
+                  key={plan.id}
+                  className="hover:shadow-lg transition-shadow relative group flex flex-row items-stretch"
+                >
+                  {/* Card Content Section (Left Side) */}
+                  <div
+                    className="flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
                     onClick={() => navigate(`/planner/${plan.id}`)}
                   >
-                    {/* Image at top */}
-                    <div className="w-full h-32 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+                    <CardHeader className="p-0 mb-2">
+                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
+                      {plan.description && (
+                        <CardDescription className="truncate">{plan.description}</CardDescription>
+                      )}
+                    </CardHeader>
+                  </div>
+                  {/* Image Section (Right Side) */}
+                  <div
+                    className="flex items-center justify-center p-2"
+                    style={{ minWidth: '96px' }}
+                  >
+                    <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {plan.featured_image_url ? (
                         <img
                           src={plan.featured_image_url}
@@ -346,17 +362,11 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                           draggable={false}
                         />
                       ) : (
-                        <div className="text-gray-300 text-xs">No image</div>
+                        <div className="text-gray-300 text-xs text-center w-full">No image</div>
                       )}
                     </div>
-                    <CardHeader>
-                      <CardTitle className="truncate text-lg">{plan.name}</CardTitle>
-                      {plan.description && (
-                        <CardDescription>{plan.description}</CardDescription>
-                      )}
-                    </CardHeader>
-                    {/* REMOVED Last modified section */}
                   </div>
+                  {/* Delete button - overlay on the top-right of card (absolute) */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -371,7 +381,6 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                 </Card>
               ))}
             </div>
-
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex flex-col items-center gap-4">
