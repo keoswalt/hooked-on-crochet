@@ -257,15 +257,17 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
-        <Button onClick={() => setShowNewPlanDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Plan
-        </Button>
+        <div>
+          <Button onClick={() => setShowNewPlanDialog(true)} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            New Plan
+          </Button>
+        </div>
       </div>
 
       {/* New Plan Dialog */}
