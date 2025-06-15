@@ -38,7 +38,12 @@ export default function PlanProjectCard({
   };
 
   return (
-    <Card onClick={handleCardClick} tabIndex={0} aria-label={project.name} className="hover:shadow-lg transition-shadow h-60 flex flex-col relative cursor-pointer pb-2">
+    <Card
+      onClick={handleCardClick}
+      tabIndex={0}
+      aria-label={project.name}
+      className="hover:shadow-lg transition-shadow h-60 flex flex-col relative cursor-pointer pb-2"
+    >
       <Button
         type="button"
         size="icon"
@@ -52,9 +57,10 @@ export default function PlanProjectCard({
       >
         <Trash className="w-4 h-4" />
       </Button>
+      {/* PATCH: Prevent card navigation when Cancel/Close clicked in dialog */}
       <ConfirmationDialog
         open={showConfirm}
-        onOpenChange={setShowConfirm}
+        onOpenChange={(open) => setShowConfirm(open)}
         onConfirm={() => {
           setShowConfirm(false);
           onRemove();
@@ -63,6 +69,20 @@ export default function PlanProjectCard({
         description="Are you sure you want to remove this project from the plan? This will only detach it from this plan, not delete the project itself."
         confirmText="Remove"
         cancelText="Cancel"
+        // Forward a synthetic onCancel that stops event propagation
+        // NOTE: ConfirmationDialog does not natively accept an onCancel, so handle via onOpenChange on AlertDialogCancel below.
+        renderCancelButton={(props) => (
+          <button
+            {...props}
+            onClick={e => {
+              e.stopPropagation();
+              if (props.onClick) props.onClick(e);
+              setShowConfirm(false);
+            }}
+          >
+            Cancel
+          </button>
+        )}
       />
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold line-clamp-2">{project.name}</CardTitle>
