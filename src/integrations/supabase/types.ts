@@ -100,6 +100,45 @@ export type Database = {
           },
         ]
       }
+      plan_project_attachments: {
+        Row: {
+          attached_at: string
+          id: string
+          plan_id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          attached_at?: string
+          id?: string
+          plan_id: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          attached_at?: string
+          id?: string
+          plan_id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_plan"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_resources: {
         Row: {
           created_at: string | null
