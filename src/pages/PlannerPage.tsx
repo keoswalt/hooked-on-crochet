@@ -16,6 +16,7 @@ import { SwatchForm } from '@/components/swatches/SwatchForm';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import { NewPlanDialog } from '@/components/planner/NewPlanDialog';
 
 type Plan = Database['public']['Tables']['plans']['Row'];
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -41,6 +42,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
   const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
+  const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -249,11 +251,22 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
-        <Button onClick={() => navigate('/planner/new')}>
+        <Button onClick={() => setShowNewPlanDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           New Plan
         </Button>
       </div>
+
+      {/* New Plan Dialog */}
+      <NewPlanDialog
+        open={showNewPlanDialog}
+        onOpenChange={setShowNewPlanDialog}
+        userId={user.id}
+        onCreated={(planId) => {
+          setShowNewPlanDialog(false);
+          navigate(`/planner/${planId}`);
+        }}
+      />
 
       {/* Plans Section */}
       <div className="mb-8">

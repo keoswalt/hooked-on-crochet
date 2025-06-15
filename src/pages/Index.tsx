@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/Header';
 import { ProjectListPage } from './ProjectListPage';
 import { ProjectDetailPage } from './ProjectDetailPage';
 import { PlannerPage } from './PlannerPage';
-// Removed: import { PlannerDetailPage } from './PlannerDetailPage';
+import PlannerDetailPage from './PlannerDetailPage';
 import { StashPage } from './StashPage';
 import { SwatchesPage } from './SwatchesPage';
 import type { User } from '@supabase/supabase-js';
@@ -46,10 +46,9 @@ const Index = () => {
     if (location.pathname === '/planner') {
       return 'planner-list';
     }
-    // Skip planner-detail entirely
-    // if (location.pathname.startsWith('/planner/') && plannerId) {
-    //   return 'planner-detail';
-    // }
+    if (location.pathname.startsWith('/planner/') && plannerId) {
+      return 'planner-detail';
+    }
     if (location.pathname === '/stash') {
       return 'stash';
     }
@@ -86,7 +85,9 @@ const Index = () => {
       {currentPage === 'planner-list' && (
         <PlannerPage user={user} />
       )}
-      {/* Removed: planner-detail */}
+      {currentPage === 'planner-detail' && (
+        <PlannerDetailPage user={user} />
+      )}
       {currentPage === 'stash' && (
         <StashPage user={user} />
       )}
