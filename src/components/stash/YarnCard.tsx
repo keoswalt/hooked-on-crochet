@@ -80,20 +80,6 @@ export const YarnCard = ({ yarn, onEdit, onDelete }: YarnCardProps) => {
               <Badge variant="secondary">{getYarnWeightLabel(yarn.weight)}</Badge>
             </div>
           )}
-
-          {yarn.yardage && (
-            <div className="space-y-1">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full ${stockLevel.color}`}
-                  style={{ width: `${Math.max(remainingPercentage, 0)}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-500">
-                Stock: {stockLevel.label} ({Math.round(remainingPercentage)}%)
-              </p>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
