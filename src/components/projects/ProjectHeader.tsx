@@ -178,7 +178,6 @@ export const ProjectHeader = ({
                   </SelectContent>
                 </Select>
               </div>
-              <ProjectStatusChip status={project.status} />
             </div>
             
             {project.featured_image_url && (
