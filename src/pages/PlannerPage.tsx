@@ -329,19 +329,16 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           </Card>
         ) : (
           <>
-            {/* Plan cards row: IMAGE LEFT, CONTENT RIGHT, Large Square */}
-            <div className="grid grid-cols-1 gap-6 mb-6">
+            {/* Plan cards row: Responsive stacked on mobile, horizontal on desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               {plans.map((plan) => (
                 <Card
                   key={plan.id}
-                  className="hover:shadow-lg transition-shadow relative group flex flex-row items-stretch"
+                  className="hover:shadow-lg transition-shadow relative group flex flex-col md:flex-row items-stretch h-full"
                 >
-                  {/* Image Section (Left Side, now large, square) */}
-                  <div
-                    className="flex items-center justify-center p-4"
-                    style={{ minWidth: '192px' }}
-                  >
-                    <div className="w-48 h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                  {/* Image Section (stacked on mobile, left on desktop) */}
+                  <div className="w-full md:w-48 md:h-48 flex items-center justify-center p-4 shrink-0">
+                    <div className="w-full h-48 md:w-48 md:h-48 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {plan.featured_image_url ? (
                         <img
                           src={plan.featured_image_url}
@@ -354,9 +351,9 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                       )}
                     </div>
                   </div>
-                  {/* Card Content Section (Right Side) */}
+                  {/* Card Content Section (stacked row below image on mobile, right on desktop) */}
                   <div
-                    className="flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
+                    className="w-full flex-1 flex flex-col justify-center px-4 py-4 cursor-pointer"
                     onClick={() => navigate(`/planner/${plan.id}`)}
                   >
                     <CardHeader className="p-0 mb-2">
@@ -366,18 +363,21 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
                       )}
                     </CardHeader>
                   </div>
-                  {/* Delete button - overlay on the top-right of card (absolute) */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPlanToDelete(plan);
-                    }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-gray-100"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  {/* Delete button - full width row on mobile, top-right overlay on desktop */}
+                  <div className="w-full flex justify-end md:absolute md:top-2 md:right-2 md:w-auto md:justify-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPlanToDelete(plan);
+                      }}
+                      className={`h-8 w-8 p-0 hover:bg-gray-100 
+                        ${"opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"}`}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>
