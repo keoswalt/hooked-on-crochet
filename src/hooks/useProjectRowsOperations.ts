@@ -279,30 +279,18 @@ export const useProjectRowsOperations = (
         position: index + 1
       }));
       
-      // Batch update all positions in a single transaction
+      // Batch update all positions using Promise.all for parallel execution
       if (reorderedRows.length > 0) {
-        const { error: batchError } = await supabase.rpc('batch_update_positions', {
-          row_updates: reorderedRows.map(row => ({
-            id: row.id,
-            position: row.position
-          }))
-        });
-
-        // If batch function doesn't exist, fall back to the original method but with Promise.all
-        if (batchError?.code === '42883') { // Function doesn't exist
-          const updatePromises = reorderedRows.map(row => 
-            supabase
-              .from('project_rows')
-              .update({ position: row.position })
-              .eq('id', row.id)
-          );
-          
-          const results = await Promise.all(updatePromises);
-          const updateError = results.find(result => result.error);
-          if (updateError?.error) throw updateError.error;
-        } else if (batchError) {
-          throw batchError;
-        }
+        const updatePromises = reorderedRows.map(row => 
+          supabase
+            .from('project_rows')
+            .update({ position: row.position })
+            .eq('id', row.id)
+        );
+        
+        const results = await Promise.all(updatePromises);
+        const updateError = results.find(result => result.error);
+        if (updateError?.error) throw updateError.error;
       }
       
       // Update local state immediately
