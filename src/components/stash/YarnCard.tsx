@@ -83,9 +83,6 @@ export const YarnCard = ({ yarn, onEdit, onDelete }: YarnCardProps) => {
 
           {yarn.yardage && (
             <div className="space-y-1">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Yardage:</span> {yarn.remaining_yardage || 0} / {yarn.yardage} yds
-              </p>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${stockLevel.color}`}
