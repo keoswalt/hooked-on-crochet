@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 
 interface ProjectDetailStateProps {
   initialProject: Project;
@@ -25,7 +25,7 @@ export const useProjectDetailState = ({ initialProject, onProjectUpdate }: Proje
     const loadProjectMode = async () => {
       try {
         const { data, error } = await supabase
-          .from('projects')
+          .from('patterns')
           .select('last_mode')
           .eq('id', project.id)
           .single();
@@ -48,7 +48,7 @@ export const useProjectDetailState = ({ initialProject, onProjectUpdate }: Proje
     
     try {
       await supabase
-        .from('projects')
+        .from('patterns')
         .update({ last_mode: newMode })
         .eq('id', project.id);
     } catch (error) {

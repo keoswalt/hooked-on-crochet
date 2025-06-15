@@ -1,3 +1,4 @@
+
 import { useProjectRows } from '@/hooks/useProjectRows';
 import { useRowOperations } from '@/hooks/useRowOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -54,7 +55,7 @@ export const useProjectDetailRowHandlers = (projectId: string, mode: 'edit' | 'm
     }
   };
 
-  const handleDuplicateRow = async (rowToDuplicate: Database['public']['Tables']['project_rows']['Row']) => {
+  const handleDuplicateRow = async (rowToDuplicate: Database['public']['Tables']['pattern_rows']['Row']) => {
     try {
       await duplicateRow(rowToDuplicate);
     } catch (error) {

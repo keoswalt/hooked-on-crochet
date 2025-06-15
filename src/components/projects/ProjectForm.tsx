@@ -9,7 +9,7 @@ import { useImageOperations } from '@/hooks/useImageOperations';
 import { useProjectTags } from '@/hooks/useProjectTags';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 type HookSize = Database['public']['Enums']['hook_size'];
 type YarnWeight = Database['public']['Enums']['yarn_weight'];
 

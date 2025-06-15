@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -14,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database['public']['Tables']['patterns']['Row'];
 type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectHeaderProps {
@@ -57,7 +58,7 @@ export const ProjectHeader = ({
         // Then update the project in the database
         try {
           const { data, error } = await supabase
-            .from('projects')
+            .from('patterns')
             .update({ featured_image_url: null })
             .eq('id', project.id)
             .eq('user_id', userId)
@@ -92,7 +93,7 @@ export const ProjectHeader = ({
   const handleStatusChange = async (newStatus: ProjectStatus) => {
     try {
       const { data, error } = await supabase
-        .from('projects')
+        .from('patterns')
         .update({ status: newStatus })
         .eq('id', project.id)
         .eq('user_id', userId)
@@ -142,7 +143,9 @@ export const ProjectHeader = ({
                 <div className="flex items-center gap-3 flex-wrap mb-4">
                   <h1 className="text-2xl font-bold">{project.name}</h1>
                   <TagDisplay 
-                    tags={projectTags} 
+                    entityId={project.id}
+                    entityType="project"
+                    userId={userId}
                     onRemoveTag={handleRemoveTag}
                     showRemoveButton={false}
                   />
