@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -74,6 +75,9 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
       const updates = images.map((img, idx) => ({
         id: img.id,
         position: idx + 1,
+        plan_id: img.plan_id,
+        user_id: img.user_id,
+        image_url: img.image_url,
       }));
       await supabase.from("plan_images").upsert(updates, { onConflict: "id" });
     }
@@ -81,10 +85,12 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     // eslint-disable-next-line
   }, [images.length]);
 
-  // Drag and drop reorder logic
+  // Drag and drop reorder logic (pass planId and userId)
   const { reorderImages, reordering } = usePlanImagesReorder(
     images,
-    setImages
+    setImages,
+    plannerId,
+    userId
   );
 
   return (
