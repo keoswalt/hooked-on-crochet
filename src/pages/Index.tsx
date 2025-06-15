@@ -5,9 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { Header } from '@/components/layout/Header';
 import { ProjectListPage } from './ProjectListPage';
-import { ProjectDetailPage } from './ProjectDetailPage';
+// Removed: import { ProjectDetailPage } from './ProjectDetailPage';
 import { PlannerPage } from './PlannerPage';
-import { PlannerDetailPage } from './PlannerDetailPage';
+// Removed: import { PlannerDetailPage } from './PlannerDetailPage';
 import { StashPage } from './StashPage';
 import { SwatchesPage } from './SwatchesPage';
 import type { User } from '@supabase/supabase-js';
@@ -47,9 +47,10 @@ const Index = () => {
     if (location.pathname === '/planner') {
       return 'planner-list';
     }
-    if (location.pathname.startsWith('/planner/') && plannerId) {
-      return 'planner-detail';
-    }
+    // Skip planner-detail entirely
+    // if (location.pathname.startsWith('/planner/') && plannerId) {
+    //   return 'planner-detail';
+    // }
     if (location.pathname === '/stash') {
       return 'stash';
     }
@@ -86,9 +87,7 @@ const Index = () => {
       {currentPage === 'planner-list' && (
         <PlannerPage user={user} />
       )}
-      {currentPage === 'planner-detail' && (
-        <PlannerDetailPage user={user} />
-      )}
+      {/* Removed: planner-detail */}
       {currentPage === 'stash' && (
         <StashPage user={user} />
       )}
@@ -100,3 +99,4 @@ const Index = () => {
 };
 
 export default Index;
+
