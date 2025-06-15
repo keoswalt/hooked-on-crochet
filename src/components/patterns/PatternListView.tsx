@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { PatternSearch } from './PatternSearch';
 import { PatternGrid } from './PatternGrid';
@@ -17,8 +18,8 @@ interface PatternListViewProps {
   onSearchChange: (value: string) => void;
   onEditPattern: (pattern: Pattern) => void;
   onDeletePattern: (id: string) => void;
-  onDuplicatePattern: (pattern: Pattern) => void;
-  onToggleFavorite: (id: string, isFavorite: boolean) => void;
+  onDuplicatePattern: (pattern: Pattern) => Promise<void>;
+  onToggleFavorite: (id: string, isFavorite: boolean) => Promise<void>;
   onCardClick: (pattern: Pattern) => void;
   onCreatePattern: () => void;
   onImportPattern: (file: File) => void;
@@ -52,9 +53,9 @@ export const PatternListView = ({
           patterns.map(pattern => tagOps.fetchPatternTags(pattern.id))
         );
         
-        const tagMap = new Map();
+        const tagMap: Record<string, Tag[]> = {};
         patterns.forEach((pattern, index) => {
-          tagMap.set(pattern.id, allTags[index]);
+          tagMap[pattern.id] = allTags[index];
         });
         
         setPatternTags(tagMap);
