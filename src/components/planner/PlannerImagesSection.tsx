@@ -115,8 +115,7 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
     );
 
     // Update DB
-    // Instead of pushing builder objects, "await" each and collect actual Promises
-
+    // Change: Remove .then(result => result), push real Promises
     const updates: Promise<any>[] = [];
 
     if (prevFeatured && prevFeatured.id !== imageId) {
@@ -125,7 +124,6 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
           .from("plan_images")
           .update({ is_featured: false })
           .eq("id", prevFeatured.id)
-          .then(result => result)
       );
     }
 
@@ -134,7 +132,6 @@ const PlannerImagesSection = ({ plannerId, userId }: PlannerImagesSectionProps) 
         .from("plan_images")
         .update({ is_featured: true })
         .eq("id", imageId)
-        .then(result => result)
     );
 
     // Await all updates
