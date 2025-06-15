@@ -3,16 +3,16 @@ import { Button } from '@/components/ui/button';
 import { GripVertical, Copy, Trash2, Check, Image, Replace } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
-type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
+type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
 
 interface RowCardHeaderProps {
-  row: ProjectRow;
+  row: PatternRow;
   mode: 'edit' | 'make';
   rowNumber?: number;
   isCheckboxDisabled: boolean;
   onMakeModeCheck: () => void;
   onImageButtonClick: () => void;
-  onDuplicate: (row: ProjectRow) => void;
+  onDuplicate: (row: PatternRow) => void;
   onDeleteClick: () => void;
 }
 

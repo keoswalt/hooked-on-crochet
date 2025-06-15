@@ -8,10 +8,10 @@ import { LinkifiedText } from '@/components/ui/linkified-text';
 import { CounterSection } from './CounterSection';
 import type { Database } from '@/integrations/supabase/types';
 
-type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
+type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
 
 interface RowCardContentProps {
-  row: ProjectRow;
+  row: PatternRow;
   mode: 'edit' | 'make';
   rowNumber?: number;
   userId: string;

@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Minus, Plus, Lock, Unlock } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
-type ProjectRow = Database['public']['Tables']['project_rows']['Row'];
+type PatternRow = Database['public']['Tables']['pattern_rows']['Row'];
 
 interface CounterSectionProps {
-  row: ProjectRow;
+  row: PatternRow;
   mode: 'edit' | 'make';
   isCompleted: boolean;
   onUpdateCounter: (id: string, newCounter: number) => void;

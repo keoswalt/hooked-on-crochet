@@ -22,9 +22,26 @@ export const usePatternRowsOperations = (
 ) => {
   const { toast } = useToast();
 
-  const handleAddRow = useCallback(async () => {
+  const handleAddRow = useCallback(async (insertAfterPosition?: number) => {
     try {
-      const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+      let position: number;
+      let counter: number;
+
+      if (insertAfterPosition !== undefined) {
+        // Insert after specific position
+        position = insertAfterPosition + 0.5;
+        // Calculate counter based on position in the list
+        const rowsAtOrBeforePosition = rows.filter(r => 
+          r.type === 'row' && (r.position || 0) <= insertAfterPosition
+        ).length;
+        counter = rowsAtOrBeforePosition + 1;
+      } else {
+        // Add at the end
+        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+        position = maxPosition + 1;
+        counter = rows.filter(r => r.type === 'row').length + 1;
+      }
+
       const { data, error } = await supabase
         .from('pattern_rows')
         .insert({
@@ -32,15 +49,20 @@ export const usePatternRowsOperations = (
           type: 'row',
           instructions: '',
           label: '',
-          counter: rows.filter(r => r.type === 'row').length + 1,
-          position: maxPosition + 1,
+          counter: counter,
+          position: position,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setRows([...rows, data]);
+      // If we inserted in the middle, reorder positions
+      if (insertAfterPosition !== undefined) {
+        await reorderPositions();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -50,23 +72,36 @@ export const usePatternRowsOperations = (
     }
   }, [patternId, rows, setRows, toast]);
 
-  const handleAddNote = useCallback(async () => {
+  const handleAddNote = useCallback(async (insertAfterPosition?: number) => {
     try {
-      const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+      let position: number;
+
+      if (insertAfterPosition !== undefined) {
+        position = insertAfterPosition + 0.5;
+      } else {
+        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+        position = maxPosition + 1;
+      }
+
       const { data, error } = await supabase
         .from('pattern_rows')
         .insert({
           pattern_id: patternId,
           type: 'note',
           instructions: '',
-          position: maxPosition + 1,
+          position: position,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setRows([...rows, data]);
+      // If we inserted in the middle, reorder positions
+      if (insertAfterPosition !== undefined) {
+        await reorderPositions();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -76,23 +111,36 @@ export const usePatternRowsOperations = (
     }
   }, [patternId, rows, setRows, toast]);
 
-  const handleAddDivider = useCallback(async () => {
+  const handleAddDivider = useCallback(async (insertAfterPosition?: number) => {
     try {
-      const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+      let position: number;
+
+      if (insertAfterPosition !== undefined) {
+        position = insertAfterPosition + 0.5;
+      } else {
+        const maxPosition = Math.max(...rows.map(r => r.position || 0), -1);
+        position = maxPosition + 1;
+      }
+
       const { data, error } = await supabase
         .from('pattern_rows')
         .insert({
           pattern_id: patternId,
           type: 'divider',
           instructions: '--- Divider ---',
-          position: maxPosition + 1,
+          position: position,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setRows([...rows, data]);
+      // If we inserted in the middle, reorder positions
+      if (insertAfterPosition !== undefined) {
+        await reorderPositions();
+      } else {
+        setRows([...rows, data]);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -101,6 +149,31 @@ export const usePatternRowsOperations = (
       });
     }
   }, [patternId, rows, setRows, toast]);
+
+  const reorderPositions = useCallback(async () => {
+    try {
+      const sortedRows = [...rows].sort((a, b) => (a.position || 0) - (b.position || 0));
+      const updates = sortedRows.map((row, index) => ({
+        id: row.id,
+        position: index + 1
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('pattern_rows')
+          .update({ position: update.position })
+          .eq('id', update.id);
+      }
+
+      await fetchRows();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [rows, fetchRows, toast]);
 
   const handleUpdateRow = useCallback(async (rowId: string, updates: Partial<PatternRow>) => {
     try {
@@ -251,5 +324,6 @@ export const usePatternRowsOperations = (
     handleCompleteRow,
     handleUncompleteRow,
     handleMarkInProgress,
+    reorderPositions,
   };
 };
