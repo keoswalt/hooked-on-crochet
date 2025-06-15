@@ -38,8 +38,8 @@ export function ProjectPlanCard({
       )}
       aria-label={`View plan: ${planName}`}
     >
-      <CardContent className="flex flex-col items-center p-3">
-        <div className="w-full aspect-square rounded bg-gray-100 mb-2 overflow-hidden flex items-center justify-center">
+      <CardContent className="flex flex-row items-center p-3 gap-3">
+        <div className="w-16 h-16 flex-shrink-0 rounded bg-gray-100 overflow-hidden flex items-center justify-center">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -48,10 +48,12 @@ export function ProjectPlanCard({
               draggable={false}
             />
           ) : (
-            <div className="text-xs text-gray-400">No image</div>
+            <div className="text-xs text-gray-400 text-center">No image</div>
           )}
         </div>
-        <div className="text-sm text-center font-medium line-clamp-2">{planName}</div>
+        <div className="flex-1 flex items-center min-w-0">
+          <div className="text-sm text-left font-medium line-clamp-2">{planName}</div>
+        </div>
       </CardContent>
     </Card>
   );
