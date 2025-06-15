@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,8 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
+  const [showNewYarnDialog, setShowNewYarnDialog] = useState(false);
+  const [showNewSwatchDialog, setShowNewSwatchDialog] = useState(false);
   const [newPlanName, setNewPlanName] = useState('');
   const [newPlanDescription, setNewPlanDescription] = useState('');
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
@@ -141,6 +144,16 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     setEditingSwatch(null);
   };
 
+  const handleNewYarnSaved = () => {
+    fetchData();
+    setShowNewYarnDialog(false);
+  };
+
+  const handleNewSwatchSaved = () => {
+    fetchData();
+    setShowNewSwatchDialog(false);
+  };
+
   if (loading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
@@ -196,9 +209,14 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Yarn</h2>
-            <Button variant="outline" size="sm" onClick={() => navigate('/stash')}>
-              Manage Stash
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/stash')}>
+                Manage Stash
+              </Button>
+              <Button size="sm" onClick={() => setShowNewYarnDialog(true)}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           {yarnStash.length === 0 ? (
             <Card>
@@ -235,9 +253,14 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Swatches</h2>
-            <Button variant="outline" size="sm" onClick={() => navigate('/swatches')}>
-              Manage Swatches
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/swatches')}>
+                Manage Swatches
+              </Button>
+              <Button size="sm" onClick={() => setShowNewSwatchDialog(true)}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           {swatches.length === 0 ? (
             <Card>
@@ -301,6 +324,34 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
               Create Plan
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Yarn Dialog */}
+      <Dialog open={showNewYarnDialog} onOpenChange={setShowNewYarnDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Yarn</DialogTitle>
+          </DialogHeader>
+          <YarnForm
+            userId={user.id}
+            onSave={handleNewYarnSaved}
+            onCancel={() => setShowNewYarnDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* New Swatch Dialog */}
+      <Dialog open={showNewSwatchDialog} onOpenChange={setShowNewSwatchDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Swatch</DialogTitle>
+          </DialogHeader>
+          <SwatchForm
+            userId={user.id}
+            onSave={handleNewSwatchSaved}
+            onCancel={() => setShowNewSwatchDialog(false)}
+          />
         </DialogContent>
       </Dialog>
 
