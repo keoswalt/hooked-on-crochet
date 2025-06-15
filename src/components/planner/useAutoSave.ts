@@ -20,6 +20,13 @@ export function useAutoSave({ planId, elements, debounceMs = 1200, onSaved }: Us
   const lastSavedData = useRef<string>(""); // Serialize for fast comparison
 
   useEffect(() => {
+    // Do NOT run if planId is falsy/empty
+    if (!planId || planId.trim() === "") {
+      setStatus("idle");
+      setError(null);
+      return;
+    }
+
     // Serialize current
     const currentData = JSON.stringify(elements);
 
