@@ -36,6 +36,9 @@ export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
   const [isPanning, setIsPanning] = useState(false);
   const panOrigin = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // --- FIX: Add this line to declare the double-click flag ---
+  const justDoubleClicked = React.useRef(false);
+
   // Add text element on drop
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
