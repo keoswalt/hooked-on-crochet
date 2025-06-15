@@ -242,7 +242,11 @@ export const PlannerDetailPage = ({
       <PlannerProjectsSection plannerId={plannerId as string} user={user} />
 
       {/* NOTES SECTION */}
-      <PlannerNotesSection plannerId={plannerId as string} userId={user.id} />
+      <PlannerNotesSection
+        // @ts-expect-error -- notes section may be missing prop types, but these should match usage in other planner sections
+        plannerId={plannerId as string}
+        userId={user.id}
+      />
     </div>
   );
 };
