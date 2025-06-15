@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PlanImage } from "./usePlanImages";
@@ -53,33 +52,27 @@ export function usePlanImageFeatured(images: PlanImage[], setImages: SetImages) 
       )
     );
 
-    // Fix: Await the Supabase update and push actual promises to updates array
-    const updates: Promise<any>[] = [];
-
+    // Sequentially unfeature previous if needed, then set new featured
+    let unfeatureError: any = undefined;
     if (prevFeatured && prevFeatured.id !== imageId) {
-      const unfeaturePromise = supabase
+      const { error } = await supabase
         .from("plan_images")
         .update({ is_featured: false })
         .eq("id", prevFeatured.id)
-        .select('*')
-        .then(r => r); // Make it a real promise
-      updates.push(unfeaturePromise);
+        .select('*');
+      if (error) unfeatureError = error;
     }
 
-    const featurePromise = supabase
+    const { error: featureError } = await supabase
       .from("plan_images")
       .update({ is_featured: true })
       .eq("id", imageId)
-      .select('*')
-      .then(r => r);
-    updates.push(featurePromise);
+      .select('*');
 
-    const results = await Promise.all(updates);
-    const error = results.find(r => r?.error)?.error;
-    if (error) {
+    if (unfeatureError || featureError) {
       toast({
         title: "Error",
-        description: error.message,
+        description: unfeatureError?.message || featureError?.message,
         variant: "destructive",
       });
       setImages(prev =>
