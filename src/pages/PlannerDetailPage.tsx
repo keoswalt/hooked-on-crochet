@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CanvasBoard } from '@/components/planner/CanvasBoard';
-import { BottomDrawer } from '@/components/planner/BottomDrawer';
 import { DebugPanel } from '@/components/planner/DebugPanel';
+import { ToolsToolbar, ToolType } from '@/components/planner/ToolsToolbar';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -22,6 +23,9 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
   const { toast } = useToast();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Selected tool state (default: text tool)
+  const [selectedTool, setSelectedTool] = useState<ToolType>("text");
 
   useEffect(() => {
     if (plannerId) {
@@ -84,19 +88,16 @@ export const PlannerDetailPage = ({ user }: PlannerDetailPageProps) => {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col relative">
-        {/* Canvas Area - now using new CanvasBoard */}
+        {/* Canvas Area */}
         <div className="flex-1 relative z-10">
-          {/* Replace InfiniteCanvas with new CanvasBoard */}
-          <CanvasBoard />
-        </div>
-
-        {/* Bottom Drawer - remains unchanged */}
-        <div className="flex-shrink-0 z-30 relative">
-          <BottomDrawer userId={user.id} planId={plan.id} />
+          <CanvasBoard selectedTool={selectedTool} />
         </div>
       </div>
-      
-      {/* Debug Panel - highest z-index to stay on top */}
+
+      {/* New Tools Toolbar (Sticky to bottom) */}
+      <ToolsToolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+
+      {/* Debug Panel */}
       <DebugPanel planId={plan.id} userId={user.id} />
     </div>
   );

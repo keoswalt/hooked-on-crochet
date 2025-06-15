@@ -3,6 +3,7 @@ import { CanvasItem } from "./CanvasItem";
 import { v4 as uuidv4 } from "uuid";
 import { RotateCcw } from "lucide-react"; // use for reset icon
 import { Button } from "@/components/ui/button";
+import type { ToolType } from "./ToolsToolbar";
 
 interface CanvasElement {
   id: string;
@@ -12,7 +13,11 @@ interface CanvasElement {
   content: string;
 }
 
-export const CanvasBoard: React.FC = () => {
+interface CanvasBoardProps {
+  selectedTool?: ToolType;
+}
+
+export const CanvasBoard: React.FC<CanvasBoardProps> = ({ selectedTool }) => {
   const boardRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<CanvasElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
