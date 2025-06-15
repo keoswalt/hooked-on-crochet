@@ -1,6 +1,7 @@
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Palette, Pencil } from 'lucide-react';
+import { Pencil, Archive, Palette } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
@@ -16,8 +17,8 @@ export const Header = ({ userEmail }: HeaderProps) => {
   };
 
   const isProjectsActive = location.pathname.startsWith('/projects');
-  // root "/" and /planner are both considered planner active
-  const isPlannerActive = location.pathname === '/' || location.pathname.startsWith('/planner');
+  const isStashActive = location.pathname.startsWith('/stash');
+  const isSwatchesActive = location.pathname.startsWith('/swatches');
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -51,12 +52,20 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   <span className="hidden sm:inline">Projects</span>
                 </Button>
                 <Button
-                  variant={isPlannerActive ? "default" : "outline"}
-                  onClick={() => navigate('/planner')}
+                  variant={isStashActive ? "default" : "outline"}
+                  onClick={() => navigate('/stash')}
+                  className="flex items-center gap-2"
+                >
+                  <Archive className="h-4 w-4" />
+                  <span className="hidden sm:inline">Stash</span>
+                </Button>
+                <Button
+                  variant={isSwatchesActive ? "default" : "outline"}
+                  onClick={() => navigate('/swatches')}
                   className="flex items-center gap-2"
                 >
                   <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">Plans</span>
+                  <span className="hidden sm:inline">Swatches</span>
                 </Button>
               </nav>
             )}
@@ -71,3 +80,4 @@ export const Header = ({ userEmail }: HeaderProps) => {
     </header>
   );
 };
+
