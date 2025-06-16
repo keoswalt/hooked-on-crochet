@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { SwatchFilters } from '@/components/swatches/SwatchFilters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import { useSwatches } from "@/hooks/useSwatches";
 
 type Swatch = Database['public']['Tables']['swatches']['Row'];
 
@@ -27,47 +27,19 @@ interface SwatchesPageProps {
 }
 
 export const SwatchesPage = ({ user }: SwatchesPageProps) => {
-  const [swatches, setSwatches] = useState<Swatch[]>([]);
+  const { data: swatches = [], isLoading: _loading, refetch } = useSwatches(user);
   const [filteredSwatches, setFilteredSwatches] = useState<Swatch[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingSwatch, setEditingSwatch] = useState<Swatch | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSwatches();
-  }, [user.id]);
-
-  useEffect(() => {
     setFilteredSwatches(swatches);
   }, [swatches]);
 
-  const fetchSwatches = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('swatches')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setSwatches(data || []);
-    } catch (error: any) {
-      console.error('Error fetching swatches:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load swatches",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSwatchSaved = () => {
-    fetchSwatches();
+    refetch();
     setShowAddDialog(false);
     setEditingSwatch(null);
   };
@@ -126,7 +98,7 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
         description: "Swatch cloned successfully",
       });
 
-      fetchSwatches();
+      refetch();
     } catch (error: any) {
       console.error('Error cloning swatch:', error);
       toast({
@@ -162,7 +134,7 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
         description: "Swatch deleted successfully",
       });
 
-      fetchSwatches();
+      refetch();
     } catch (error: any) {
       console.error('Error deleting swatch:', error);
       toast({
@@ -172,14 +144,6 @@ export const SwatchesPage = ({ user }: SwatchesPageProps) => {
       });
     }
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

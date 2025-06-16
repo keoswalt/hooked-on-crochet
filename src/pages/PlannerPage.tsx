@@ -19,6 +19,9 @@ import type { Database } from '@/integrations/supabase/types';
 import { NewPlanDialog } from '@/components/planner/NewPlanDialog';
 import { PlansGrid } from '@/components/planner/PlansGrid';
 import { PlannerRelatedOverview } from '@/components/planner/PlannerRelatedOverview';
+import { usePlansList } from "@/hooks/usePlansList";
+import { useYarnStash } from "@/hooks/useYarnStash";
+import { useSwatches } from "@/hooks/useSwatches";
 
 // Export these types so they can be used elsewhere
 export type Plan = Database['public']['Tables']['plans']['Row'] & {
@@ -35,14 +38,8 @@ export type PlannerPageProps = {
 const PLANS_PER_PAGE = 9;
 
 export const PlannerPage = ({ user }: PlannerPageProps) => {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [yarnStash, setYarnStash] = useState<YarnStash[]>([]);
-  const [swatches, setSwatches] = useState<Swatch[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [plansLoading, setPlansLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPlans, setTotalPlans] = useState(0);
   const [showNewYarnDialog, setShowNewYarnDialog] = useState(false);
   const [showNewSwatchDialog, setShowNewSwatchDialog] = useState(false);
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
@@ -51,6 +48,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   const [showNewPlanDialog, setShowNewPlanDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const { data: plansData, isLoading: plansLoading, refetch } = usePlansList(user, searchQuery, currentPage);
+  const plans = plansData?.plans || [];
+  const totalPlans = plansData?.totalPlans || 0;
+
+  const { data: yarnsData = [], refetch: yarnRefetch } = useYarnStash(user);
+  const yarnStash = yarnsData.slice(0,6);
+  const { data: swatchData = [], refetch: swatchRefetch } = useSwatches(user);
+  const swatches = swatchData.slice(0,6);
 
   const totalPages = Math.ceil(totalPlans / PLANS_PER_PAGE);
 
@@ -62,123 +68,20 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
           setCurrentPage(1); // Reset to first page on new search
-          fetchPlans(query, 1);
+          refetch();
         }, 300);
       };
     })(),
-    []
+    [refetch]
   );
-
-  useEffect(() => {
-    fetchInitialData();
-  }, [user.id]);
 
   useEffect(() => {
     if (searchQuery) {
       debounceSearch(searchQuery);
     } else {
       setCurrentPage(1);
-      fetchPlans('', 1);
     }
   }, [searchQuery, debounceSearch]);
-
-  const fetchInitialData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch initial plans data
-      await fetchPlans('', 1);
-
-      // Fetch yarn stash (limit to recent entries for overview)
-      const { data: yarn, error: yarnError } = await supabase
-        .from('yarn_stash')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(6);
-
-      if (yarnError) throw yarnError;
-      setYarnStash(yarn || []);
-
-      // Fetch swatches (limit to recent entries for overview)
-      const { data: swatchData, error: swatchError } = await supabase
-        .from('swatches')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(6);
-
-      if (swatchError) throw swatchError;
-      setSwatches(swatchData || []);
-
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load data",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchPlans = async (query: string, page: number) => {
-    try {
-      setPlansLoading(true);
-      
-      const offset = (page - 1) * PLANS_PER_PAGE;
-      
-      // Compose the SQL to join plan_images table for featured images
-      let plansQuery = supabase
-        .from('plans')
-        .select('*, plan_images!left(is_featured, image_url)')
-        .eq('user_id', user.id);
-
-      let countQuery = supabase
-        .from('plans')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      if (query.trim()) {
-        const searchFilter = `name.ilike.%${query}%,description.ilike.%${query}%`;
-        plansQuery = plansQuery.or(searchFilter);
-        countQuery = countQuery.or(searchFilter);
-      }
-
-      // Count
-      const { count, error: countError } = await countQuery;
-      if (countError) throw countError;
-      setTotalPlans(count || 0);
-
-      // Get data (with featured image)
-      const { data: planData, error: plansError } = await plansQuery
-        .order('updated_at', { ascending: false })
-        .range(offset, offset + PLANS_PER_PAGE - 1);
-
-      if (plansError) throw plansError;
-
-      // Map image
-      const plansWithImage = (planData || []).map((plan: any) => ({
-        ...plan,
-        featured_image_url: Array.isArray(plan.plan_images)
-          ? plan.plan_images.find((img: any) => img.is_featured === true)?.image_url
-          : null
-      }));
-
-      setPlans(plansWithImage);
-
-    } catch (error: any) {
-      console.error('Error fetching plans:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load plans",
-        variant: "destructive",
-      });
-    } finally {
-      setPlansLoading(false);
-    }
-  };
 
   const handleDeletePlan = async () => {
     if (!planToDelete) return;
@@ -204,7 +107,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       });
 
       // Refresh plans data
-      fetchPlans(searchQuery, currentPage);
+      refetch();
       setPlanToDelete(null);
     } catch (error: any) {
       console.error('Error deleting plan:', error);
@@ -225,37 +128,33 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
   };
 
   const handleYarnSaved = () => {
-    fetchInitialData();
+    yarnRefetch();
     setEditingYarn(null);
   };
 
   const handleSwatchSaved = () => {
-    fetchInitialData();
+    swatchRefetch();
     setEditingSwatch(null);
   };
 
   const handleNewYarnSaved = () => {
-    fetchInitialData();
+    yarnRefetch();
     setShowNewYarnDialog(false);
   };
 
   const handleNewSwatchSaved = () => {
-    fetchInitialData();
+    swatchRefetch();
     setShowNewSwatchDialog(false);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchPlans(searchQuery, page);
+    refetch();
   };
 
   const clearSearch = () => {
     setSearchQuery('');
   };
-
-  if (loading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

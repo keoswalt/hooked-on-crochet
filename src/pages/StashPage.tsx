@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import YarnDisplayCard from '@/components/shared/YarnDisplayCard';
+import { useYarnStash } from "@/hooks/useYarnStash";
 
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
 
@@ -27,47 +28,19 @@ interface StashPageProps {
 }
 
 export const StashPage = ({ user }: StashPageProps) => {
-  const [yarns, setYarns] = useState<YarnStash[]>([]);
+  const { data: yarns = [], isLoading: _loading, refetch } = useYarnStash(user);
   const [filteredYarns, setFilteredYarns] = useState<YarnStash[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchYarns();
-  }, [user.id]);
-
-  useEffect(() => {
     setFilteredYarns(yarns);
   }, [yarns]);
 
-  const fetchYarns = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('yarn_stash')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setYarns(data || []);
-    } catch (error: any) {
-      console.error('Error fetching yarns:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load yarn stash",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleYarnSaved = () => {
-    fetchYarns();
+    refetch();
     setShowAddDialog(false);
     setEditingYarn(null);
   };
@@ -90,7 +63,7 @@ export const StashPage = ({ user }: StashPageProps) => {
         description: "Yarn deleted successfully",
       });
 
-      fetchYarns();
+      refetch();
     } catch (error: any) {
       console.error('Error deleting yarn:', error);
       toast({
@@ -100,14 +73,6 @@ export const StashPage = ({ user }: StashPageProps) => {
       });
     }
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

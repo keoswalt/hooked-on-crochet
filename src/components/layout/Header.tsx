@@ -19,6 +19,14 @@ export const Header = ({ userEmail }: HeaderProps) => {
   const isStashActive = location.pathname.startsWith('/stash');
   const isSwatchesActive = location.pathname.startsWith('/swatches');
 
+  const prefetchProjects = () => import('@/pages/ProjectListPage');
+  const prefetchStash = () => {
+    // no-op query prefetch for now
+  };
+  const prefetchSwatches = () => {
+    import('@/pages/SwatchesPage');
+  };
+
   return (
     // Use a wrapper div for full-width bg and border, then inner .container for content
     <div className="w-full border-b border-gray-200 bg-white">
@@ -44,6 +52,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
             {userEmail && (
               <nav className="flex space-x-4">
                 <Button
+                  onMouseEnter={prefetchProjects}
                   variant={isProjectsActive ? "default" : "outline"}
                   onClick={() => navigate('/projects')}
                   className="flex items-center gap-2"
@@ -52,6 +61,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   <span className="hidden sm:inline">Projects</span>
                 </Button>
                 <Button
+                  onMouseEnter={prefetchStash}
                   variant={isStashActive ? "default" : "outline"}
                   onClick={() => navigate('/stash')}
                   className="flex items-center gap-2"
@@ -60,6 +70,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   <span className="hidden sm:inline">Stash</span>
                 </Button>
                 <Button
+                  onMouseEnter={prefetchSwatches}
                   variant={isSwatchesActive ? "default" : "outline"}
                   onClick={() => navigate('/swatches')}
                   className="flex items-center gap-2"
