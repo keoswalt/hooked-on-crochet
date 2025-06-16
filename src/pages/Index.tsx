@@ -66,10 +66,13 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <AuthForm mode={authMode} onModeChange={setAuthMode} />
-      </div>
+      <div className="min-h-screen bg-white sm:bg-gray-800 flex flex-col">
+  <Header />
+  <div className="flex flex-1 justify-center items-center">
+    <AuthForm mode={authMode} onModeChange={setAuthMode} />
+  </div>
+</div>
+
     );
   }
 

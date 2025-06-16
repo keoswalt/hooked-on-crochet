@@ -90,75 +90,76 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-      <Card className="border-0 shadow-none sm:border sm:shadow-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/hooked-on-crochet-favicon-inverted.svg" className="h-8 w-8" />
-          </div>
-          <CardTitle className="text-2xl">
-            {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
-          </CardTitle>
-          <CardDescription>
-            {mode === 'signin'
-              ? 'Sign in to view your crochet projects'
-              : 'Start tracking your crochet projects'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
-            </Button>
-          </form>
-          
-          {mode === 'signin' && (
-            <div className="mt-4 text-center">
-              <Button
-                variant="link"
-                onClick={handleForgotPassword}
-                disabled={resetLoading}
-                className="text-sm"
-              >
-                {resetLoading ? 'Sending...' : 'Forgot your password?'}
-              </Button>
-            </div>
-          )}
-          
-          <div className="mt-4 text-center">
-            <Button
-              variant="link"
-              onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
-            >
-              {mode === 'signin'
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <div className="w-full sm:max-w-md sm:mx-auto">
+  <Card className="border-0 shadow-none sm:border sm:shadow-sm px-4 py-6 sm:px-6">
+    <CardHeader className="text-center">
+      <div className="flex justify-center mb-4">
+        <img src="/hooked-on-crochet-favicon-inverted.svg" className="h-8 w-8" />
+      </div>
+      <CardTitle className="text-2xl">
+        {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+      </CardTitle>
+      <CardDescription>
+        {mode === 'signin'
+          ? 'Sign in to view your crochet projects'
+          : 'Start tracking your crochet projects'}
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+        </Button>
+      </form>
+
+      {mode === 'signin' && (
+        <div className="mt-4 text-center">
+          <Button
+            variant="link"
+            onClick={handleForgotPassword}
+            disabled={resetLoading}
+            className="text-sm"
+          >
+            {resetLoading ? 'Sending...' : 'Forgot your password?'}
+          </Button>
+        </div>
+      )}
+
+      <div className="mt-4 text-center">
+        <Button
+          variant="link"
+          onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
+        >
+          {mode === 'signin'
+            ? "Don't have an account? Sign up"
+            : 'Already have an account? Sign in'}
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
   );
 };
