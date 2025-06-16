@@ -1,3 +1,4 @@
+import { NavigationProvider } from "@/context/NavigationContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
+      <NavigationProvider>
         <BrowserRouter>
           <Suspense fallback={null}>
             <Routes>
@@ -46,6 +48,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        </NavigationProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
