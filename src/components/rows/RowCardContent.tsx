@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ImageUploader, ImageUploaderRef } from '@/components/images/ImageUploader';
@@ -56,6 +56,24 @@ export const RowCardContent = ({
   const handleMakeModeCounterChange = (newCounter: number) => {
     onMakeModeCounterChange(newCounter);
   };
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+const resizeTextarea = () => {
+  const el = textareaRef.current;
+  if (el) {
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }
+};
+
+useEffect(() => {
+  resizeTextarea();
+}, [localInstructions]);
+
+const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  onInstructionsChange(e); // preserve original behavior
+  resizeTextarea();        // resize after setting new content
+};
 
   return (
     <div className="space-y-3">
@@ -82,21 +100,23 @@ export const RowCardContent = ({
         </div>
       )}
 
-      {mode === 'edit' ? (
-        <textarea
-          value={localInstructions}
-          onChange={onInstructionsChange}
-          onFocus={onInstructionsFocus}
-          onBlur={onInstructionsBlur}
-          className="w-full p-2 border rounded-md min-h-[160px] resize-none"
-          placeholder={`Enter ${row.type} instructions...`}
-        />
-      ) : (
-        <LinkifiedText 
-          text={localInstructions}
-          className="w-full p-2 border rounded-md min-h-[80px] bg-gray-50"
-        />
-      )}
+{mode === 'edit' ? (
+  <textarea
+    ref={textareaRef}
+    value={localInstructions}
+    onChange={handleInstructionsChange}
+    onFocus={onInstructionsFocus}
+    onBlur={onInstructionsBlur}
+    className="w-full p-2 border rounded-md min-h-[80px] resize-none overflow-hidden"
+    placeholder={`Enter ${row.type} instructions...`}
+  />
+) : (
+  <LinkifiedText 
+    text={localInstructions}
+    className="w-full p-2 border rounded-md min-h-[80px] bg-gray-50"
+  />
+)}
+
       
       {row.type === 'row' && (
         <div className="space-y-3">
