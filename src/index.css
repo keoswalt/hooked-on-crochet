@@ -24,19 +24,19 @@
     
     /* Semantic Tokens - Light Mode */
     --background: var(--color-cream);
-    --foreground: var(--color-slate);
+    --foreground: var(--color-slate-dark);
 
     --card: var(--color-cream);
-    --card-foreground: var(--color-slate);
+    --card-foreground: var(--color-slate-dark);
 
     --popover: var(--color-cream);
-    --popover-foreground: var(--color-slate);
+    --popover-foreground: var(--color-slate-dark);
 
     --primary: var(--color-sage);
     --primary-foreground: var(--color-white);
 
     --secondary: var(--color-pink);
-    --secondary-foreground: var(--color-slate);
+    --secondary-foreground: var(--color-slate-dark);
 
     --muted: var(--color-sage-light);
     --muted-foreground: var(--color-slate-light);
@@ -66,29 +66,29 @@
 
   .dark {
     /* Semantic Tokens - Dark Mode */
-    --background: var(--color-slate);
-    --foreground: var(--color-cream);
+    --background: var(--color-slate-dark);
+    --foreground: var(--color-white);
 
-    --card: var(--color-slate);
-    --card-foreground: var(--color-cream);
+    --card: var(--color-slate-dark);
+    --card-foreground: var(--color-white);
 
-    --popover: var(--color-slate);
-    --popover-foreground: var(--color-cream);
+    --popover: var(--color-slate-dark);
+    --popover-foreground: var(--color-white);
 
     --primary: var(--color-sage);
-    --primary-foreground: var(--color-cream);
+    --primary-foreground: var(--color-white);
 
     --secondary: var(--color-pink);
-    --secondary-foreground: var(--color-cream);
+    --secondary-foreground: var(--color-slate-dark);
 
     --muted: var(--color-slate-dark);
     --muted-foreground: var(--color-slate-light);
 
     --accent: var(--color-pink);
-    --accent-foreground: var(--color-cream);
+    --accent-foreground: var(--color-slate-dark);
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: var(--color-cream);
+    --destructive-foreground: var(--color-white);
 
     --border: var(--color-slate-darker);
     --input: var(--color-slate-darker);

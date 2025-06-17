@@ -29,10 +29,10 @@ export const Header = ({ userEmail }: HeaderProps) => {
 
   return (
     // Use a wrapper div for full-width bg and border, then inner .container for content
-    <div className="w-full border-b border-gray-200 bg-slate">
+    <div className="w-full border-b border-gray-200 bg-foreground">
       <div className="container mx-auto">
         <header className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4">
             {/* Logo/Favicon and Title */}
             <div 
               className="flex items-center space-x-3 cursor-pointer transition-opacity"
@@ -43,14 +43,14 @@ export const Header = ({ userEmail }: HeaderProps) => {
                 alt="Hooked on Crochet" 
                 className="h-8 w-8"
               />
-              <h1 className="hidde hover:text-pink sm:block text-xl font-bold text-white">
+              <h1 className="hidden hover:text-pink sm:block text-l font-bold text-white">
                 Hooked on Crochet
               </h1>
             </div>
             
             {/* Navigation */}
             {userEmail && (
-              <nav className="flex space-x-4">
+              <nav className="flex space-x-2">
                 <Button
                   onMouseEnter={prefetchProjects}
                   variant={isProjectsActive ? "default" : "outline"}
@@ -83,7 +83,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center">
+          <div className="flex items-center pl-2">
             {userEmail && <UserMenu userEmail={userEmail} />}
           </div>
         </header>

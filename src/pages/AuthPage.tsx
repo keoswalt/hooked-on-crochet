@@ -6,7 +6,7 @@ const AuthPage = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
   return (
-    <div className="min-h-screen bg-white sm:bg-gray-800 flex flex-col">
+    <div className="min-h-screen bg-white sm:bg-primary flex flex-col">
       <Header />
       <div className="flex flex-1 justify-center items-center">
         <AuthForm mode={authMode} onModeChange={setAuthMode} />
