@@ -35,7 +35,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
           <div className="flex items-center space-x-4">
             {/* Logo/Favicon and Title */}
             <div 
-              className="flex items-center hover:text-accent space-x-3 cursor-pointer transition-opacity"
+              className="flex items-center space-x-3 cursor-pointer transition-opacity"
               onClick={handleLogoClick}
             >
               <img 
@@ -43,7 +43,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                 alt="Hooked on Crochet" 
                 className="h-8 w-8"
               />
-              <h1 className="hidden  sm:block text-l font-bold text-white">
+              <h1 className="hidden hover:text-accent sm:block text-l font-bold text-white">
                 Hooked on Crochet
               </h1>
             </div>
