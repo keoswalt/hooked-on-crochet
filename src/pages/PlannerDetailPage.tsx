@@ -14,7 +14,6 @@ import PlannerResourcesSection from "@/components/planner/PlannerResourcesSectio
 import PlannerYarnSection from "@/components/planner/PlannerYarnSection";
 import PlannerSwatchesSection from "@/components/planner/PlannerSwatchesSection";
 import PlannerProjectsSection from "@/components/planner/PlannerProjectsSection";
-import PlannerNotesSection from "@/components/planner/PlannerNotesSection";
 import { Textarea } from "@/components/ui/textarea";
 import PlanImageUploadDialog from "@/components/planner/PlanImageUploadDialog";
 import PlanImagesGrid from "@/components/planner/PlanImagesGrid";

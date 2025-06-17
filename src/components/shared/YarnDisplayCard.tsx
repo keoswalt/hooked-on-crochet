@@ -27,7 +27,7 @@ export const YarnDisplayCard = ({
 
   return (
     <div
-      className={`relative rounded-lg border transition-shadow shadow hover:shadow-md hover-scale cursor-pointer ring-0 border-gray-200 bg-white focus:outline-none ${className}`}
+      className={`relative w-sm rounded-lg border transition-shadow shadow hover:shadow-md hover-scale cursor-pointer ring-0 border-gray-200 bg-white focus:outline-none ${className}`}
       tabIndex={0}
       onClick={handleCardClick}
       {...props}
@@ -66,7 +66,7 @@ export const YarnDisplayCard = ({
 
       <div className="pt-6 pb-4 px-4">
         {yarn.image_url ? (
-          <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-gray-100">
+          <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-gray-100">
             <img src={yarn.image_url} alt={yarn.name} className="w-full h-full object-cover" />
           </div>
         ) : (
