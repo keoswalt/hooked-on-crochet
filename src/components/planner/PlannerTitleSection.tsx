@@ -35,14 +35,9 @@ export const PlannerTitleSection = ({
         disabled={loading}
         maxLength={100}
         placeholder="Plan Name"
-        className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight px-0 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none mb-6"
+        className="text-3xl sm:text-3xl md:text-3xl lg:text-4xl font-bold border-none shadow-none bg-transparent focus:ring-0 focus:outline-none mb-6"
       />
-      {/* Show auto-save status */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1">
-        {saving && <Loader2 className="animate-spin h-5 w-5 text-gray-300" />}
-        {saveSuccess && !saving && <CheckCircle2 className="h-5 w-5 text-green-500" />}
-        {saveError && !saving && <XCircle className="h-5 w-5 text-red-500" />}
-      </div>
+
     </div>
     <Textarea
       value={editableDesc}
