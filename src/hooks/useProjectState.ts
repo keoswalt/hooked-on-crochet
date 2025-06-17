@@ -31,7 +31,9 @@ export const useProjectState = (user: User) => {
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const fetchProjectsWrapper = () => fetchProjectsQuery();
+  const fetchProjectsWrapper = async () => {
+    await fetchProjectsQuery();
+  };
 
   return {
     projects,

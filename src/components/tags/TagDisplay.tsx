@@ -26,7 +26,7 @@ export const TagDisplay = ({
   return (
     <div className="flex flex-wrap gap-1">
       {tags.map((tag) => (
-        <Badge key={tag.id} variant="secondary" className={`${size === 'sm' ? 'text-xs px-2 py-0.5' : ''} flex items-center gap-1`}>
+        <Badge key={tag.id} variant="outline" className={`${size === 'sm' ? 'text-xs px-2 py-0.5' : ''} flex items-center gap-1`}>
           <span>{tag.name}</span>
           {showRemoveButton && onRemoveTag && (
             <Button

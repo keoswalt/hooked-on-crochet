@@ -74,7 +74,7 @@ export default function PlanResourceCard({
       <div className="flex flex-row items-center justify-between pt-2">
         {/* URL prefix chip (left) */}
         <Badge
-          variant="secondary"
+          variant="outline"
           className="text-xs px-2 py-0.5 select-none"
           tabIndex={-1}
         >

@@ -161,7 +161,7 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Project Planner</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Hooked on Crochet</h1>
           <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
         </div>
         <div>

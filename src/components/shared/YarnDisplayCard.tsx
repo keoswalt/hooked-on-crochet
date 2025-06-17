@@ -29,7 +29,7 @@ export const YarnDisplayCard = ({
 
   return (
     <div
-      className={`relative w-sm rounded-lg border transition-shadow shadow hover:shadow-md hover-scale cursor-pointer ring-0 border-gray-200 bg-white focus:outline-none ${className}`}
+      className={`relative w-sm rounded-lg border transition-shadow shadow hover:shadow-md hover-scale cursor-pointer ring-0 border bg-white focus:outline-none ${className}`}
       tabIndex={0}
       onClick={handleCardClick}
       {...props}
@@ -105,7 +105,7 @@ export const YarnDisplayCard = ({
           {yarn.weight && (
             <div className="flex flex-wrap items-center gap-2 w-full pt-1">
               <span className="text-xs font-medium mb-0.5">Weight:</span>
-              <Badge variant="secondary" className="max-w-full break-words whitespace-normal">
+              <Badge variant="outline" className="max-w-full break-words whitespace-normal">
                 {getYarnWeightLabel(yarn.weight)}
               </Badge>
             </div>

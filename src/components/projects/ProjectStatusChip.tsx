@@ -49,12 +49,8 @@ export const ProjectStatusChip = ({ status, size = 'default' }: ProjectStatusChi
 
   return (
     <Badge 
-      variant="outline" 
+      variant="dark" 
       className={`
-        ${config.bgColor} 
-        ${config.textColor} 
-        ${config.borderColor} 
-        ${textSize}
         flex items-center gap-1 
         hover:shadow-sm 
         transition-shadow

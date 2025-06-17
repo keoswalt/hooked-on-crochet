@@ -20,7 +20,7 @@ export const ModeHeader = ({
 }: ModeHeaderProps) => {
   return (
     <div className="bg-gray-50">
-      <Card className="border border-gray-200 rounded-lg shadow-sm">
+      <Card className="border rounded-lg shadow-sm">
         <CardContent className="py-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>

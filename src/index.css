@@ -1,92 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base Color Tokens */
+    --color-white: 0 0% 100%;
+    --color-sage: 84 33% 53%;      /* #92b55a */
+    --color-pink: 302 71% 73%;     /* #ea8ded */
+    --color-cream: 60 30% 99%;     /* #FFFDF7 */
+    --color-slate: 217 16% 20%;    /* #2c313b */
+    
+    /* Tints and Shades */
+    --color-sage-light: 84 33% 95%;
+    --color-sage-medium: 84 33% 90%;
+    --color-pink-light: 302 71% 90%;
+    --color-pink-medium: 302 71% 45%;
+    --color-slate-light: 217 16% 60%;
+    --color-slate-dark: 217 16% 15%;
+    --color-slate-darker: 217 16% 25%;
+    
+    /* Semantic Tokens - Light Mode */
+    --background: var(--color-cream);
+    --foreground: var(--color-slate);
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: var(--color-cream);
+    --card-foreground: var(--color-slate);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: var(--color-cream);
+    --popover-foreground: var(--color-slate);
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: var(--color-sage);
+    --primary-foreground: var(--color-white);
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: var(--color-pink);
+    --secondary-foreground: var(--color-slate);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: var(--color-sage-light);
+    --muted-foreground: var(--color-slate-light);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: var(--color-pink-light);
+    --accent-foreground: var(--color-pink-medium);
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: var(--color-cream);
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: var(--color-slate);
+    --input: var(--color-slate-light);
+    --ring: var(--color-sage);
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar Tokens - Light Mode */
+    --sidebar-background: var(--color-cream);
+    --sidebar-foreground: var(--color-slate);
+    --sidebar-primary: var(--color-sage);
+    --sidebar-primary-foreground: var(--color-cream);
+    --sidebar-accent: var(--color-pink-light);
+    --sidebar-accent-foreground: var(--color-pink-medium);
+    --sidebar-border: var(--color-sage-medium);
+    --sidebar-ring: var(--color-sage);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Semantic Tokens - Dark Mode */
+    --background: var(--color-slate);
+    --foreground: var(--color-cream);
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: var(--color-slate);
+    --card-foreground: var(--color-cream);
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: var(--color-slate);
+    --popover-foreground: var(--color-cream);
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: var(--color-sage);
+    --primary-foreground: var(--color-cream);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: var(--color-pink);
+    --secondary-foreground: var(--color-cream);
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: var(--color-slate-dark);
+    --muted-foreground: var(--color-slate-light);
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: var(--color-pink);
+    --accent-foreground: var(--color-cream);
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: var(--color-cream);
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: var(--color-slate-darker);
+    --input: var(--color-slate-darker);
+    --ring: var(--color-sage);
+
+    /* Sidebar Tokens - Dark Mode */
+    --sidebar-background: var(--color-slate);
+    --sidebar-foreground: var(--color-cream);
+    --sidebar-primary: var(--color-sage);
+    --sidebar-primary-foreground: var(--color-cream);
+    --sidebar-accent: var(--color-pink);
+    --sidebar-accent-foreground: var(--color-cream);
+    --sidebar-border: var(--color-slate-darker);
+    --sidebar-ring: var(--color-sage);
   }
 }
 
@@ -97,5 +113,10 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
 }
