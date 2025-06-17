@@ -30,18 +30,18 @@ export const Header = ({ userEmail }: HeaderProps) => {
   return (
     // Use a wrapper div for full-width bg and border, then inner .container for content
     <div className="w-full border-b border-gray-200 bg-foreground">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         <header className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             {/* Logo/Favicon and Title */}
             <div 
-              className="flex items-center space-x-3 cursor-pointer transition-opacity"
+              className="flex items-center cursor-pointer transition-opacity"
               onClick={handleLogoClick}
             >
               <img 
                 src="/hooked-on-crochet-favicon.svg" 
                 alt="Hooked on Crochet" 
-                className="h-8 w-8"
+                className="h-8 w-8 sm:hidden"
               />
               <h1 className="hidden hover:text-accent sm:block text-l font-bold text-white">
                 Hooked on Crochet
