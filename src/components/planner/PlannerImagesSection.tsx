@@ -36,7 +36,7 @@ const PlannerImagesSection = ({
 
   return (
     <PlannerSection
-      title="Images"
+      title="Inspiration"
       buttonText="Add Image"
       buttonDisabled={false}
       onAdd={() => setShowImagesUpload(true)}

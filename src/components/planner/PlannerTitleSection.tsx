@@ -35,7 +35,7 @@ export const PlannerTitleSection = ({
         disabled={loading}
         maxLength={100}
         placeholder="Plan Name"
-        className="text-3xl sm:text-3xl md:text-3xl lg:text-4xl font-bold border-none shadow-none bg-transparent focus:ring-0 focus:outline-none mb-6"
+        className="text-3xl px-0 sm:text-3xl md:text-3xl lg:text-4xl font-bold border-none shadow-none bg-transparent focus:ring-0 focus:outline-none mb-6"
       />
 
     </div>

@@ -147,10 +147,9 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
       </Breadcrumb>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Crochet Projects</h1>
-          <p className="text-gray-600 mt-2">Keep track of all your crochet projects</p>
+          <h1 className="text-3xl font-bold text-gray-900">Projects & Patterns</h1>
         </div>
       </div>
       

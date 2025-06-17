@@ -160,13 +160,15 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
     <div className="container mx-auto px-4 py-8">
 
       {/* Plans Section */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-semibold">Your Plans</h2>
-          <Button onClick={() => setShowNewPlanDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Plan
-          </Button>
+      <div className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
+          <h2 className="text-3xl sm:text-4xl font-bold">Plans & Ideas</h2>
+          <div>
+            <Button onClick={() => setShowNewPlanDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Plan
+            </Button>
+          </div>
         </div>
 
         <PlansGrid

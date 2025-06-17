@@ -117,11 +117,13 @@ export const StashPage = ({ user }: StashPageProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <Breadcrumb>
+      <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigate('/')}>Home</BreadcrumbLink>
+              <BreadcrumbLink
+              onClick={() => navigate('/planner')}>
+                Planner
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -129,14 +131,16 @@ export const StashPage = ({ user }: StashPageProps) => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-      </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Your Yarn Stash</h1>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Yarn
-        </Button>
+        {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
+        <h1 className="text-3xl font-bold">Yarn Stash</h1>
+        <div>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Yarn
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6">
