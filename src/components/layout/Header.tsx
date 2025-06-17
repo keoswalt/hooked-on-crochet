@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, Archive, Palette } from 'lucide-react';
+import { Pencil, Palette, SwatchBook, Eclipse } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
@@ -66,7 +66,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   onClick={() => navigate('/stash')}
                   className="flex items-center gap-2"
                 >
-                  <Archive className="h-4 w-4" />
+                  <Palette className="h-4 w-4" />
                   <span className="hidden sm:inline">Stash</span>
                 </Button>
                 <Button
@@ -75,7 +75,7 @@ export const Header = ({ userEmail }: HeaderProps) => {
                   onClick={() => navigate('/swatches')}
                   className="flex items-center gap-2"
                 >
-                  <Palette className="h-4 w-4" />
+                  <SwatchBook className="h-4 w-4" />
                   <span className="hidden sm:inline">Swatches</span>
                 </Button>
               </nav>
