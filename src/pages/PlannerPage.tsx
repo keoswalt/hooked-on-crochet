@@ -158,34 +158,16 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Hooked on Crochet</h1>
-          <p className="text-gray-600 mt-2">Plan your crochet projects with an infinite canvas</p>
-        </div>
-        <div>
+
+      {/* Plans Section */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-semibold">Your Plans</h2>
           <Button onClick={() => setShowNewPlanDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Plan
           </Button>
         </div>
-      </div>
-
-      {/* New Plan Dialog */}
-      <NewPlanDialog
-        open={showNewPlanDialog}
-        onOpenChange={setShowNewPlanDialog}
-        userId={user.id}
-        onCreated={(planId) => {
-          setShowNewPlanDialog(false);
-          navigate(`/planner/${planId}`);
-        }}
-      />
-
-      {/* Plans Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Your Plans</h2>
 
         <PlansGrid
           plans={plans}
@@ -202,6 +184,17 @@ export const PlannerPage = ({ user }: PlannerPageProps) => {
           PLANS_PER_PAGE={PLANS_PER_PAGE}
         />
       </div>
+
+      {/* New Plan Dialog */}
+      <NewPlanDialog
+        open={showNewPlanDialog}
+        onOpenChange={setShowNewPlanDialog}
+        userId={user.id}
+        onCreated={(planId) => {
+          setShowNewPlanDialog(false);
+          navigate(`/planner/${planId}`);
+        }}
+      />
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
