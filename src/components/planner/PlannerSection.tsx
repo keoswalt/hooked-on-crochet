@@ -24,7 +24,7 @@ export const PlannerSection = ({
       {buttonText && (
         <Button
           size="sm"
-          variant="outline"
+          variant="default"
           onClick={onAdd}
           disabled={buttonDisabled}
         >
