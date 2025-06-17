@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -12,10 +12,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { YarnCard } from '@/components/stash/YarnCard';
 import { YarnForm } from '@/components/stash/YarnForm';
 import { YarnFilters } from '@/components/stash/YarnFilters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import YarnDisplayCard from '@/components/shared/YarnDisplayCard';
@@ -28,94 +28,124 @@ interface StashPageProps {
 }
 
 export const StashPage = ({ user }: StashPageProps) => {
-  const { data: yarns = [], isLoading: _loading, refetch } = useYarnStash(user);
-  const [filteredYarns, setFilteredYarns] = useState<YarnStash[]>([]);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingYarn, setEditingYarn] = useState<YarnStash | null>(null);
+  const { data: yarns = [], isLoading: loading, refetch } = useYarnStash(user);
+  const [filteredYarns, setFilteredYarns] = useState<YarnStash[]>([]);
+  const [deletingYarn, setDeletingYarn] = useState<string | null>(null);
 
   useEffect(() => {
     setFilteredYarns(yarns);
   }, [yarns]);
-
-  const handleYarnSaved = () => {
-    refetch();
-    setShowAddDialog(false);
-    setEditingYarn(null);
-  };
 
   const handleEditYarn = (yarn: YarnStash) => {
     setEditingYarn(yarn);
   };
 
   const handleDeleteYarn = async (yarnId: string) => {
-    try {
-      const { error } = await supabase
-        .from('yarn_stash')
-        .delete()
-        .eq('id', yarnId);
+    setDeletingYarn(yarnId);
+  };
 
-      if (error) throw error;
+  const handleConfirmDelete = async () => {
+    if (!deletingYarn) return;
 
+    const { error } = await supabase
+      .from('yarn_stash')
+      .delete()
+      .eq('id', deletingYarn);
+
+    if (error) {
       toast({
-        title: "Success",
-        description: "Yarn deleted successfully",
+        title: 'Error deleting yarn',
+        description: error.message,
+        variant: 'destructive',
       });
-
-      refetch();
-    } catch (error: any) {
-      console.error('Error deleting yarn:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete yarn",
-        variant: "destructive",
-      });
+      return;
     }
+
+    await refetch();
+    toast({
+      title: 'Yarn deleted',
+      description: 'The yarn has been removed from your stash.',
+    });
+    setDeletingYarn(null);
+  };
+
+  const handleDuplicateYarn = async (yarn: YarnStash) => {
+    // Create a new yarn object without the id and timestamps
+    const { id, created_at, updated_at, ...yarnData } = yarn;
+    
+    const { data, error } = await supabase
+      .from('yarn_stash')
+      .insert([{ 
+        ...yarnData,
+        name: `${yarnData.name} (Copy)`,
+        user_id: user.id 
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: 'Error duplicating yarn',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await refetch();
+    toast({
+      title: 'Yarn duplicated',
+      description: 'A copy of the yarn has been added to your stash.',
+    });
+  };
+
+  const handleYarnSaved = async () => {
+    await refetch();
+    setShowAddDialog(false);
+    setEditingYarn(null);
+    toast({
+      title: editingYarn ? 'Yarn updated' : 'Yarn added',
+      description: editingYarn
+        ? 'Your yarn has been updated successfully.'
+        : 'New yarn has been added to your stash.',
+    });
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink 
-              onClick={() => navigate('/planner')}
-              className="cursor-pointer hover:text-foreground"
-            >
-              Planner
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Stash</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Yarn Stash</h1>
-          <p className="text-gray-600 mt-2">Manage your yarn collection</p>
-        </div>
-        <div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Yarn
-          </Button>
-        </div>
+      <div className="mb-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate('/')}>Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Yarn Stash</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
-      {/* Filters */}
-      <YarnFilters 
-        yarns={yarns} 
-        onFilter={setFilteredYarns}
-        className="mb-6"
-      />
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Your Yarn Stash</h1>
+        <Button onClick={() => setShowAddDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add New Yarn
+        </Button>
+      </div>
 
-      {/* Yarn Grid */}
+      <div className="mb-6">
+        <YarnFilters
+          yarns={yarns}
+          onFilter={setFilteredYarns}
+        />
+      </div>
+
       {filteredYarns.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-500 mb-4">
@@ -136,6 +166,7 @@ export const StashPage = ({ user }: StashPageProps) => {
               yarn={yarn}
               onEdit={handleEditYarn}
               onDelete={handleDeleteYarn}
+              onDuplicate={handleDuplicateYarn}
             />
           ))}
         </div>
@@ -171,6 +202,17 @@ export const StashPage = ({ user }: StashPageProps) => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={!!deletingYarn}
+        onOpenChange={(open) => !open && setDeletingYarn(null)}
+        title="Delete Yarn"
+        description="Are you sure you want to delete this yarn? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

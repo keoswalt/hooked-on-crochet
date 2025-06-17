@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Package } from "lucide-react";
+import { Edit, Trash2, Package, Copy } from "lucide-react";
 import { getYarnWeightLabel } from "@/utils/yarnWeights";
 import type { Database } from "@/integrations/supabase/types";
 type YarnStash = Database['public']['Tables']['yarn_stash']['Row'];
@@ -8,6 +8,7 @@ interface YarnDisplayCardProps {
   yarn: YarnStash;
   onEdit?: (yarn: YarnStash) => void;
   onDelete?: (yarnId: string) => void;
+  onDuplicate?: (yarn: YarnStash) => void;
   className?: string;
   "data-testid"?: string;
 }
@@ -15,6 +16,7 @@ export const YarnDisplayCard = ({
   yarn,
   onEdit,
   onDelete,
+  onDuplicate,
   className = "",
   ...props
 }: YarnDisplayCardProps) => {
@@ -32,9 +34,9 @@ export const YarnDisplayCard = ({
       onClick={handleCardClick}
       {...props}
     >
-      {/* Optional Edit/Delete buttons */}
-      {(onEdit || onDelete) && (
-        <div className="absolute top-2 right-2 flex gap-2 z-20 pointer-events-auto">
+      {/* Optional Edit/Delete/Duplicate buttons */}
+      {(onEdit || onDelete || onDuplicate) && (
+        <div className="flex justify-end gap-2 pt-2 px-2 pointer-events-auto">
           {onEdit && (
             <Button
               size="icon"
@@ -46,6 +48,19 @@ export const YarnDisplayCard = ({
               title="Edit yarn"
             >
               <Edit className="w-4 h-4" />
+            </Button>
+          )}
+          {onDuplicate && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={e => {
+                e.stopPropagation();
+                onDuplicate(yarn);
+              }}
+              title="Duplicate yarn"
+            >
+              <Copy className="w-4 h-4" />
             </Button>
           )}
           {onDelete && (
@@ -64,7 +79,7 @@ export const YarnDisplayCard = ({
         </div>
       )}
 
-      <div className="pt-6 pb-4 px-4">
+      <div className="pt-2 pb-4 px-4">
         {yarn.image_url ? (
           <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-gray-100">
             <img src={yarn.image_url} alt={yarn.name} className="w-full h-full object-cover" />
