@@ -53,7 +53,7 @@ export const UserMenu = ({ userEmail }: UserMenuProps) => {
         <DropdownMenuItem 
           onClick={handleSignOut} 
           disabled={isLoading}
-          className="cursor-pointer text-red-600 focus:text-red-600"
+          className="cursor-pointer text-base"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign Out

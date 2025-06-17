@@ -16,6 +16,7 @@
     /* Tints and Shades */
     --color-sage-light: 83 31% 84%;
     --color-sage-medium: 84 32% 62%;
+    --color-sage-dark: 83 39% 35%;
     --color-pink-light: 302 71% 90%;
     --color-pink-medium: 302 71% 45%;
     --color-slate-light: 217 16% 60%;
@@ -34,6 +35,7 @@
 
     --primary: var(--color-sage);
     --primary-foreground: var(--color-white);
+    --primary-dark: var(--color-sage-dark);
 
     --secondary: var(--color-pink);
     --secondary-foreground: var(--color-slate-dark);
@@ -41,8 +43,8 @@
     --muted: var(--color-sage-light);
     --muted-foreground: var(--color-slate-light);
 
-    --accent: var(--color-pink-light);
-    --accent-foreground: var(--color-pink-medium);
+    --accent: var(--color-sage-light);
+    --accent-foreground: var(--color-slate-dark);
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: var(--color-cream);
