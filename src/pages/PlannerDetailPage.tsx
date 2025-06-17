@@ -38,7 +38,6 @@ export const PlannerDetailPage = ({
   const [editableDesc, setEditableDesc] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const debouncedSaveTimeout = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -85,9 +84,8 @@ export const PlannerDetailPage = ({
       return;
     }
     setSaveError(null);
-    setSaveSuccess(false);
-    if (debouncedSaveTimeout.current) clearTimeout(debouncedSaveTimeout.current);
     setSaving(true);
+    if (debouncedSaveTimeout.current) clearTimeout(debouncedSaveTimeout.current);
     debouncedSaveTimeout.current = setTimeout(() => {
       savePlanFields();
     }, 1000);
@@ -130,11 +128,6 @@ export const PlannerDetailPage = ({
         name: editableName,
         description: editableDesc,
       });
-      setSaveSuccess(true);
-      toast({
-        title: "Saved",
-        description: "Plan updated successfully.",
-      });
     } catch (err: any) {
       setSaveError(err.message);
       toast({
@@ -144,7 +137,6 @@ export const PlannerDetailPage = ({
       });
     } finally {
       setSaving(false);
-      setTimeout(() => setSaveSuccess(false), 2000);
     }
   };
 
@@ -219,7 +211,6 @@ export const PlannerDetailPage = ({
           loading={loading}
           handleFieldBlur={handleFieldBlur}
           saving={saving}
-          saveSuccess={saveSuccess}
           saveError={saveError}
         />
       </div>

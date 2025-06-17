@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
@@ -11,7 +10,7 @@ interface PlannerTitleSectionProps {
   loading: boolean;
   handleFieldBlur: () => void;
   saving: boolean;
-  saveSuccess: boolean;
+  saveSuccess?: boolean;
   saveError: string | null;
 }
 
