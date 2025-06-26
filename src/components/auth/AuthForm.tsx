@@ -101,8 +101,8 @@ export const AuthForm = ({ mode, onModeChange }: AuthFormProps) => {
       </CardTitle>
       <CardDescription>
         {mode === 'signin'
-          ? 'Sign in to view your crochet projects'
-          : 'Start tracking your crochet projects'}
+          ? 'Sign in to view your crochet projects.'
+          : 'Sign in to view your crochet projects.'}
       </CardDescription>
     </CardHeader>
     <CardContent>
