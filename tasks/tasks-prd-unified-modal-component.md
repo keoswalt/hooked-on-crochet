@@ -1,6 +1,7 @@
 ## Relevant Files
 
 - `src/ui/modal.tsx` – New unified Modal component implementing the core API, styling, and behaviour.
+- `src/hooks/useFocusTrap.ts` – Hook implementing keyboard focus trapping behaviour used by Modal.
 - `src/ui/dialog.tsx` – Existing dialog implementation; will be reviewed/refactored or deprecated once the new modal is in place.
 - `src/ui/alert-dialog.tsx` – Alert-style dialog that may leverage the new modal for consistent styling.
 - `src/ui/custom-confirmation-dialog.tsx` – Confirmation dialog to migrate to the new modal component.
@@ -15,14 +16,14 @@
 
 ## Tasks
 
-- [ ] 1.0 Scaffold Unified Modal Component
+- [X] 1.0 Scaffold Unified Modal Component
   - [x] 1.1 Create `src/ui/modal.tsx` with basic React component and typed props (`isOpen`, `onClose`, `title`, `children`, etc.).
   - [x] 1.2 Render modal content inside a React portal (`<div id="modal-root">`) to avoid z-index conflicts.
   - [x] 1.3 Add structural elements: backdrop, container, header, body, footer slots.
   - [x] 1.4 Stub utility helpers for focus trap and scroll lock (to be implemented later).
   - [x] 1.5 Add Storybook/Playground entry or temporary route for manual review.
 
-- [ ] 2.0 Implement Styling & Responsive Design
+- [X] 2.0 Implement Styling & Responsive Design
   - [x] 2.1 Apply Tailwind classes for desktop layout (centered, `max-w-lg`, rounded corners, shadow).
   - [x] 2.2 Add mobile sheet variant: full-width panel sliding up, height ≤ 90vh with internal scroll area.
   - [x] 2.3 Implement animation using Tailwind transitions; respect `prefers-reduced-motion`.
@@ -31,15 +32,15 @@
   - [x] 2.6 Provide default action buttons (**Cancel** left, **Save/Confirm** right) using existing `Button` component.
   - [x] 2.7 Document theming and variant usage in component JSDoc and Storybook.
 
-- [ ] 3.0 Add Accessibility & Core Behaviours (focus, dismissal, scroll-lock)
-  - [ ] 3.1 Implement focus trap to keep focus within modal while open.
-  - [ ] 3.2 Restore focus to triggering element on close.
-  - [ ] 3.3 Close modal on **ESC** key press.
-  - [ ] 3.4 Optional backdrop click to close (configurable via prop).
-  - [ ] 3.5 Lock body scroll while modal is open; restore on close.
-  - [ ] 3.6 Add ARIA roles (`role="dialog"`, `aria-labelledby`, `aria-describedby`) and ensure header/body IDs link correctly.
-  - [ ] 3.7 Ensure colour contrast meets WCAG AA.
-  - [ ] 3.8 Add `isLoading` prop handling (disable buttons, show spinner).
+- [X] 3.0 Add Accessibility & Core Behaviours (focus, dismissal, scroll-lock)
+  - [x] 3.1 Implement focus trap to keep focus within modal while open.
+  - [x] 3.2 Restore focus to triggering element on close.
+  - [x] 3.3 Close modal on **ESC** key press.
+  - [x] 3.4 Optional backdrop click to close (configurable via prop).
+  - [x] 3.5 Lock body scroll while modal is open; restore on close.
+  - [x] 3.6 Add ARIA roles (`role="dialog"`, `aria-labelledby`, `aria-describedby`) and ensure header/body IDs link correctly.
+  - [x] 3.7 Ensure colour contrast meets WCAG AA.
+  - [x] 3.8 Add `isLoading` prop handling (disable buttons, show spinner).
 
 - [ ] 4.0 Create Test Suite (unit & integration)
   - [ ] 4.1 Write tests for open/close logic via prop changes.
@@ -56,4 +57,4 @@
   - [ ] 5.4 Delete deprecated modal code and styles after successful migration.
   - [ ] 5.5 Update README / contributor docs with usage examples and guidelines.
   - [ ] 5.6 Perform manual QA on key pages (Planner, Projects, Stash) on desktop and mobile.
-  - [ ] 5.7 Monitor production logs/analytics for modal-related errors post-deployment. 
+  - [ ] 5.7 Monitor production logs/analytics for modal-related errors post-deployment.

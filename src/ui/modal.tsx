@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 /**
  * Unified Modal component.
@@ -28,6 +29,7 @@ import { Button } from "@/components/ui/button";
  * onConfirm         – () => void – Confirm button handler.
  * confirmText       – string – Confirm button label (default "Save").
  * cancelText        – string – Cancel button label (default "Cancel").
+ * isLoading         – boolean – show loading state on confirm button and disable actions.
  *
  * Usage
  * -----
@@ -56,12 +58,19 @@ export interface ModalProps {
   size?: "sm" | "md" | "lg" | "full";
   /** Render built-in Cancel / Confirm buttons in the footer. */
   showDefaultActions?: boolean;
+  /**
+   * Allow clicking on the backdrop to close the modal. Default: true.
+   * Set to false for critical dialogs that require explicit action.
+   */
+  dismissOnBackdropClick?: boolean;
   /** Callback for the Confirm/Save button. */
   onConfirm?: () => void;
   /** Customise confirm button text. (Default "Save") */
   confirmText?: string;
   /** Customise cancel button text. (Default "Cancel") */
   cancelText?: string;
+  /** Show loading state on confirm button and disable actions. */
+  isLoading?: boolean;
 }
 
 /**
@@ -78,14 +87,22 @@ const ModalBase: React.FC<ModalProps> = ({
   variant = "center",
   size = "lg",
   showDefaultActions = false,
+  dismissOnBackdropClick = true,
   onConfirm,
   confirmText = "Save",
   cancelText = "Cancel",
+  isLoading = false,
   children,
 }) => {
   const [mounted, setMounted] = React.useState(false);
   // Local state to keep component mounted during exit animation
   const [shouldRender, setShouldRender] = React.useState(isOpen);
+
+  /**
+   * Keep reference to the element that was focused before the modal opened so
+   * we can restore focus when it closes (accessibility requirement).
+   */
+  const previouslyFocusedRef = React.useRef<HTMLElement | null>(null);
 
   // Manage focus & body scroll when modal is open (placeholder implementations).
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -102,6 +119,39 @@ const ModalBase: React.FC<ModalProps> = ({
       setShouldRender(true);
     }
   }, [isOpen]);
+
+  // Capture the currently focused element when the modal opens, restore on close.
+  React.useEffect(() => {
+    if (isOpen) {
+      previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+    } else {
+      // Using setTimeout ensures the focus is restored after any state updates.
+      setTimeout(() => {
+        previouslyFocusedRef.current?.focus?.();
+      }, 0);
+    }
+    // We only need to run when `isOpen` toggles.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // Close modal when ESC key is pressed.
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
+  // Generate stable IDs for ARIA linking.
+  const headerId = React.useId();
+  const descriptionId = React.useId();
 
   if (!shouldRender || !mounted || typeof document === "undefined") {
     return null;
@@ -131,6 +181,10 @@ const ModalBase: React.FC<ModalProps> = ({
   );
 
   const entering = isOpen;
+  const animationStyle: React.CSSProperties | undefined = entering
+    ? undefined
+    : { animationFillMode: "forwards" };
+
   const containerClass = cn(
     variant === "center" && "",
     variant === "sheet" && "w-full rounded-none rounded-t-md max-h-[90vh]",
@@ -151,32 +205,42 @@ const ModalBase: React.FC<ModalProps> = ({
   const modalMarkup = (
     <div className={wrapperClass}>
       {/* Backdrop */}
-      <ModalBackdrop onClick={onClose} />
+      <ModalBackdrop onClick={dismissOnBackdropClick ? onClose : undefined} />
 
       {/* Container & content */}
       <ModalContainer
         ref={containerRef}
         role="dialog"
         aria-modal="true"
+        {...(title ? { "aria-labelledby": headerId } : {})}
+        aria-describedby={descriptionId}
         className={containerClass}
+        style={animationStyle}
         onAnimationEnd={handleAnimationEnd}
       >
         {/* Title prop convenience – optional */}
-        {title && <ModalHeader data-testid="modal-title">{title}</ModalHeader>}
+        {title && (
+          <ModalHeader id={headerId} data-testid="modal-title">
+            {title}
+          </ModalHeader>
+        )}
 
         {/* Children rendered directly – expected to include Modal.* slots */}
-        {children && <ModalBody>{children}</ModalBody>}
+        {children && <ModalBody id={descriptionId}>{children}</ModalBody>}
 
         {/* Default action buttons if requested */}
         {showDefaultActions && (
           <ModalFooter>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
               {cancelText}
             </Button>
-            <Button onClick={() => {
-              onConfirm?.();
-              // Keep consumer responsible for closing if needed.
-            }}>
+            <Button
+              onClick={() => {
+                onConfirm?.();
+              }}
+              disabled={isLoading}
+            >
+              {isLoading && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
               {confirmText}
             </Button>
           </ModalFooter>
