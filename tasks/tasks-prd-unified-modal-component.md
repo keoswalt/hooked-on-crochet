@@ -42,13 +42,13 @@
   - [x] 3.7 Ensure colour contrast meets WCAG AA.
   - [x] 3.8 Add `isLoading` prop handling (disable buttons, show spinner).
 
-- [ ] 4.0 Create Test Suite (unit & integration)
-  - [ ] 4.1 Write tests for open/close logic via prop changes.
-  - [ ] 4.2 Test focus trapping and restoration using `@testing-library/user-event`.
-  - [ ] 4.3 Verify ESC and backdrop dismissal paths.
-  - [ ] 4.4 Snapshots/visual tests for responsive variants (desktop vs. mobile).
-  - [ ] 4.5 Accessibility audit with `jest-axe`.
-  - [ ] 4.6 Achieve ≥ 90 % line coverage for `modal.tsx`.
+- [X] 4.0 Create Test Suite (unit & integration)
+  - [x] 4.1 Write tests for open/close logic via prop changes.
+  - [x] 4.2 Test focus trapping and restoration using `@testing-library/user-event`.
+  - [x] 4.3 Verify ESC and backdrop dismissal paths.
+  - [x] 4.4 Snapshots/visual tests for responsive variants (desktop vs. mobile).
+  - [x] 4.5 Accessibility audit with `jest-axe`.
+  - [x] 4.6 Achieve ≥ 90 % line coverage for `modal.tsx`.
 
 - [ ] 5.0 Migrate Existing Modals & Update Documentation
   - [ ] 5.1 Refactor `src/ui/alert-dialog.tsx` to wrap new `Modal`.

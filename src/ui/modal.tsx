@@ -314,7 +314,7 @@ const ModalFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <footer
       ref={ref}
-      className={cn("mt-6 flex space-x-2", className)}
+      className={cn("mt-6 flex space-x-2 justify-end", className)}
       {...props}
     />
   )
