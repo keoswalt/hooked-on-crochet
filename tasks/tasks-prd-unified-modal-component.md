@@ -23,13 +23,13 @@
   - [x] 1.5 Add Storybook/Playground entry or temporary route for manual review.
 
 - [ ] 2.0 Implement Styling & Responsive Design
-  - [ ] 2.1 Apply Tailwind classes for desktop layout (centered, `max-w-lg`, rounded corners, shadow).
-  - [ ] 2.2 Add mobile sheet variant: full-width panel sliding up, height ≤ 90vh with internal scroll area.
-  - [ ] 2.3 Implement animation using Tailwind transitions; respect `prefers-reduced-motion`.
-  - [ ] 2.4 Wire up size variants (`sm`, `md`, `lg`, `full`) via `size` prop.
-  - [ ] 2.5 Integrate design tokens for colours, spacing, typography.
-  - [ ] 2.6 Provide default action buttons (**Cancel** left, **Save/Confirm** right) using existing `Button` component.
-  - [ ] 2.7 Document theming and variant usage in component JSDoc and Storybook.
+  - [x] 2.1 Apply Tailwind classes for desktop layout (centered, `max-w-lg`, rounded corners, shadow).
+  - [x] 2.2 Add mobile sheet variant: full-width panel sliding up, height ≤ 90vh with internal scroll area.
+  - [x] 2.3 Implement animation using Tailwind transitions; respect `prefers-reduced-motion`.
+  - [x] 2.4 Wire up size variants (`sm`, `md`, `lg`, `full`) via `size` prop.
+  - [x] 2.5 Integrate design tokens for colours, spacing, typography.
+  - [x] 2.6 Provide default action buttons (**Cancel** left, **Save/Confirm** right) using existing `Button` component.
+  - [x] 2.7 Document theming and variant usage in component JSDoc and Storybook.
 
 - [ ] 3.0 Add Accessibility & Core Behaviours (focus, dismissal, scroll-lock)
   - [ ] 3.1 Implement focus trap to keep focus within modal while open.

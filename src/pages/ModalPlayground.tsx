@@ -4,19 +4,39 @@ import * as React from "react";
 
 export const ModalPlayground: React.FC = () => {
   const [open, setOpen] = React.useState(false);
+  const [variant, setVariant] = React.useState<"center" | "sheet">("center");
+  const [size, setSize] = React.useState<"sm" | "md" | "lg" | "full">("lg");
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <Button onClick={() => setOpen(true)}>Open Modal</Button>
+      <div className="space-x-2 mb-4">
+        <Button onClick={() => { setVariant("center"); setOpen(true); }}>
+          Open Center Modal
+        </Button>
+        <Button onClick={() => { setVariant("sheet"); setOpen(true); }}>
+          Open Sheet Modal
+        </Button>
+      </div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="Modal Playground">
-        <p className="mb-4">This is a simple playground for the unified Modal component.</p>
-        <Modal.Footer>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+      <div className="space-x-2 mb-4">
+        {(["sm", "md", "lg", "full"] as const).map(s => (
+          <Button key={s} variant={size === s ? undefined : "outline"} onClick={() => setSize(s)}>
+            {s.toUpperCase()}
           </Button>
-          <Button onClick={() => alert("Confirmed!")}>Confirm</Button>
-        </Modal.Footer>
+        ))}
+      </div>
+
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Modal Playground"
+        variant={variant}
+        size={size}
+        showDefaultActions
+        onConfirm={() => alert("Confirmed!")}
+        confirmText="Confirm"
+      >
+        <p className="mb-4">This is a simple playground for the unified Modal component.</p>
       </Modal>
     </div>
   );

@@ -3,7 +3,40 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { Button } from "@/components/ui/button";
 
+/**
+ * Unified Modal component.
+ *
+ * Features
+ * --------
+ * • Desktop centered dialog or mobile sheet variant (`variant="center" | "sheet"`).
+ * • Size variants (`sm | md | lg | full`) controlling max-width on centered dialog.
+ * • Built-in backdrop, focus-trap stub, scroll-lock, and accessibility roles.
+ * • Tailwind animations that respect `prefers-reduced-motion`.
+ * • Themed via design-token utility classes (`bg-card`, `text-card-foreground`, `border`).
+ * • Optional default action buttons (**Cancel** / **Save**) with overrides for text / callback.
+ *
+ * Props
+ * -----
+ * isOpen            – boolean – controls visibility.
+ * onClose           – () => void – invoked when user requests close (backdrop click, Cancel button, etc.).
+ * title             – ReactNode – optional header title.
+ * variant           – "center" | "sheet" – layout style (default "center").
+ * size              – "sm" | "md" | "lg" | "full" – width cap for center variant (default "lg").
+ * showDefaultActions – boolean – render default Cancel / Save buttons.
+ * onConfirm         – () => void – Confirm button handler.
+ * confirmText       – string – Confirm button label (default "Save").
+ * cancelText        – string – Cancel button label (default "Cancel").
+ *
+ * Usage
+ * -----
+ * <Modal isOpen={open} onClose={close} title="Edit Profile" variant="center" size="md" showDefaultActions>
+ *   <Modal.Body> ...form fields... </Modal.Body>
+ * </Modal>
+ *
+ * The component also exposes sub-components (`Modal.Header`, `.Body`, `.Footer`, `.Backdrop`, `.Container`) for advanced composition.
+ */
 export interface ModalProps {
   /** Controls whether the modal is shown. */
   isOpen: boolean;
@@ -11,8 +44,24 @@ export interface ModalProps {
   onClose: () => void;
   /** Optional title displayed at the top of the modal. */
   title?: React.ReactNode;
+  /**
+   * Layout variant.
+   * "center" – traditional centered dialog (default).
+   * "sheet"  – mobile sheet that slides up from the bottom and spans full width.
+   */
+  variant?: "center" | "sheet";
   /** Modal content. */
   children?: React.ReactNode;
+  /** Width size variant for the centered dialog. */
+  size?: "sm" | "md" | "lg" | "full";
+  /** Render built-in Cancel / Confirm buttons in the footer. */
+  showDefaultActions?: boolean;
+  /** Callback for the Confirm/Save button. */
+  onConfirm?: () => void;
+  /** Customise confirm button text. (Default "Save") */
+  confirmText?: string;
+  /** Customise cancel button text. (Default "Cancel") */
+  cancelText?: string;
 }
 
 /**
@@ -22,8 +71,21 @@ export interface ModalProps {
  * Additional features (portal rendering, backdrop, focus-trap, etc.)
  * will be layered on in subsequent subtasks.
  */
-const ModalBase: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const ModalBase: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  variant = "center",
+  size = "lg",
+  showDefaultActions = false,
+  onConfirm,
+  confirmText = "Save",
+  cancelText = "Cancel",
+  children,
+}) => {
   const [mounted, setMounted] = React.useState(false);
+  // Local state to keep component mounted during exit animation
+  const [shouldRender, setShouldRender] = React.useState(isOpen);
 
   // Manage focus & body scroll when modal is open (placeholder implementations).
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -35,7 +97,13 @@ const ModalBase: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) =
     setMounted(true);
   }, []);
 
-  if (!isOpen || !mounted || typeof document === "undefined") {
+  React.useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+    }
+  }, [isOpen]);
+
+  if (!shouldRender || !mounted || typeof document === "undefined") {
     return null;
   }
 
@@ -46,18 +114,73 @@ const ModalBase: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) =
     document.body.appendChild(modalRoot);
   }
 
+  const sizeClass =
+    variant === "center"
+      ? {
+          sm: "max-w-sm",
+          md: "max-w-md",
+          lg: "max-w-lg",
+          full: "max-w-none",
+        }[size]
+      : ""; // Width handled automatically for sheet variant
+
+  const wrapperClass = cn(
+    "fixed inset-0 z-50 flex",
+    variant === "center" && "items-center justify-center",
+    variant === "sheet" && "items-end justify-center"
+  );
+
+  const entering = isOpen;
+  const containerClass = cn(
+    variant === "center" && "",
+    variant === "sheet" && "w-full rounded-none rounded-t-md max-h-[90vh]",
+    sizeClass,
+    // Animations
+    variant === "center" && (entering ? "animate-in fade-in-0 zoom-in-95" : "animate-out fade-out-0 zoom-out-95"),
+    variant === "sheet" && (entering ? "animate-in slide-in-from-bottom" : "animate-out slide-out-to-bottom"),
+    "motion-reduce:animate-none"
+  );
+
+  const handleAnimationEnd: React.AnimationEventHandler<HTMLDivElement> = (e) => {
+    if (!entering && e.target === e.currentTarget) {
+      // Animation finished, unmount
+      setShouldRender(false);
+    }
+  };
+
   const modalMarkup = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={wrapperClass}>
       {/* Backdrop */}
       <ModalBackdrop onClick={onClose} />
 
       {/* Container & content */}
-      <ModalContainer ref={containerRef} role="dialog" aria-modal="true">
+      <ModalContainer
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        className={containerClass}
+        onAnimationEnd={handleAnimationEnd}
+      >
         {/* Title prop convenience – optional */}
         {title && <ModalHeader data-testid="modal-title">{title}</ModalHeader>}
 
         {/* Children rendered directly – expected to include Modal.* slots */}
         {children && <ModalBody>{children}</ModalBody>}
+
+        {/* Default action buttons if requested */}
+        {showDefaultActions && (
+          <ModalFooter>
+            <Button variant="outline" onClick={onClose}>
+              {cancelText}
+            </Button>
+            <Button onClick={() => {
+              onConfirm?.();
+              // Keep consumer responsible for closing if needed.
+            }}>
+              {confirmText}
+            </Button>
+          </ModalFooter>
+        )}
 
         {/* Close button (temp, will live in header later) */}
         <button
@@ -83,7 +206,7 @@ ModalBase.displayName = "Modal";
 const ModalBackdrop: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => (
   <div
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 transition-opacity data-[state=open]:animate-in data-[state=closed]:animate-out",
+      "fixed inset-0 z-50 bg-black/50 animate-in fade-in-0 motion-reduce:animate-none",
       className
     )}
     {...props}
@@ -96,7 +219,7 @@ const ModalContainer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
     <div
       ref={ref}
       className={cn(
-        "z-50 w-full max-w-lg rounded-md bg-background p-6 shadow-lg",
+        "z-50 w-full max-w-lg rounded-md bg-card text-card-foreground p-6 shadow-lg border",
         "relative flex flex-col",
         className
       )}
@@ -127,7 +250,7 @@ const ModalFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <footer
       ref={ref}
-      className={cn("mt-6 flex flex-row-reverse space-x-2 space-x-reverse", className)}
+      className={cn("mt-6 flex space-x-2", className)}
       {...props}
     />
   )
