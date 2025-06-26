@@ -44,10 +44,10 @@
   - [x] 4.4 Save generated `TASKS.md` into the `/tasks/` directory
   - [x] 4.5 Write unit tests for the transformation logic (`convert-summary-to-tasks.test.ts`)
 
-- [ ] 5.0 Integrate analysis and reporting into the GitHub Actions CI workflow
-  - [ ] 5.1 Create `.github/workflows/code-evaluation.yml`
-  - [ ] 5.2 Set up Node environment, install dependencies, and run `npm run lint && npm run type-check && npm run dep-scan`
-  - [ ] 5.3 Run summary and task-generation scripts as CI steps
-  - [ ] 5.4 Upload all report artifacts for pull-request visibility
-  - [ ] 5.5 Fail CI if Critical vulnerabilities or type errors are detected
-  - [ ] 5.6 Update `README.md` with instructions to run analysis locally 
+- [x] 5.0 Integrate analysis and reporting into the GitHub Actions CI workflow
+  - [x] 5.1 Create `.github/workflows/code-evaluation.yml`
+  - [x] 5.2 Set up Node environment, install dependencies, and run `npm run lint && npm run type-check && npm run dep-scan`
+  - [x] 5.3 Run summary and task-generation scripts as CI steps
+  - [x] 5.4 Upload all report artifacts for pull-request visibility
+  - [x] 5.5 Fail CI if Critical vulnerabilities or type errors are detected
+  - [x] 5.6 Update `README.md` with instructions to run analysis locally 

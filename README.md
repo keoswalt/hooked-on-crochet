@@ -21,3 +21,26 @@ The app allows for four main types of content:
 
 ## Cursor
 I've experimented with various AI code assistants throughout this process, but for now Cursor is my tool of choice. There's a Cursor rules folder in the main directory that includes Markdown files created by Ryan Carson that he graciously open sourced and [can be accessed here](https://github.com/snarktank/ai-dev-tasks). Watch his interview on the [How I AI podcast](https://www.youtube.com/watch?v=fD4ktSkNCw4) to lean how to use them in your process.
+
+## Local Code Evaluation & Analysis
+
+You can reproduce the same checks that run in CI:
+
+```bash
+# Install dependencies
+npm ci
+
+# 1. Static analysis (ESLint & TypeScript strict)
+npm run analysis:static
+
+# 2. Dependency vulnerability scan
+npm run dep-scan
+
+# 3. Summarize findings
+npm run summary:prss
+
+# 4. Convert the summary into a task checklist
+npx tsx scripts/convert-summary-to-tasks.ts
+```
+
+All generated reports live in the `reports/` directory, and the remediation checklist is written to `tasks/TASKS.md`.
