@@ -18,6 +18,7 @@ const StashPage = lazy(() => import("./pages/StashPage").then(m => ({ default: m
 const SwatchesPage = lazy(() => import("./pages/SwatchesPage").then(m => ({ default: m.SwatchesPage })));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
+const ModalPlaygroundPage = lazy(() => import("./pages/ModalPlayground").then(m => ({ default: m.ModalPlayground })));
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -42,6 +43,9 @@ const App = () => (
 
               <Route path="/stash" element={<RequireAuth component={StashPage} />} />
               <Route path="/swatches" element={<RequireAuth component={SwatchesPage} />} />
+
+              {/* Playground route (development only) */}
+              <Route path="/modal-playground" element={<RequireAuth component={ModalPlaygroundPage} />} />
 
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
