@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "analysis:static": "tsx scripts/run-static-analysis.ts",
     "dep-scan": "tsx scripts/run-dependency-scan.ts",
-    "summary:prss": "tsx scripts/generate-prss-summary.ts"
+    "summary:prss": "tsx scripts/generate-prss-summary.ts",
+    "test": "tsx --test scripts/**/*.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

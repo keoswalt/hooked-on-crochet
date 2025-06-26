@@ -1,20 +1,19 @@
 ## Relevant Files
 
-- `.github/workflows/code-evaluation.yml` - CI workflow to run static analysis and dependency scanning on every push and pull request.
-- `scripts/run-static-analysis.ts` - Executes ESLint and TypeScript strict checks, outputs Markdown report.
-- `scripts/run-dependency-scan.ts` - Runs chosen dependency vulnerability scanner and outputs Markdown report.
-- `scripts/generate-prss-summary.ts` - Aggregates analysis outputs and categorizes findings by severity.
+- `.github/workflows/code-evaluation.yml` - CI workflow that installs dependencies, runs analysis tools, and publishes report artifacts.
+- `scripts/run-static-analysis.ts` - Executes ESLint & TypeScript strict checks, outputs Markdown report.
+- `scripts/run-dependency-scan.ts` - Runs npm audit and outputs Markdown report.
+- `scripts/generate-prss-summary.ts` - Aggregates analysis outputs and summarizes findings by severity.
 - `scripts/convert-summary-to-tasks.ts` - Converts the PRSS summary report into a prioritized TASKS.md checklist.
-- `scripts/__tests__/convert-summary-to-tasks.test.ts` - Unit tests for the summary-to-tasks transformation logic.
-- `eslint.config.js` - Extended to include recommended, TypeScript, React, and security rule sets.
-- `tsconfig.json` - Updated to enable strict compiler options.
-- `package.json` - Adds NPM scripts and devDependencies for analysis tooling and CI integration.
+- `eslint.config.js` - Extended ESLint configuration with TypeScript, React, security, and Prettier rule sets.
+- `tsconfig.json` - Strict compiler options enabled for TypeScript.
+- `package.json` - NPM scripts & devDependencies for analysis tooling and CI integration.
 
 ### Notes
 
-- Unit tests live beside the scripts they cover (e.g., `scripts/convert-summary-to-tasks.ts` and `scripts/__tests__/convert-summary-to-tasks.test.ts`).
-- Use `npm run lint`, `npm run type-check`, and `npm run dep-scan` to run analyses locally.
-- Run all tests with `npm test` (powered by Jest).
+- Unit tests should live beside the scripts they cover (e.g., `scripts/convert-summary-to-tasks.test.ts`).
+- Run analysis locally with `npm run lint`, `npm run type-check`, and `npm run dep-scan`.
+- All reports live in the `/reports/` directory for easy access.
 
 ## Tasks
 
@@ -34,3 +33,21 @@
 
 - [ ] 3.0 Generate a Markdown report summarizing and categorizing findings by severity
   - [x] 3.1 Implement `generate-prss-summary.ts` to parse static and dependency reports
+  - [x] 3.2 Map each finding to a severity level (Critical, High, Moderate, Low, Informational)
+  - [x] 3.3 Compile combined report `/reports/prss-summary-YYYYMMDD.md`
+  - [x] 3.4 Verify summary report formatting with Prettier
+
+- [x] 4.0 Transform findings into a prioritized Markdown task list grouped by category
+  - [x] 4.1 Implement `convert-summary-to-tasks.ts` to convert the summary report into `TASKS.md`
+  - [x] 4.2 Sort tasks by severity (Critical → Informational) and add checkboxes
+  - [x] 4.3 Attach remediation links or code examples for each task
+  - [x] 4.4 Save generated `TASKS.md` into the `/tasks/` directory
+  - [x] 4.5 Write unit tests for the transformation logic (`convert-summary-to-tasks.test.ts`)
+
+- [ ] 5.0 Integrate analysis and reporting into the GitHub Actions CI workflow
+  - [ ] 5.1 Create `.github/workflows/code-evaluation.yml`
+  - [ ] 5.2 Set up Node environment, install dependencies, and run `npm run lint && npm run type-check && npm run dep-scan`
+  - [ ] 5.3 Run summary and task-generation scripts as CI steps
+  - [ ] 5.4 Upload all report artifacts for pull-request visibility
+  - [ ] 5.5 Fail CI if Critical vulnerabilities or type errors are detected
+  - [ ] 5.6 Update `README.md` with instructions to run analysis locally 
