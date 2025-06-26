@@ -1,0 +1,12 @@
+{
+  "date": "20250626",
+  "dependency": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 3,
+    "low": 0,
+    "info": 0
+  },
+  "eslintIssues": 0,
+  "tsIssues": 0
+}
