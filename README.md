@@ -1,73 +1,23 @@
-# Welcome to your Lovable project
+# 🧶 Hooked on Crochet
 
-## Project info
+## About
+This is a passion project I created to experiment with integrating AI code assistants into my development process. It brings together two of my favorite mediums as a maker (yarn and software) and I enjoy tinkering with it as time allows.
 
-**URL**: https://lovable.dev/projects/6ddb498c-d8f2-4a9f-87c6-9c48f551a090
+## Structure
+The app allows for four main types of content:
+1. Yarn
+2. Projects
+3. Plans
+4. Swatches
 
-## How can I edit this code?
+### Projects & Plans
+**Plans** allow you to collect sources of inspiration and ideas including images, links, yarn from your stash, or swatches from your library. You can also link to projects from a plan once you're ready to start creating a pattern.
 
-There are several ways of editing your application.
+**Projects** should really be called patterns, and one of my goals is to eventually refactor the code and database schema to make this change. For now, just know that projects = patterns. They have an "edit" and a "make" mode, so you can draft a pattern and then easily change to make mode to track progress on a completed pattern as you work. The system will save your progress.
 
-**Use Lovable**
+## Tech Stack
+- Database: Supabase
+- Code: Next.js, TypeScript, Tailwind CSS
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6ddb498c-d8f2-4a9f-87c6-9c48f551a090) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/6ddb498c-d8f2-4a9f-87c6-9c48f551a090) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Cursor
+I've experimented with various AI code assistants throughout this process, but for now Cursor is my tool of choice. There's a Cursor rules folder in the main directory that includes Markdown files created by Ryan Carson that he graciously open sourced and [can be accessed here](https://github.com/snarktank/ai-dev-tasks). Watch his interview on the [How I AI podcast](https://www.youtube.com/watch?v=fD4ktSkNCw4) to lean how to use them in your process.
