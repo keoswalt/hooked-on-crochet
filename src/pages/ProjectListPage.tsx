@@ -4,7 +4,6 @@ import { ProjectListView } from '@/components/projects/ProjectListView';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { useProjectState } from '@/hooks/useProjectState';
 import { useProjectOperations } from '@/hooks/useProjectOperations';
 import type { Database } from '@/integrations/supabase/types';
@@ -34,7 +33,7 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
   const { setPreviousPage } = useNavigationContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
   const [formData, setFormData] = useState<{
     name: string;
     hook_size: HookSize | '';
@@ -107,14 +106,14 @@ export const ProjectListPage = ({ user }: ProjectListPageProps) => {
       const savedProject = await handleSaveProject(projectData, editingProject);
       if (savedProject) {
         setShowForm(false);
-        setEditingProject(null);
+        setEditingProject(undefined);
       }
     }
   };
 
   const handleFormCancel = () => {
     setShowForm(false);
-    setEditingProject(null);
+    setEditingProject(undefined);
   };
 
   const handleCardClick = (project: Project) => {
